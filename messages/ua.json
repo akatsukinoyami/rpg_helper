@@ -10,6 +10,7 @@
 	"auth_register_login_link": "Увійти",
 	"auth_field_name": "Ім'я",
 	"auth_field_email": "Email",
+	"auth_field_login": "Email або ім'я",
 	"auth_field_password": "Пароль",
 	"auth_error_invalid_credentials": "Невірний email або пароль",
 	"auth_error_email_taken": "Email вже використовується",

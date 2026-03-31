@@ -17,16 +17,13 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 	})
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	// Populate locals with current session/user on every request
-	const sessionData = await auth.api.getSession({ headers: event.request.headers })
-	event.locals.user = sessionData?.user ?? null
-	event.locals.session = sessionData?.session ?? null
-
-	// Let Better Auth handle its own routes (/api/auth/*)
 	if (event.url.pathname.startsWith('/api/auth')) {
 		return auth.handler(event.request)
 	}
 
+	const sessionData = await auth.api.getSession({ headers: event.request.headers })
+	event.locals.user = sessionData?.user ?? null
+	event.locals.session = sessionData?.session ?? null
 	return resolve(event)
 }
 

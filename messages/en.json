@@ -10,6 +10,7 @@
 	"auth_register_login_link": "Sign in",
 	"auth_field_name": "Name",
 	"auth_field_email": "Email",
+	"auth_field_login": "Email or name",
 	"auth_field_password": "Password",
 	"auth_error_invalid_credentials": "Invalid email or password",
 	"auth_error_email_taken": "Email is already in use",
