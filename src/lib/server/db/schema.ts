@@ -26,6 +26,9 @@ export type DiceResult = {
 	total: number
 }
 
+export type Locale = "en" | "ru" | "ua";
+export type LocalizedText = Partial<Record<Locale, string>>;
+
 // ---------------------------------------------------------------------------
 // Better Auth tables
 // ---------------------------------------------------------------------------
@@ -96,16 +99,16 @@ export const games = pgTable('games', {
 
 export const races = pgTable('races', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: varchar('name', { length: 100 }).notNull(),
-	description: text('description'),
+	name: jsonb('name').$type<LocalizedText>().notNull(),
+	description: jsonb('description').$type<LocalizedText>(),
 	baseStats: jsonb('base_stats').$type<Stats>().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 })
 
 export const skills = pgTable('skills', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: varchar('name', { length: 100 }).notNull(),
-	description: text('description'),
+	name: jsonb('name').$type<LocalizedText>().notNull(),
+	description: jsonb('description').$type<LocalizedText>(),
 	statModifiers: jsonb('stat_modifiers').$type<Partial<Stats>>(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 })
@@ -125,8 +128,8 @@ export const raceSkills = pgTable(
 
 export const items = pgTable('items', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: varchar('name', { length: 100 }).notNull(),
-	description: text('description'),
+	name: jsonb('name').$type<LocalizedText>().notNull(),
+	description: jsonb('description').$type<LocalizedText>(),
 	type: varchar('type', { enum: ['usable', 'sellable', 'both'] }).notNull(),
 	effect: jsonb('effect').$type<ItemEffect>(),
 	value: integer('value').default(0).notNull(),
@@ -143,6 +146,7 @@ export const characters = pgTable('characters', {
 		.references(() => games.id, { onDelete: 'cascade' }),
 	raceId: uuid('race_id').references(() => races.id, { onDelete: 'set null' }),
 	name: varchar('name', { length: 100 }).notNull(),
+	gender: varchar('gender', { enum: ['male', 'female', 'none', 'both'] }).default('none').notNull(),
 	age: integer('age'),
 	bodyDescription: text('body_description'),
 	prehistory: text('prehistory'),
