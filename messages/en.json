@@ -40,5 +40,21 @@
 	"char_gender_male": "Male",
 	"char_gender_female": "Female",
 	"char_gender_none": "No gender",
-	"char_gender_both": "Both"
+	"char_gender_both": "Both",
+	"char_no_character": "You don't have a character in this game yet.",
+	"char_create_button": "Create Character",
+	"char_create_title": "Create Character",
+	"char_create_submit": "Submit for Approval",
+	"char_create_back": "Back to game",
+	"char_field_name": "Character Name",
+	"char_field_race": "Race",
+	"char_field_race_placeholder": "Select a race…",
+	"char_field_age": "Age (optional)",
+	"char_field_body": "Appearance (optional)",
+	"char_field_prehistory": "Background (optional)",
+	"char_stats_title": "Base Stats",
+	"char_starting_skills": "Starting Skills",
+	"char_status_pending_info": "Your character is awaiting GM approval.",
+	"char_status_rejected_info": "Your character was rejected by the GM.",
+	"char_error_name_required": "Character name is required"
 }

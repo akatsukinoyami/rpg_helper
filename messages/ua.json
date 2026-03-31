@@ -40,5 +40,21 @@
 	"char_gender_male": "Чоловіча",
 	"char_gender_female": "Жіноча",
 	"char_gender_none": "Відсутня",
-	"char_gender_both": "Обидві"
+	"char_gender_both": "Обидві",
+	"char_no_character": "У вас поки немає персонажа в цій грі.",
+	"char_create_button": "Створити персонажа",
+	"char_create_title": "Створити персонажа",
+	"char_create_submit": "Надіслати на схвалення",
+	"char_create_back": "Назад до гри",
+	"char_field_name": "Ім'я персонажа",
+	"char_field_race": "Раса",
+	"char_field_race_placeholder": "Оберіть расу…",
+	"char_field_age": "Вік (необов'язково)",
+	"char_field_body": "Зовнішність (необов'язково)",
+	"char_field_prehistory": "Передісторія (необов'язково)",
+	"char_stats_title": "Базові характеристики",
+	"char_starting_skills": "Початкові навички",
+	"char_status_pending_info": "Ваш персонаж очікує на схвалення ГМ.",
+	"char_status_rejected_info": "Ваш персонаж був відхилений ГМ.",
+	"char_error_name_required": "Ім'я персонажа обов'язкове"
 }

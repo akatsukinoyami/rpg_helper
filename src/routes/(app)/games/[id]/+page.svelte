@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms'
 	import * as m from '$lib/paraglide/messages'
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime'
+	import { localize } from '$lib/localize'
 	import type { PageData } from './$types'
 
 	let { data }: { data: PageData } = $props()
@@ -39,6 +41,27 @@
 	{/if}
 </div>
 
+<!-- No character yet — prompt to create one -->
+{#if !data.myCharacter}
+	<div class="mt-6 flex items-center justify-between rounded-2xl bg-indigo-50 px-6 py-4 ring-1 ring-indigo-200">
+		<p class="text-sm text-indigo-800">{m.char_no_character()}</p>
+		<a
+			href={localizeHref(`/games/${data.game.id}/characters/new`)}
+			class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+		>
+			{m.char_create_button()}
+		</a>
+	</div>
+{:else if data.myCharacter.status === 'pending'}
+	<div class="mt-6 rounded-2xl bg-yellow-50 px-6 py-4 ring-1 ring-yellow-200">
+		<p class="text-sm text-yellow-800">{m.char_status_pending_info()}</p>
+	</div>
+{:else if data.myCharacter.status === 'rejected'}
+	<div class="mt-6 rounded-2xl bg-red-50 px-6 py-4 ring-1 ring-red-200">
+		<p class="text-sm text-red-800">{m.char_status_rejected_info()}</p>
+	</div>
+{/if}
+
 <!-- Characters -->
 <section class="mt-8">
 	<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_dashboard_characters()}</h2>
@@ -51,7 +74,9 @@
 				<div class="flex items-center justify-between rounded-2xl bg-white px-6 py-4 ring-1 ring-gray-200">
 					<div>
 						<p class="font-medium text-gray-900">{char.name}</p>
-						<p class="text-sm text-gray-500">{char.user.name}{char.race ? ` · ${char.race.name}` : ''}</p>
+						<p class="text-sm text-gray-500">
+							{char.user.name}{char.race ? ` · ${localize(char.race.name, getLocale())}` : ''}
+						</p>
 					</div>
 
 					<div class="flex items-center gap-3">

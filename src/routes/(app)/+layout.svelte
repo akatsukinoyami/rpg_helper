@@ -1,10 +1,16 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
+	import { goto } from '$app/navigation'
+	import { authClient } from '$lib/auth-client'
 	import * as m from '$lib/paraglide/messages'
 	import { localizeHref } from '$lib/paraglide/runtime'
 	import type { LayoutData } from './$types'
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props()
+
+	async function signOut() {
+		await authClient.signOut()
+		goto('/sign_in')
+	}
 </script>
 
 <div class="min-h-screen bg-gray-50">
@@ -14,21 +20,16 @@
 				<a href={localizeHref('/games')} class="text-base font-semibold text-gray-900">
 					RPG Helper
 				</a>
-				<a
-					href={localizeHref('/games')}
-					class="text-sm text-gray-500 hover:text-gray-900"
-				>
+				<a href={localizeHref('/games')} class="text-sm text-gray-500 hover:text-gray-900">
 					{m.nav_games()}
 				</a>
 			</div>
 
 			<div class="flex items-center gap-4">
 				<span class="text-sm text-gray-600">{data.user.name}</span>
-				<form method="post" action="/signout" use:enhance>
-					<button type="submit" class="text-sm text-gray-500 hover:text-gray-900">
-						{m.nav_signout()}
-					</button>
-				</form>
+				<button onclick={signOut} class="text-sm text-gray-500 hover:text-gray-900">
+					{m.nav_signout()}
+				</button>
 			</div>
 		</div>
 	</nav>

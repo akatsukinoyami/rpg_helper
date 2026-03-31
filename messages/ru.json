@@ -40,5 +40,21 @@
 	"char_gender_male": "Мужской",
 	"char_gender_female": "Женский",
 	"char_gender_none": "Отсутствует",
-	"char_gender_both": "Оба"
+	"char_gender_both": "Оба",
+	"char_no_character": "У вас пока нет персонажа в этой игре.",
+	"char_create_button": "Создать персонажа",
+	"char_create_title": "Создать персонажа",
+	"char_create_submit": "Отправить на одобрение",
+	"char_create_back": "Назад к игре",
+	"char_field_name": "Имя персонажа",
+	"char_field_race": "Раса",
+	"char_field_race_placeholder": "Выберите расу…",
+	"char_field_age": "Возраст (необязательно)",
+	"char_field_body": "Внешность (необязательно)",
+	"char_field_prehistory": "Предыстория (необязательно)",
+	"char_stats_title": "Базовые характеристики",
+	"char_starting_skills": "Начальные навыки",
+	"char_status_pending_info": "Ваш персонаж ожидает одобрения ГМ.",
+	"char_status_rejected_info": "Ваш персонаж был отклонён ГМ.",
+	"char_error_name_required": "Имя персонажа обязательно"
 }

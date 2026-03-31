@@ -25,8 +25,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const isGm = game.gmUserId === userId
 	const myCharacter = game.characters.find((c) => c.userId === userId) ?? null
 
-	if (!isGm && !myCharacter) error(403)
-
 	return { game, isGm, myCharacter }
 }
 

@@ -90,7 +90,7 @@
 
 <p class="mt-6 text-center text-sm text-gray-500">
 	{m.auth_register_have_account()}
-	<a href={localizeHref('/login')} class="font-medium text-indigo-600 hover:text-indigo-500">
+	<a href={localizeHref('/sign_in')} class="font-medium text-indigo-600 hover:text-indigo-500">
 		{m.auth_register_login_link()}
 	</a>
 </p>

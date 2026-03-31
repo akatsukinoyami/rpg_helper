@@ -88,7 +88,7 @@
 
 <p class="mt-6 text-center text-sm text-gray-500">
 	{m.auth_login_no_account()}
-	<a href={localizeHref('/register')} class="font-medium text-indigo-600 hover:text-indigo-500">
+	<a href={localizeHref('/sign_up')} class="font-medium text-indigo-600 hover:text-indigo-500">
 		{m.auth_login_register_link()}
 	</a>
 </p>
