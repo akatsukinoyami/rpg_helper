@@ -1,43 +1,44 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-	import * as m from '$lib/paraglide/messages'
-	import { localizeHref } from '$lib/paraglide/runtime'
-	import { authClient } from '$lib/auth-client'
-	import Button from '$lib/components/Button.svelte'
-	import InputText from '$lib/components/InputText.svelte'
+	import { goto } from '$app/navigation';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import { authClient } from '$lib/auth-client';
+	import Button from '$lib/components/Button.svelte';
+	import InputText from '$lib/components/InputText.svelte';
 
-	let name = $state('')
-	let email = $state('')
-	let password = $state('')
-	let error = $state<string | null>(null)
-	let loading = $state(false)
+	let name = $state('');
+	let email = $state('');
+	let password = $state('');
+	let error = $state<string | null>(null);
+	let loading = $state(false);
 
 	function errorMessage(code: string) {
-		if (code === 'USER_ALREADY_EXISTS' || code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') return m.auth_error_email_taken()
-		if (code === 'PASSWORD_TOO_SHORT') return m.auth_error_password_too_short()
-		if (code === 'PASSWORD_TOO_LONG') return m.auth_error_password_too_long()
-		return m.auth_error_generic()
+		if (code === 'USER_ALREADY_EXISTS' || code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL')
+			return m.auth_error_email_taken();
+		if (code === 'PASSWORD_TOO_SHORT') return m.auth_error_password_too_short();
+		if (code === 'PASSWORD_TOO_LONG') return m.auth_error_password_too_long();
+		return m.auth_error_generic();
 	}
 
 	async function submit() {
 		if (password.length < 8) {
-			error = 'PASSWORD_TOO_SHORT'
-			return
+			error = 'PASSWORD_TOO_SHORT';
+			return;
 		}
-		loading = true
-		error = null
+		loading = true;
+		error = null;
 		try {
-			const result = await authClient.signUp.email({ name, email, password })
+			const result = await authClient.signUp.email({ name, email, password });
 			if (result.error) {
-				error = result.error.code ?? 'GENERIC'
+				error = result.error.code ?? 'GENERIC';
 			} else {
-				goto('/games')
+				goto('/games');
 			}
 		} catch (e) {
-			console.error('sign-up error', e)
-			error = 'GENERIC'
+			console.error('sign-up error', e);
+			error = 'GENERIC';
 		} finally {
-			loading = false
+			loading = false;
 		}
 	}
 </script>

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { localizeHref } from "$lib/paraglide/runtime";
-  import { mdiCog } from "@mdi/js";
-  import Icon from "./Icon.svelte";
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import { mdiCog } from '@mdi/js';
+	import Icon from './Icon.svelte';
 
-  interface Props {
-    appTitle: string;
-  }
+	interface Props {
+		appTitle: string;
+	}
 
-  let { appTitle }: Props = $props();
+	let { appTitle }: Props = $props();
 </script>
 
 

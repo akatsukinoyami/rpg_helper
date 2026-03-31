@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
-	import * as m from '$lib/paraglide/messages'
-	import { getLocale, localizeHref } from '$lib/paraglide/runtime'
-	import { localize } from '$lib/localize'
-	import type { ActionData, PageData } from './$types'
+	import { enhance } from '$app/forms';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import { localize } from '$lib/localize';
+	import type { ActionData, PageData } from './$types';
 	import Button from '$lib/components/Button.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import InputNumber from '$lib/components/InputNumber.svelte';
@@ -12,11 +12,11 @@
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
 	import StatPreview from '$lib/partials/StatPreview.svelte';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props()
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let selectedRaceId = $state('')
+	let selectedRaceId = $state('');
 
-	const selectedRace = $derived(data.races.find((r) => r.id === selectedRaceId))
+	const selectedRace = $derived(data.races.find((r) => r.id === selectedRaceId));
 </script>
 
 <Container>

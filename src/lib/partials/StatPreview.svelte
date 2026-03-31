@@ -1,12 +1,12 @@
 <script lang="ts">
-  import Badge from "$lib/components/Badge.svelte";
-  import { localize } from "$lib/localize";
-  import { m } from "$lib/paraglide/messages";
-  import { getLocale } from "$lib/paraglide/runtime";
+	import Badge from '$lib/components/Badge.svelte';
+	import { localize } from '$lib/localize';
+	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	const statKeys = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 
-  const statLabels: Record<string, string> = {
+	const statLabels: Record<string, string> = {
 		str: 'STR',
 		dex: 'DEX',
 		con: 'CON',
@@ -15,7 +15,7 @@
 		cha: 'CHA'
 	};
 
-  let { selectedRace } = $props();
+	let { selectedRace } = $props();
 </script>
 
 

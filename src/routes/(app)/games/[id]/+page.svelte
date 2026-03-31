@@ -1,31 +1,33 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
-	import * as m from '$lib/paraglide/messages'
-	import { getLocale, localizeHref } from '$lib/paraglide/runtime'
-	import { localize } from '$lib/localize'
-	import type { PageData } from './$types'
+	import { enhance } from '$app/forms';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import { localize } from '$lib/localize';
+	import type { PageData } from './$types';
 	import Badge, { type BadgeKind } from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import InputSelect from '$lib/components/InputSelect.svelte';
 	import Tile from '$lib/components/Tile.svelte';
 
-	let { data }: { data: PageData } = $props()
+	let { data }: { data: PageData } = $props();
 
 	const statusLabel = (status: string) => {
-		if (status === 'approved') return m.game_dashboard_approved()
-		if (status === 'rejected') return m.game_dashboard_rejected()
-		return m.game_dashboard_pending()
-	}
+		if (status === 'approved') return m.game_dashboard_approved();
+		if (status === 'rejected') return m.game_dashboard_rejected();
+		return m.game_dashboard_pending();
+	};
 
 	const statusClass = (status: string): BadgeKind => {
-		if (status === 'approved') return 'success'
-		if (status === 'rejected') return 'danger'
-		return 'warn'
-	}
+		if (status === 'approved') return 'success';
+		if (status === 'rejected') return 'danger';
+		return 'warn';
+	};
 
 	const otherPlayers = $derived(
-		data.game.characters.filter((c) => c.userId !== data.game.gmUserId && c.userId !== data.myCharacter?.userId)
-	)
+		data.game.characters.filter(
+			(c) => c.userId !== data.game.gmUserId && c.userId !== data.myCharacter?.userId
+		)
+	);
 </script>
 
 <div class="flex items-start justify-between">

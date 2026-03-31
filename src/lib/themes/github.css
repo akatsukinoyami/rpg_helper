@@ -6,20 +6,20 @@
 [data-theme="github-system"] {
 	color-scheme: light;
 
-	--color-white:     #ffffff;
-	--color-gray-50:   #f6f8fa;
-	--color-gray-100:  #eaeef2;
-	--color-gray-200:  #d0d7de;
-	--color-gray-300:  #afb8c1;
-	--color-gray-400:  #8c959f;
-	--color-gray-500:  #6e7781;
-	--color-gray-600:  #57606a;
-	--color-gray-700:  #424a53;
-	--color-gray-800:  #32383f;
-	--color-gray-900:  #24292f;
-	--color-gray-950:  #1b1f24;
+	--color-white: #ffffff;
+	--color-gray-50: #f6f8fa;
+	--color-gray-100: #eaeef2;
+	--color-gray-200: #d0d7de;
+	--color-gray-300: #afb8c1;
+	--color-gray-400: #8c959f;
+	--color-gray-500: #6e7781;
+	--color-gray-600: #57606a;
+	--color-gray-700: #424a53;
+	--color-gray-800: #32383f;
+	--color-gray-900: #24292f;
+	--color-gray-950: #1b1f24;
 
-	--color-indigo-50:  #ddf4ff;
+	--color-indigo-50: #ddf4ff;
 	--color-indigo-100: #cae8ff;
 	--color-indigo-200: #a5d6ff;
 	--color-indigo-300: #79c0ff;
@@ -30,13 +30,13 @@
 	--color-indigo-800: #033d8b;
 	--color-indigo-900: #0a3069;
 
-	--color-green-50:  #dafbe1;
+	--color-green-50: #dafbe1;
 	--color-green-100: #ceead5;
 	--color-green-200: #a7d8b0;
 	--color-green-600: #1a7f37;
 	--color-green-700: #116329;
 
-	--color-red-50:  #fff0ef;
+	--color-red-50: #fff0ef;
 	--color-red-100: #ffcecb;
 	--color-red-200: #ffabab;
 	--color-red-300: #ff8182;
@@ -44,7 +44,7 @@
 	--color-red-700: #a40e26;
 	--color-red-800: #82071e;
 
-	--color-yellow-50:  #fff8c5;
+	--color-yellow-50: #fff8c5;
 	--color-yellow-100: #fae17d;
 	--color-yellow-200: #f0b72f;
 	--color-yellow-700: #7d4e00;
@@ -54,20 +54,20 @@
 [data-theme="github-dark"] {
 	color-scheme: dark;
 
-	--color-white:     #161b22;
-	--color-gray-50:   #0d1117;
-	--color-gray-100:  #21262d;
-	--color-gray-200:  #30363d;
-	--color-gray-300:  #3d444d;
-	--color-gray-400:  #545d68;
-	--color-gray-500:  #768390;
-	--color-gray-600:  #9198a1;
-	--color-gray-700:  #adbac7;
-	--color-gray-800:  #cdd9e5;
-	--color-gray-900:  #e6edf3;
-	--color-gray-950:  #f0f6fc;
+	--color-white: #161b22;
+	--color-gray-50: #0d1117;
+	--color-gray-100: #21262d;
+	--color-gray-200: #30363d;
+	--color-gray-300: #3d444d;
+	--color-gray-400: #545d68;
+	--color-gray-500: #768390;
+	--color-gray-600: #9198a1;
+	--color-gray-700: #adbac7;
+	--color-gray-800: #cdd9e5;
+	--color-gray-900: #e6edf3;
+	--color-gray-950: #f0f6fc;
 
-	--color-indigo-50:  #0a1628;
+	--color-indigo-50: #0a1628;
 	--color-indigo-100: #0c2045;
 	--color-indigo-200: #388bfd;
 	--color-indigo-300: #58a6ff;
@@ -78,13 +78,13 @@
 	--color-indigo-800: #79c0ff;
 	--color-indigo-900: #b6e3ff;
 
-	--color-green-50:  #0a1f10;
+	--color-green-50: #0a1f10;
 	--color-green-100: #0d2d18;
 	--color-green-200: #1a4d2b;
 	--color-green-600: #2ea043;
 	--color-green-700: #56d364;
 
-	--color-red-50:  #1e0c0c;
+	--color-red-50: #1e0c0c;
 	--color-red-100: #2d1010;
 	--color-red-200: #3d1515;
 	--color-red-300: #da3633;
@@ -92,7 +92,7 @@
 	--color-red-700: #ff7b72;
 	--color-red-800: #ffa198;
 
-	--color-yellow-50:  #1e1400;
+	--color-yellow-50: #1e1400;
 	--color-yellow-100: #2d1f00;
 	--color-yellow-200: #9e6a03;
 	--color-yellow-700: #e3b341;
@@ -103,20 +103,20 @@
 	[data-theme="github-system"] {
 		color-scheme: dark;
 
-		--color-white:     #161b22;
-		--color-gray-50:   #0d1117;
-		--color-gray-100:  #21262d;
-		--color-gray-200:  #30363d;
-		--color-gray-300:  #3d444d;
-		--color-gray-400:  #545d68;
-		--color-gray-500:  #768390;
-		--color-gray-600:  #9198a1;
-		--color-gray-700:  #adbac7;
-		--color-gray-800:  #cdd9e5;
-		--color-gray-900:  #e6edf3;
-		--color-gray-950:  #f0f6fc;
+		--color-white: #161b22;
+		--color-gray-50: #0d1117;
+		--color-gray-100: #21262d;
+		--color-gray-200: #30363d;
+		--color-gray-300: #3d444d;
+		--color-gray-400: #545d68;
+		--color-gray-500: #768390;
+		--color-gray-600: #9198a1;
+		--color-gray-700: #adbac7;
+		--color-gray-800: #cdd9e5;
+		--color-gray-900: #e6edf3;
+		--color-gray-950: #f0f6fc;
 
-		--color-indigo-50:  #0a1628;
+		--color-indigo-50: #0a1628;
 		--color-indigo-100: #0c2045;
 		--color-indigo-200: #388bfd;
 		--color-indigo-300: #58a6ff;
@@ -127,13 +127,13 @@
 		--color-indigo-800: #79c0ff;
 		--color-indigo-900: #b6e3ff;
 
-		--color-green-50:  #0a1f10;
+		--color-green-50: #0a1f10;
 		--color-green-100: #0d2d18;
 		--color-green-200: #1a4d2b;
 		--color-green-600: #2ea043;
 		--color-green-700: #56d364;
 
-		--color-red-50:  #1e0c0c;
+		--color-red-50: #1e0c0c;
 		--color-red-100: #2d1010;
 		--color-red-200: #3d1515;
 		--color-red-300: #da3633;
@@ -141,7 +141,7 @@
 		--color-red-700: #ff7b72;
 		--color-red-800: #ffa198;
 
-		--color-yellow-50:  #1e1400;
+		--color-yellow-50: #1e1400;
 		--color-yellow-100: #2d1f00;
 		--color-yellow-200: #9e6a03;
 		--color-yellow-700: #e3b341;

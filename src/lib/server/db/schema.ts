@@ -1,32 +1,42 @@
-import { relations } from 'drizzle-orm'
-import { boolean, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm';
+import {
+	boolean,
+	integer,
+	jsonb,
+	pgTable,
+	primaryKey,
+	text,
+	timestamp,
+	uuid,
+	varchar
+} from 'drizzle-orm/pg-core';
 
 // ---------------------------------------------------------------------------
 // Shared types
 // ---------------------------------------------------------------------------
 
 export type Stats = {
-	str: number
-	dex: number
-	con: number
-	int: number
-	wis: number
-	cha: number
-}
+	str: number;
+	dex: number;
+	con: number;
+	int: number;
+	wis: number;
+	cha: number;
+};
 
 export type ItemEffect = {
-	stat?: keyof Stats
-	modifier?: number
-	description?: string
-}
+	stat?: keyof Stats;
+	modifier?: number;
+	description?: string;
+};
 
 export type DiceResult = {
-	dice: number[]
-	modifier: number
-	total: number
-}
+	dice: number[];
+	modifier: number;
+	total: number;
+};
 
-export type Locale = "en" | "ru" | "ua";
+export type Locale = 'en' | 'ru' | 'ua';
 export type LocalizedText = Partial<Record<Locale, string>>;
 
 // ---------------------------------------------------------------------------
@@ -41,7 +51,7 @@ export const user = pgTable('user', {
 	image: text('image'),
 	createdAt: timestamp('created_at').notNull(),
 	updatedAt: timestamp('updated_at').notNull()
-})
+});
 
 export const session = pgTable('session', {
 	id: text('id').primaryKey(),
@@ -54,7 +64,7 @@ export const session = pgTable('session', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' })
-})
+});
 
 export const account = pgTable('account', {
 	id: text('id').primaryKey(),
@@ -72,7 +82,7 @@ export const account = pgTable('account', {
 	password: text('password'),
 	createdAt: timestamp('created_at').notNull(),
 	updatedAt: timestamp('updated_at').notNull()
-})
+});
 
 export const verification = pgTable('verification', {
 	id: text('id').primaryKey(),
@@ -81,7 +91,7 @@ export const verification = pgTable('verification', {
 	expiresAt: timestamp('expires_at').notNull(),
 	createdAt: timestamp('created_at'),
 	updatedAt: timestamp('updated_at')
-})
+});
 
 // ---------------------------------------------------------------------------
 // App tables
@@ -95,7 +105,7 @@ export const games = pgTable('games', {
 		.notNull()
 		.references(() => user.id),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 export const races = pgTable('races', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -103,7 +113,7 @@ export const races = pgTable('races', {
 	description: jsonb('description').$type<LocalizedText>(),
 	baseStats: jsonb('base_stats').$type<Stats>().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 export const skills = pgTable('skills', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -111,7 +121,7 @@ export const skills = pgTable('skills', {
 	description: jsonb('description').$type<LocalizedText>(),
 	statModifiers: jsonb('stat_modifiers').$type<Partial<Stats>>(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 export const raceSkills = pgTable(
 	'race_skills',
@@ -124,7 +134,7 @@ export const raceSkills = pgTable(
 			.references(() => skills.id, { onDelete: 'cascade' })
 	},
 	(t) => [primaryKey({ columns: [t.raceId, t.skillId] })]
-)
+);
 
 export const items = pgTable('items', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -134,7 +144,7 @@ export const items = pgTable('items', {
 	effect: jsonb('effect').$type<ItemEffect>(),
 	value: integer('value').default(0).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 export const characters = pgTable('characters', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -146,7 +156,9 @@ export const characters = pgTable('characters', {
 		.references(() => games.id, { onDelete: 'cascade' }),
 	raceId: uuid('race_id').references(() => races.id, { onDelete: 'set null' }),
 	name: varchar('name', { length: 100 }).notNull(),
-	gender: varchar('gender', { enum: ['male', 'female', 'none', 'both'] }).default('none').notNull(),
+	gender: varchar('gender', { enum: ['male', 'female', 'none', 'both'] })
+		.default('none')
+		.notNull(),
 	age: integer('age'),
 	bodyDescription: text('body_description'),
 	prehistory: text('prehistory'),
@@ -156,7 +168,7 @@ export const characters = pgTable('characters', {
 		.notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
-})
+});
 
 export const characterSkills = pgTable(
 	'character_skills',
@@ -170,7 +182,7 @@ export const characterSkills = pgTable(
 		level: integer('level').default(1).notNull()
 	},
 	(t) => [primaryKey({ columns: [t.characterId, t.skillId] })]
-)
+);
 
 export const characterItems = pgTable(
 	'character_items',
@@ -184,7 +196,7 @@ export const characterItems = pgTable(
 		quantity: integer('quantity').default(1).notNull()
 	},
 	(t) => [primaryKey({ columns: [t.characterId, t.itemId] })]
-)
+);
 
 export const characterEditProposals = pgTable('character_edit_proposals', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -196,7 +208,7 @@ export const characterEditProposals = pgTable('character_edit_proposals', {
 		.default('pending')
 		.notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 // Which fields of `characterId` are visible to `visibleToCharacterId`.
 // A row only exists when the GM explicitly grants visibility.
@@ -219,7 +231,7 @@ export const characterVisibility = pgTable(
 		showInventory: boolean('show_inventory').default(false).notNull()
 	},
 	(t) => [primaryKey({ columns: [t.characterId, t.visibleToCharacterId] })]
-)
+);
 
 export const diceRolls = pgTable('dice_rolls', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -232,7 +244,7 @@ export const diceRolls = pgTable('dice_rolls', {
 	expression: varchar('expression', { length: 50 }).notNull(),
 	results: jsonb('results').$type<DiceResult>().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
-})
+});
 
 // ---------------------------------------------------------------------------
 // Relations
@@ -242,26 +254,26 @@ export const gamesRelations = relations(games, ({ one, many }) => ({
 	gm: one(user, { fields: [games.gmUserId], references: [user.id] }),
 	characters: many(characters),
 	diceRolls: many(diceRolls)
-}))
+}));
 
 export const racesRelations = relations(races, ({ many }) => ({
 	raceSkills: many(raceSkills),
 	characters: many(characters)
-}))
+}));
 
 export const skillsRelations = relations(skills, ({ many }) => ({
 	raceSkills: many(raceSkills),
 	characterSkills: many(characterSkills)
-}))
+}));
 
 export const raceSkillsRelations = relations(raceSkills, ({ one }) => ({
 	race: one(races, { fields: [raceSkills.raceId], references: [races.id] }),
 	skill: one(skills, { fields: [raceSkills.skillId], references: [skills.id] })
-}))
+}));
 
 export const itemsRelations = relations(items, ({ many }) => ({
 	characterItems: many(characterItems)
-}))
+}));
 
 export const charactersRelations = relations(characters, ({ one, many }) => ({
 	user: one(user, { fields: [characters.userId], references: [user.id] }),
@@ -274,7 +286,7 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
 	visibilityGranted: many(characterVisibility, { relationName: 'visibilitySource' }),
 	// Fields other characters expose to this character
 	visibilityReceived: many(characterVisibility, { relationName: 'visibilityTarget' })
-}))
+}));
 
 export const characterSkillsRelations = relations(characterSkills, ({ one }) => ({
 	character: one(characters, {
@@ -282,7 +294,7 @@ export const characterSkillsRelations = relations(characterSkills, ({ one }) => 
 		references: [characters.id]
 	}),
 	skill: one(skills, { fields: [characterSkills.skillId], references: [skills.id] })
-}))
+}));
 
 export const characterItemsRelations = relations(characterItems, ({ one }) => ({
 	character: one(characters, {
@@ -290,14 +302,14 @@ export const characterItemsRelations = relations(characterItems, ({ one }) => ({
 		references: [characters.id]
 	}),
 	item: one(items, { fields: [characterItems.itemId], references: [items.id] })
-}))
+}));
 
 export const characterEditProposalsRelations = relations(characterEditProposals, ({ one }) => ({
 	character: one(characters, {
 		fields: [characterEditProposals.characterId],
 		references: [characters.id]
 	})
-}))
+}));
 
 export const characterVisibilityRelations = relations(characterVisibility, ({ one }) => ({
 	character: one(characters, {
@@ -310,9 +322,9 @@ export const characterVisibilityRelations = relations(characterVisibility, ({ on
 		references: [characters.id],
 		relationName: 'visibilityTarget'
 	})
-}))
+}));
 
 export const diceRollsRelations = relations(diceRolls, ({ one }) => ({
 	game: one(games, { fields: [diceRolls.gameId], references: [games.id] }),
 	user: one(user, { fields: [diceRolls.userId], references: [user.id] })
-}))
+}));

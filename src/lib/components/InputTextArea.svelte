@@ -1,20 +1,14 @@
 <script lang="ts">
-  import type { HTMLTextareaAttributes } from 'svelte/elements';
-  import { fieldColors } from '$lib/constants';
-  import Label from '$lib/components/Label.svelte';
+	import type { HTMLTextareaAttributes } from 'svelte/elements';
+	import { fieldColors } from '$lib/constants';
+	import Label from '$lib/components/Label.svelte';
 
-  interface Props extends HTMLTextareaAttributes {
-    label?: string;
-    value?: string;
-  }
+	interface Props extends HTMLTextareaAttributes {
+		label?: string;
+		value?: string;
+	}
 
-  let {
-    label,
-    id,
-    value = $bindable(),
-    required,
-    ...rest
-  }: Props = $props()
+	let { label, id, value = $bindable(), required, ...rest }: Props = $props();
 </script>
 
 <div class="flex flex-col gap-1">

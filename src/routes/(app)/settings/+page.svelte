@@ -1,55 +1,55 @@
 <script lang="ts">
-	import { untrack } from 'svelte'
-	import { enhance } from '$app/forms'
-	import { page } from '$app/state'
-	import { goto } from '$app/navigation'
-	import { authClient } from '$lib/auth-client'
-	import * as m from '$lib/paraglide/messages'
-	import type { PageData } from './$types'
+	import { untrack } from 'svelte';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { authClient } from '$lib/auth-client';
+	import * as m from '$lib/paraglide/messages';
+	import type { PageData } from './$types';
 
 	import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import Palette from '$lib/components/Palette.svelte';
 
-	let { data }: { data: PageData } = $props()
+	let { data }: { data: PageData } = $props();
 
 	const schemeLabels: Record<string, () => string> = {
 		github: m.settings_scheme_github,
 		catppuccin: m.settings_scheme_catppuccin,
 		gruvbox: m.settings_scheme_gruvbox
-	}
+	};
 
 	const modeLabels: Record<string, () => string> = {
 		light: m.settings_mode_light,
 		dark: m.settings_mode_dark,
 		system: m.settings_mode_system
-	}
+	};
 
 	const langLabels: Record<string, string> = {
 		en: 'English',
 		ru: 'Русский',
 		ua: 'Українська'
-	}
+	};
 
-	const saved = $derived(page.url.searchParams.get('saved') === '1')
+	const saved = $derived(page.url.searchParams.get('saved') === '1');
 
 	// Initialize from server-loaded values, not from client-side getLocale().
 	// getLocale() on the client reads document.cookie, which may not reflect
 	// the saved cookie until the next full navigation.
 	async function signOut() {
-		await authClient.signOut()
-		goto('/sign_in')
+		await authClient.signOut();
+		goto('/sign_in');
 	}
 
-	let selectedLocale = $state(untrack(() => data.locale))
-	let previewScheme = $state(untrack(() => data.prefs.scheme))
-	let previewMode = $state(untrack(() => data.prefs.mode))
+	let selectedLocale = $state(untrack(() => data.locale));
+	let previewScheme = $state(untrack(() => data.prefs.scheme));
+	let previewMode = $state(untrack(() => data.prefs.mode));
 
 	// Live preview — update data-theme immediately as user picks
 	$effect(() => {
-		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`)
-	})
+		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`);
+	});
 </script>
 
 <Container>

@@ -1,53 +1,53 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-	import { authClient } from '$lib/auth-client'
-	import * as m from '$lib/paraglide/messages'
-	import { localizeHref } from '$lib/paraglide/runtime'
-	import Button from '$lib/components/Button.svelte'
-	import InputText from '$lib/components/InputText.svelte'
+	import { goto } from '$app/navigation';
+	import { authClient } from '$lib/auth-client';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import Button from '$lib/components/Button.svelte';
+	import InputText from '$lib/components/InputText.svelte';
 
-	let login = $state('')
-	let password = $state('')
-	let error = $state<string | null>(null)
-	let loading = $state(false)
+	let login = $state('');
+	let password = $state('');
+	let error = $state<string | null>(null);
+	let loading = $state(false);
 
 	async function resolveEmail(nameOrEmail: string): Promise<string | null> {
-		if (nameOrEmail.includes('@')) return nameOrEmail
+		if (nameOrEmail.includes('@')) return nameOrEmail;
 		const res = await fetch('/api/resolve-login', {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ name: nameOrEmail })
-		})
-		const data = await res.json()
-		return data.email
+		});
+		const data = await res.json();
+		return data.email;
 	}
 
 	async function submit() {
-		loading = true
-		error = null
+		loading = true;
+		error = null;
 		try {
-			const email = await resolveEmail(login)
+			const email = await resolveEmail(login);
 			if (!email) {
-				error = 'USER_NOT_FOUND'
-				return
+				error = 'USER_NOT_FOUND';
+				return;
 			}
-			const result = await authClient.signIn.email({ email, password })
+			const result = await authClient.signIn.email({ email, password });
 			if (result.error) {
-				error = result.error.code ?? 'GENERIC'
+				error = result.error.code ?? 'GENERIC';
 			} else {
-				goto('/games')
+				goto('/games');
 			}
 		} catch (e) {
-			console.error('sign-in error', e)
-			error = 'GENERIC'
+			console.error('sign-in error', e);
+			error = 'GENERIC';
 		} finally {
-			loading = false
+			loading = false;
 		}
 	}
 
 	function errorMessage(code: string) {
-		if (code === 'USER_NOT_FOUND') return m.auth_error_user_not_found()
-		return m.auth_error_invalid_credentials()
+		if (code === 'USER_NOT_FOUND') return m.auth_error_user_not_found();
+		return m.auth_error_invalid_credentials();
 	}
 </script>
 

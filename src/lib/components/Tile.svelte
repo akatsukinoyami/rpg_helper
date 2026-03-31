@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { title, subtitle, children } = $props();
+	let { title, subtitle, children } = $props();
 </script>
 
 

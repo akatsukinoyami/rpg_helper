@@ -1,26 +1,26 @@
 <script lang="ts" module>
-  import type { Snippet } from 'svelte';
-  import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements';
+	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements';
 
-  export const kinds = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-    selected: 'border-indigo-500 bg-indigo-50 text-indigo-700',
-    secondary: 'border-gray-200 text-gray-600 hover:border-gray-300',
-    danger: 'bg-red-600 text-red-900 hover:bg-red-700',
-    success: 'bg-green-600 text-green-900 hover:bg-green-700',
-    ghost: 'text-gray-500 hover:text-gray-900 border-0!'
-  } as const;
+	export const kinds = {
+		primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
+		selected: 'border-indigo-500 bg-indigo-50 text-indigo-700',
+		secondary: 'border-gray-200 text-gray-600 hover:border-gray-300',
+		danger: 'bg-red-600 text-red-900 hover:bg-red-700',
+		success: 'bg-green-600 text-green-900 hover:bg-green-700',
+		ghost: 'text-gray-500 hover:text-gray-900 border-0!'
+	} as const;
 
-  export type ButtonKind = keyof typeof kinds;
+	export type ButtonKind = keyof typeof kinds;
 
-  interface Props {
-    label?: string;
-    kind?: ButtonKind;
-    children?: Snippet;
-  };
+	interface Props {
+		label?: string;
+		kind?: ButtonKind;
+		children?: Snippet;
+	}
 
-  type asAnchor = HTMLAnchorAttributes & { href: string };
-  type asButton = HTMLButtonAttributes & { href?: never };
+	type asAnchor = HTMLAnchorAttributes & { href: string };
+	type asButton = HTMLButtonAttributes & { href?: never };
 </script>
 
 <script lang="ts">

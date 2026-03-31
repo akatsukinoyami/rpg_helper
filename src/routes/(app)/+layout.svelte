@@ -2,7 +2,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import type { Snippet } from 'svelte';
 
-	let { children }: { children: Snippet } = $props()
+	let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="min-h-screen bg-gray-50">

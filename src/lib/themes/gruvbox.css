@@ -6,96 +6,96 @@
 [data-theme="gruvbox-system"] {
 	color-scheme: light;
 
-	--color-white:     #ebdbb2;  /* bg1 — cards slightly warmer than page */
-	--color-gray-50:   #fbf1c7;  /* bg0 */
-	--color-gray-100:  #ebdbb2;  /* bg1 */
-	--color-gray-200:  #d5c4a1;  /* bg2 — borders */
-	--color-gray-300:  #bdae93;  /* bg3 */
-	--color-gray-400:  #a89984;  /* bg4 */
-	--color-gray-500:  #928374;  /* gray */
-	--color-gray-600:  #7c6f64;  /* fg4 */
-	--color-gray-700:  #665c54;  /* fg3 */
-	--color-gray-800:  #504945;  /* fg2 */
-	--color-gray-900:  #3c3836;  /* fg1 */
-	--color-gray-950:  #282828;  /* fg0 */
+	--color-white: #ebdbb2; /* bg1 — cards slightly warmer than page */
+	--color-gray-50: #fbf1c7; /* bg0 */
+	--color-gray-100: #ebdbb2; /* bg1 */
+	--color-gray-200: #d5c4a1; /* bg2 — borders */
+	--color-gray-300: #bdae93; /* bg3 */
+	--color-gray-400: #a89984; /* bg4 */
+	--color-gray-500: #928374; /* gray */
+	--color-gray-600: #7c6f64; /* fg4 */
+	--color-gray-700: #665c54; /* fg3 */
+	--color-gray-800: #504945; /* fg2 */
+	--color-gray-900: #3c3836; /* fg1 */
+	--color-gray-950: #282828; /* fg0 */
 
-	--color-indigo-50:  #fdf3e9;
+	--color-indigo-50: #fdf3e9;
 	--color-indigo-100: #fae2c5;
 	--color-indigo-200: #f5c48a;
-	--color-indigo-300: #fe8019;  /* bright orange */
+	--color-indigo-300: #fe8019; /* bright orange */
 	--color-indigo-400: #e87b0a;
-	--color-indigo-500: #d65d0e;  /* orange */
+	--color-indigo-500: #d65d0e; /* orange */
 	--color-indigo-600: #d65d0e;
 	--color-indigo-700: #af3a03;
 	--color-indigo-800: #8f2f02;
 	--color-indigo-900: #701f00;
 
-	--color-green-50:  #edf3d4;
+	--color-green-50: #edf3d4;
 	--color-green-100: #dae8a8;
 	--color-green-200: #b9d26e;
-	--color-green-600: #98971a;  /* Gruvbox green */
+	--color-green-600: #98971a; /* Gruvbox green */
 	--color-green-700: #79780e;
 
-	--color-red-50:  #fce8e4;
+	--color-red-50: #fce8e4;
 	--color-red-100: #f8cdc5;
 	--color-red-200: #f09b8a;
 	--color-red-300: #e06050;
-	--color-red-600: #cc241d;  /* Gruvbox red */
+	--color-red-600: #cc241d; /* Gruvbox red */
 	--color-red-700: #a81c17;
 	--color-red-800: #871510;
 
-	--color-yellow-50:  #fdf8d4;
+	--color-yellow-50: #fdf8d4;
 	--color-yellow-100: #faf0a0;
 	--color-yellow-200: #fabd2f;
-	--color-yellow-700: #b57614;  /* Gruvbox yellow */
+	--color-yellow-700: #b57614; /* Gruvbox yellow */
 	--color-yellow-800: #9c6512;
 }
 
 [data-theme="gruvbox-dark"] {
 	color-scheme: dark;
 
-	--color-white:     #3c3836;  /* bg1 */
-	--color-gray-50:   #282828;  /* bg0 */
-	--color-gray-100:  #3c3836;  /* bg1 — inputs */
-	--color-gray-200:  #504945;  /* bg2 — borders */
-	--color-gray-300:  #665c54;  /* bg3 */
-	--color-gray-400:  #7c6f64;  /* bg4 */
-	--color-gray-500:  #928374;  /* gray */
-	--color-gray-600:  #a89984;  /* fg4 */
-	--color-gray-700:  #bdae93;  /* fg3 */
-	--color-gray-800:  #d5c4a1;  /* fg2 */
-	--color-gray-900:  #ebdbb2;  /* fg1 */
-	--color-gray-950:  #fbf1c7;  /* fg0 */
+	--color-white: #3c3836; /* bg1 */
+	--color-gray-50: #282828; /* bg0 */
+	--color-gray-100: #3c3836; /* bg1 — inputs */
+	--color-gray-200: #504945; /* bg2 — borders */
+	--color-gray-300: #665c54; /* bg3 */
+	--color-gray-400: #7c6f64; /* bg4 */
+	--color-gray-500: #928374; /* gray */
+	--color-gray-600: #a89984; /* fg4 */
+	--color-gray-700: #bdae93; /* fg3 */
+	--color-gray-800: #d5c4a1; /* fg2 */
+	--color-gray-900: #ebdbb2; /* fg1 */
+	--color-gray-950: #fbf1c7; /* fg0 */
 
-	--color-indigo-50:  #1a2b2c;
+	--color-indigo-50: #1a2b2c;
 	--color-indigo-100: #213535;
-	--color-indigo-200: #83a598;  /* bright aqua — focus ring */
+	--color-indigo-200: #83a598; /* bright aqua — focus ring */
 	--color-indigo-300: #8ec07c;
 	--color-indigo-400: #7bb367;
 	--color-indigo-500: #83a598;
-	--color-indigo-600: #458588;  /* Gruvbox aqua — buttons */
+	--color-indigo-600: #458588; /* Gruvbox aqua — buttons */
 	--color-indigo-700: #357270;
 	--color-indigo-800: #83a598;
 	--color-indigo-900: #b8d8c8;
 
-	--color-green-50:  #1f2b1a;
+	--color-green-50: #1f2b1a;
 	--color-green-100: #283820;
 	--color-green-200: #3d5530;
-	--color-green-600: #79740e;   /* darker green — buttons (white text) */
-	--color-green-700: #b8bb26;   /* bright — badge text */
+	--color-green-600: #79740e; /* darker green — buttons (white text) */
+	--color-green-700: #b8bb26; /* bright — badge text */
 
-	--color-red-50:  #2a1a18;
+	--color-red-50: #2a1a18;
 	--color-red-100: #3d2020;
 	--color-red-200: #5a2f2f;
 	--color-red-300: #fb4934;
 	--color-red-600: #cc241d;
-	--color-red-700: #fb4934;     /* bright — badge text */
+	--color-red-700: #fb4934; /* bright — badge text */
 	--color-red-800: #fc9a8e;
 
-	--color-yellow-50:  #261e00;
+	--color-yellow-50: #261e00;
 	--color-yellow-100: #332800;
 	--color-yellow-200: #b57614;
-	--color-yellow-700: #fabd2f;  /* bright — badge text */
+	--color-yellow-700: #fabd2f; /* bright — badge text */
 	--color-yellow-800: #fce36a;
 }
 
@@ -103,20 +103,20 @@
 	[data-theme="gruvbox-system"] {
 		color-scheme: dark;
 
-		--color-white:     #3c3836;
-		--color-gray-50:   #282828;
-		--color-gray-100:  #3c3836;
-		--color-gray-200:  #504945;
-		--color-gray-300:  #665c54;
-		--color-gray-400:  #7c6f64;
-		--color-gray-500:  #928374;
-		--color-gray-600:  #a89984;
-		--color-gray-700:  #bdae93;
-		--color-gray-800:  #d5c4a1;
-		--color-gray-900:  #ebdbb2;
-		--color-gray-950:  #fbf1c7;
+		--color-white: #3c3836;
+		--color-gray-50: #282828;
+		--color-gray-100: #3c3836;
+		--color-gray-200: #504945;
+		--color-gray-300: #665c54;
+		--color-gray-400: #7c6f64;
+		--color-gray-500: #928374;
+		--color-gray-600: #a89984;
+		--color-gray-700: #bdae93;
+		--color-gray-800: #d5c4a1;
+		--color-gray-900: #ebdbb2;
+		--color-gray-950: #fbf1c7;
 
-		--color-indigo-50:  #1a2b2c;
+		--color-indigo-50: #1a2b2c;
 		--color-indigo-100: #213535;
 		--color-indigo-200: #83a598;
 		--color-indigo-300: #8ec07c;
@@ -127,13 +127,13 @@
 		--color-indigo-800: #83a598;
 		--color-indigo-900: #b8d8c8;
 
-		--color-green-50:  #1f2b1a;
+		--color-green-50: #1f2b1a;
 		--color-green-100: #283820;
 		--color-green-200: #3d5530;
 		--color-green-600: #79740e;
 		--color-green-700: #b8bb26;
 
-		--color-red-50:  #2a1a18;
+		--color-red-50: #2a1a18;
 		--color-red-100: #3d2020;
 		--color-red-200: #5a2f2f;
 		--color-red-300: #fb4934;
@@ -141,7 +141,7 @@
 		--color-red-700: #fb4934;
 		--color-red-800: #fc9a8e;
 
-		--color-yellow-50:  #261e00;
+		--color-yellow-50: #261e00;
 		--color-yellow-100: #332800;
 		--color-yellow-200: #b57614;
 		--color-yellow-700: #fabd2f;

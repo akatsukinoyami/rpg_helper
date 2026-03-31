@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
-    import Badge from '$lib/components/Badge.svelte';
+	import { enhance } from '$app/forms';
+	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
-	import * as m from '$lib/paraglide/messages'
-	import { localizeHref } from '$lib/paraglide/runtime'
-	import type { ActionData, PageData } from './$types'
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import type { ActionData, PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props()
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let showCreateForm = $state(false)
+	let showCreateForm = $state(false);
 </script>
 
 <div class="flex items-center justify-between">

@@ -1,12 +1,12 @@
 <script lang="ts" module>
-  import type { HTMLInputAttributes } from "svelte/elements";
-  import type { Options } from "$lib/types";
+	import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { Options } from '$lib/types';
 
-  export interface Props extends HTMLInputAttributes {
-    label?: string;
-    options: Options;
-    group: string;
-  }
+	export interface Props extends HTMLInputAttributes {
+		label?: string;
+		options: Options;
+		group: string;
+	}
 </script>
 
 <script lang="ts">

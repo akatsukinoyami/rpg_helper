@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { HTMLLabelAttributes } from "svelte/elements";
+	import type { HTMLLabelAttributes } from 'svelte/elements';
 
-  interface Props extends HTMLLabelAttributes {
-    label?: string;
-    required?: boolean | null | undefined;
-  }
-  let { label, required, for: id }: Props = $props();
+	interface Props extends HTMLLabelAttributes {
+		label?: string;
+		required?: boolean | null | undefined;
+	}
+	let { label, required, for: id }: Props = $props();
 </script>
 
 {#if label}

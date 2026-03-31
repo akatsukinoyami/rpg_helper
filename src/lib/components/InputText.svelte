@@ -1,21 +1,14 @@
 <script lang="ts">
-  import type { HTMLInputAttributes } from 'svelte/elements';
-  import { fieldColors } from '$lib/constants';
-  import Label from '$lib/components/Label.svelte';
+	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { fieldColors } from '$lib/constants';
+	import Label from '$lib/components/Label.svelte';
 
-  interface Props extends HTMLInputAttributes {
-    label?: string;
-    value?: string;
-  }
+	interface Props extends HTMLInputAttributes {
+		label?: string;
+		value?: string;
+	}
 
-  let {
-    label,
-    id,
-    type = 'text',
-    required,
-    value = $bindable(),
-    ...rest
-  }: Props = $props()
+	let { label, id, type = 'text', required, value = $bindable(), ...rest }: Props = $props();
 </script>
 
 <div class="flex flex-col gap-1">

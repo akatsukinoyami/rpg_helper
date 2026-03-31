@@ -1,14 +1,14 @@
 <script lang="ts" module>
-  import { fieldColors } from '$lib/constants';
-  import type { HTMLSelectAttributes } from "svelte/elements";
-  import type { Options } from "$lib/types";
-  import Label from '$lib/components/Label.svelte';
+	import { fieldColors } from '$lib/constants';
+	import type { HTMLSelectAttributes } from 'svelte/elements';
+	import type { Options } from '$lib/types';
+	import Label from '$lib/components/Label.svelte';
 
-  export interface Props extends HTMLSelectAttributes {
-    label?: string;
-    value?: string;
-    options: Options;
-  }
+	export interface Props extends HTMLSelectAttributes {
+		label?: string;
+		value?: string;
+		options: Options;
+	}
 </script>
 
 <script lang="ts">

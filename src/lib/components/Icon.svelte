@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  import type { SVGAttributes } from "svelte/elements";
+	import type { SVGAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 
 	export interface Props extends SVGAttributes<SVGPathElement> {
