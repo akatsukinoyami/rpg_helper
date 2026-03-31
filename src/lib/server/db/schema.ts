@@ -1,5 +1,5 @@
-import { pgTable, text, boolean, timestamp, uuid, varchar, integer, jsonb, primaryKey } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+import { boolean, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -91,12 +91,6 @@ export const games = pgTable('games', {
 	gmUserId: text('gm_user_id')
 		.notNull()
 		.references(() => user.id),
-	// Visibility settings — body_description is always visible
-	showName: boolean('show_name').default(false).notNull(),
-	showAge: boolean('show_age').default(false).notNull(),
-	showRace: boolean('show_race').default(false).notNull(),
-	showStats: boolean('show_stats').default(false).notNull(),
-	showHistory: boolean('show_history').default(false).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 })
 
@@ -193,15 +187,35 @@ export const characterEditProposals = pgTable('character_edit_proposals', {
 	characterId: uuid('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
-	proposedBy: text('proposed_by')
-		.notNull()
-		.references(() => user.id),
 	patch: jsonb('patch').notNull(),
 	status: varchar('status', { enum: ['pending', 'approved', 'rejected'] })
 		.default('pending')
 		.notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 })
+
+// Which fields of `characterId` are visible to `visibleToCharacterId`.
+// A row only exists when the GM explicitly grants visibility.
+// body_description is always visible and never stored here.
+export const characterVisibility = pgTable(
+	'character_visibility',
+	{
+		characterId: uuid('character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		visibleToCharacterId: uuid('visible_to_character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		showName: boolean('show_name').default(false).notNull(),
+		showAge: boolean('show_age').default(false).notNull(),
+		showRace: boolean('show_race').default(false).notNull(),
+		showStats: boolean('show_stats').default(false).notNull(),
+		showHistory: boolean('show_history').default(false).notNull(),
+		showSkills: boolean('show_skills').default(false).notNull(),
+		showInventory: boolean('show_inventory').default(false).notNull()
+	},
+	(t) => [primaryKey({ columns: [t.characterId, t.visibleToCharacterId] })]
+)
 
 export const diceRolls = pgTable('dice_rolls', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -251,7 +265,11 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
 	race: one(races, { fields: [characters.raceId], references: [races.id] }),
 	characterSkills: many(characterSkills),
 	characterItems: many(characterItems),
-	editProposals: many(characterEditProposals)
+	editProposals: many(characterEditProposals),
+	// Fields this character exposes to others
+	visibilityGranted: many(characterVisibility, { relationName: 'visibilitySource' }),
+	// Fields other characters expose to this character
+	visibilityReceived: many(characterVisibility, { relationName: 'visibilityTarget' })
 }))
 
 export const characterSkillsRelations = relations(characterSkills, ({ one }) => ({
@@ -274,10 +292,19 @@ export const characterEditProposalsRelations = relations(characterEditProposals,
 	character: one(characters, {
 		fields: [characterEditProposals.characterId],
 		references: [characters.id]
+	})
+}))
+
+export const characterVisibilityRelations = relations(characterVisibility, ({ one }) => ({
+	character: one(characters, {
+		fields: [characterVisibility.characterId],
+		references: [characters.id],
+		relationName: 'visibilitySource'
 	}),
-	proposedBy: one(user, {
-		fields: [characterEditProposals.proposedBy],
-		references: [user.id]
+	visibleTo: one(characters, {
+		fields: [characterVisibility.visibleToCharacterId],
+		references: [characters.id],
+		relationName: 'visibilityTarget'
 	})
 }))
 
