@@ -24,6 +24,7 @@
 	"games_player_badge": "Игрок",
 	"game_create_title": "Создать игру",
 	"game_create_submit": "Создать",
+	"game_create_reset": "Отменить",
 	"game_field_name": "Название",
 	"game_field_description": "Описание (необязательно)",
 	"game_dashboard_characters": "Персонажи",
@@ -70,5 +71,6 @@
 	"settings_mode_light": "Светлый",
 	"settings_mode_dark": "Тёмный",
 	"settings_mode_system": "Системный",
-	"settings_save": "Сохранить"
+	"settings_save": "Сохранить",
+	"settings_account_label": "Аккаунт"
 }

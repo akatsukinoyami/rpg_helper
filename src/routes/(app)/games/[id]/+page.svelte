@@ -4,6 +4,10 @@
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime'
 	import { localize } from '$lib/localize'
 	import type { PageData } from './$types'
+	import Badge, { type BadgeKind } from '$lib/components/Badge.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import InputSelect from '$lib/components/InputSelect.svelte';
+	import Tile from '$lib/components/Tile.svelte';
 
 	let { data }: { data: PageData } = $props()
 
@@ -13,10 +17,10 @@
 		return m.game_dashboard_pending()
 	}
 
-	const statusClass = (status: string) => {
-		if (status === 'approved') return 'bg-green-100 text-green-700'
-		if (status === 'rejected') return 'bg-red-100 text-red-700'
-		return 'bg-yellow-100 text-yellow-700'
+	const statusClass = (status: string): BadgeKind => {
+		if (status === 'approved') return 'success'
+		if (status === 'rejected') return 'danger'
+		return 'warn'
 	}
 
 	const otherPlayers = $derived(
@@ -35,9 +39,7 @@
 		</p>
 	</div>
 	{#if data.isGm}
-		<span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
-			{m.games_gm_badge()}
-		</span>
+		<Badge label={m.games_gm_badge()} />
 	{/if}
 </div>
 
@@ -71,41 +73,23 @@
 	{:else}
 		<div class="flex flex-col gap-3">
 			{#each data.game.characters as char}
-				<div class="flex items-center justify-between rounded-2xl bg-white px-6 py-4 ring-1 ring-gray-200">
-					<div>
-						<p class="font-medium text-gray-900">{char.name}</p>
-						<p class="text-sm text-gray-500">
-							{char.user.name}{char.race ? ` · ${localize(char.race.name, getLocale())}` : ''}
-						</p>
-					</div>
+				<Tile 
+					title={char.name} 
+					subtitle="{char.user.name}{char.race ? ` · ${localize(char.race.name, getLocale())}` : ''}"
+				>
+					<Badge label={statusLabel(char.status)} kind={statusClass(char.status)}/>
+					{#if data.isGm && char.status === 'pending'}
+						<form method="post" action="?/approve" use:enhance>
+							<input type="hidden" name="characterId" value={char.id} />
+							<Button type="submit" label={m.game_dashboard_approve()} kind='success'/>
+						</form>
 
-					<div class="flex items-center gap-3">
-						<span class="rounded-full px-3 py-1 text-xs font-medium {statusClass(char.status)}">
-							{statusLabel(char.status)}
-						</span>
-
-						{#if data.isGm && char.status === 'pending'}
-							<form method="post" action="?/approve" use:enhance>
-								<input type="hidden" name="characterId" value={char.id} />
-								<button
-									type="submit"
-									class="rounded-lg bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
-								>
-									{m.game_dashboard_approve()}
-								</button>
-							</form>
-							<form method="post" action="?/reject" use:enhance>
-								<input type="hidden" name="characterId" value={char.id} />
-								<button
-									type="submit"
-									class="rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
-								>
-									{m.game_dashboard_reject()}
-								</button>
-							</form>
-						{/if}
-					</div>
-				</div>
+						<form method="post" action="?/reject" use:enhance>
+							<input type="hidden" name="characterId" value={char.id} />
+							<Button type="submit" label={m.game_dashboard_reject()} kind='danger'/>
+						</form>
+					{/if}
+				</Tile>
 			{/each}
 		</div>
 	{/if}
@@ -116,26 +100,13 @@
 	<section class="mt-10 border-t border-gray-200 pt-8">
 		<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_transfer_gm()}</h2>
 		<form method="post" action="?/transfer" use:enhance class="flex items-end gap-3">
-			<div class="flex flex-col gap-1">
-				<label class="text-sm font-medium text-gray-700" for="newGmUserId">
-					{m.game_transfer_gm_to()}
-				</label>
-				<select
-					id="newGmUserId"
-					name="newGmUserId"
-					class="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-				>
-					{#each otherPlayers as player}
-						<option value={player.userId}>{player.user.name}</option>
-					{/each}
-				</select>
-			</div>
-			<button
-				type="submit"
-				class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-			>
-				{m.game_transfer_gm_submit()}
-			</button>
+			<InputSelect 
+				id="newGmUserId"
+				name="newGmUserId"
+				label={m.game_transfer_gm_to()}
+				options={otherPlayers.map(player => [player.userId, player.user.name] as [string, string])} 
+			/>
+			<Button type="submit" label={m.game_transfer_gm_submit()} kind='danger'/>
 		</form>
 	</section>
 {/if}

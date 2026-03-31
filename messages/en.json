@@ -24,6 +24,7 @@
 	"games_player_badge": "Player",
 	"game_create_title": "Create Game",
 	"game_create_submit": "Create",
+	"game_create_reset": "Reset",
 	"game_field_name": "Name",
 	"game_field_description": "Description (optional)",
 	"game_dashboard_characters": "Characters",
@@ -70,5 +71,6 @@
 	"settings_mode_light": "Light",
 	"settings_mode_dark": "Dark",
 	"settings_mode_system": "System",
-	"settings_save": "Save"
+	"settings_save": "Save",
+	"settings_account_label": "Account"
 }

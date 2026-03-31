@@ -24,6 +24,7 @@
 	"games_player_badge": "Гравець",
 	"game_create_title": "Створити гру",
 	"game_create_submit": "Створити",
+	"game_create_reset": "Скасувати",
 	"game_field_name": "Назва",
 	"game_field_description": "Опис (необов'язково)",
 	"game_dashboard_characters": "Персонажі",
@@ -70,5 +71,6 @@
 	"settings_mode_light": "Світлий",
 	"settings_mode_dark": "Темний",
 	"settings_mode_system": "Системний",
-	"settings_save": "Зберегти"
+	"settings_save": "Зберегти",
+	"settings_account_label": "Акаунт"
 }
