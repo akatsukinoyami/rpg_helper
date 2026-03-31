@@ -8,6 +8,13 @@
       "when": 1774955371172,
       "tag": "0000_faithful_carnage",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774957167379,
+      "tag": "0001_talented_leopardon",
+      "breakpoints": true
     }
   ]
 }
