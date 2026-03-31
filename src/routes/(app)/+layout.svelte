@@ -27,6 +27,9 @@
 
 			<div class="flex items-center gap-4">
 				<span class="text-sm text-gray-600">{data.user.name}</span>
+				<a href={localizeHref('/settings')} class="text-sm text-gray-500 hover:text-gray-900">
+					{m.nav_settings()}
+				</a>
 				<button onclick={signOut} class="text-sm text-gray-500 hover:text-gray-900">
 					{m.nav_signout()}
 				</button>
