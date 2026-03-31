@@ -1,5 +1,5 @@
 {
-  "id": "7ef86de8-5969-4328-a535-9a2549ace919",
+  "id": "3799c276-bd2f-40f4-af4e-e3d47054df57",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -447,6 +447,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "gender": {
+          "name": "gender",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'none'"
+        },
         "age": {
           "name": "age",
           "type": "integer",
@@ -691,13 +698,13 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
         "description": {
           "name": "description",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -809,13 +816,13 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
         "description": {
           "name": "description",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -937,13 +944,13 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
         "description": {
           "name": "description",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

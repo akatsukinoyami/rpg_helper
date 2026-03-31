@@ -55,6 +55,7 @@ CREATE TABLE "characters" (
 	"game_id" uuid NOT NULL,
 	"race_id" uuid,
 	"name" varchar(100) NOT NULL,
+	"gender" varchar DEFAULT 'none' NOT NULL,
 	"age" integer,
 	"body_description" text,
 	"prehistory" text,
@@ -83,8 +84,8 @@ CREATE TABLE "games" (
 --> statement-breakpoint
 CREATE TABLE "items" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(100) NOT NULL,
-	"description" text,
+	"name" jsonb NOT NULL,
+	"description" jsonb,
 	"type" varchar NOT NULL,
 	"effect" jsonb,
 	"value" integer DEFAULT 0 NOT NULL,
@@ -99,8 +100,8 @@ CREATE TABLE "race_skills" (
 --> statement-breakpoint
 CREATE TABLE "races" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(100) NOT NULL,
-	"description" text,
+	"name" jsonb NOT NULL,
+	"description" jsonb,
 	"base_stats" jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
@@ -119,8 +120,8 @@ CREATE TABLE "session" (
 --> statement-breakpoint
 CREATE TABLE "skills" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(100) NOT NULL,
-	"description" text,
+	"name" jsonb NOT NULL,
+	"description" jsonb,
 	"stat_modifiers" jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
