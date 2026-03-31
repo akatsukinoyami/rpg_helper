@@ -3,7 +3,11 @@
   import { mdiCog } from "@mdi/js";
   import Icon from "./Icon.svelte";
 
-  let { appTitle, user } = $props();
+  interface Props {
+    appTitle: string;
+  }
+
+  let { appTitle }: Props = $props();
 </script>
 
 

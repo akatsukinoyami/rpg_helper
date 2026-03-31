@@ -1,10 +1,17 @@
 <script lang="ts">
+  import type { HTMLInputAttributes } from 'svelte/elements';
+
+  interface Props extends HTMLInputAttributes {
+    label?: string;
+    value?: string;
+  }
+
   let {
     label,
     id,
     value = $bindable(),
     ...rest
-  } = $props()
+  }: Props = $props()
 </script>
 
 <div class="flex flex-col gap-1">
