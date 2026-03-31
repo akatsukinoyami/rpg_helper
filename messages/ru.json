@@ -56,5 +56,19 @@
 	"char_starting_skills": "Начальные навыки",
 	"char_status_pending_info": "Ваш персонаж ожидает одобрения ГМ.",
 	"char_status_rejected_info": "Ваш персонаж был отклонён ГМ.",
-	"char_error_name_required": "Имя персонажа обязательно"
+	"char_error_name_required": "Имя персонажа обязательно",
+	"nav_settings": "Настройки",
+	"settings_title": "Настройки",
+	"settings_saved": "Настройки сохранены.",
+	"settings_lang_label": "Язык",
+	"settings_theme_label": "Тема",
+	"settings_scheme_label": "Цветовая схема",
+	"settings_scheme_github": "GitHub",
+	"settings_scheme_catppuccin": "Catppuccin",
+	"settings_scheme_gruvbox": "Gruvbox",
+	"settings_mode_label": "Режим",
+	"settings_mode_light": "Светлый",
+	"settings_mode_dark": "Тёмный",
+	"settings_mode_system": "Системный",
+	"settings_save": "Сохранить"
 }

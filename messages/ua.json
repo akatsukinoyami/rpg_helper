@@ -56,5 +56,19 @@
 	"char_starting_skills": "Початкові навички",
 	"char_status_pending_info": "Ваш персонаж очікує на схвалення ГМ.",
 	"char_status_rejected_info": "Ваш персонаж був відхилений ГМ.",
-	"char_error_name_required": "Ім'я персонажа обов'язкове"
+	"char_error_name_required": "Ім'я персонажа обов'язкове",
+	"nav_settings": "Налаштування",
+	"settings_title": "Налаштування",
+	"settings_saved": "Налаштування збережено.",
+	"settings_lang_label": "Мова",
+	"settings_theme_label": "Тема",
+	"settings_scheme_label": "Колірна схема",
+	"settings_scheme_github": "GitHub",
+	"settings_scheme_catppuccin": "Catppuccin",
+	"settings_scheme_gruvbox": "Gruvbox",
+	"settings_mode_label": "Режим",
+	"settings_mode_light": "Світлий",
+	"settings_mode_dark": "Темний",
+	"settings_mode_system": "Системний",
+	"settings_save": "Зберегти"
 }

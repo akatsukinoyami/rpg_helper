@@ -56,5 +56,19 @@
 	"char_starting_skills": "Starting Skills",
 	"char_status_pending_info": "Your character is awaiting GM approval.",
 	"char_status_rejected_info": "Your character was rejected by the GM.",
-	"char_error_name_required": "Character name is required"
+	"char_error_name_required": "Character name is required",
+	"nav_settings": "Settings",
+	"settings_title": "Settings",
+	"settings_saved": "Settings saved.",
+	"settings_lang_label": "Language",
+	"settings_theme_label": "Theme",
+	"settings_scheme_label": "Color scheme",
+	"settings_scheme_github": "GitHub",
+	"settings_scheme_catppuccin": "Catppuccin",
+	"settings_scheme_gruvbox": "Gruvbox",
+	"settings_mode_label": "Mode",
+	"settings_mode_light": "Light",
+	"settings_mode_dark": "Dark",
+	"settings_mode_system": "System",
+	"settings_save": "Save"
 }
