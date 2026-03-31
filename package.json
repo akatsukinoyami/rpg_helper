@@ -9,7 +9,11 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:seed": "bun src/lib/server/db/seed.ts",
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
@@ -20,6 +24,7 @@
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
+		"@types/node": "^25.5.0",
 		"drizzle-kit": "^0.31.10",
 		"svelte": "^5.54.0",
 		"svelte-check": "^4.4.2",
