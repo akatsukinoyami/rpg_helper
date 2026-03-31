@@ -27,4 +27,19 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	return resolve(event)
 }
 
-export const handle = sequence(handleParaglide, handleAuth)
+const VALID_THEMES = new Set([
+	'github-light', 'github-dark', 'github-system',
+	'catppuccin-light', 'catppuccin-dark', 'catppuccin-system',
+	'gruvbox-light', 'gruvbox-dark', 'gruvbox-system'
+])
+
+const handleTheme: Handle = ({ event, resolve }) => {
+	const raw = event.cookies.get('rph_theme') ?? ''
+	const theme = VALID_THEMES.has(raw) ? raw : 'github-light'
+	event.locals.theme = theme
+	return resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('%rph.theme%', theme)
+	})
+}
+
+export const handle = sequence(handleParaglide, handleAuth, handleTheme)

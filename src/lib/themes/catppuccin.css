@@ -1,0 +1,150 @@
+/* ══════════════════════════════════════════════════════════
+   CATPPUCCIN  —  Latte (light) · Mocha (dark)
+══════════════════════════════════════════════════════════ */
+
+[data-theme="catppuccin-light"],
+[data-theme="catppuccin-system"] {
+	color-scheme: light;
+
+	--color-white:     #ffffff;
+	--color-gray-50:   #eff1f5;  /* Base */
+	--color-gray-100:  #e6e9ef;  /* Mantle */
+	--color-gray-200:  #ccd0da;  /* Surface 0 */
+	--color-gray-300:  #bcc0cc;  /* Surface 1 */
+	--color-gray-400:  #9ca0b0;  /* Overlay 0 */
+	--color-gray-500:  #8c8fa1;  /* Overlay 1 */
+	--color-gray-600:  #7c7f93;  /* Overlay 2 */
+	--color-gray-700:  #6c6f85;  /* Subtext 1 */
+	--color-gray-800:  #5c5f77;  /* Subtext 0 */
+	--color-gray-900:  #4c4f69;  /* Text */
+	--color-gray-950:  #3a3c52;
+
+	--color-indigo-50:  #f1ebfc;
+	--color-indigo-100: #e5d9f8;
+	--color-indigo-200: #cbb8f2;
+	--color-indigo-300: #ad91e8;
+	--color-indigo-400: #9a74e2;
+	--color-indigo-500: #8839ef;  /* Mauve */
+	--color-indigo-600: #7527d9;
+	--color-indigo-700: #6122b5;
+	--color-indigo-800: #4d1991;
+	--color-indigo-900: #3a1270;
+
+	--color-green-50:  #eaf5e9;
+	--color-green-100: #d5ead4;
+	--color-green-200: #a9d4a7;
+	--color-green-600: #40a02b;  /* Catppuccin Green */
+	--color-green-700: #348b22;
+
+	--color-red-50:  #fce9ee;
+	--color-red-100: #f8d1db;
+	--color-red-200: #f0a3b3;
+	--color-red-300: #e5758a;
+	--color-red-600: #d20f39;  /* Catppuccin Red */
+	--color-red-700: #b00c30;
+	--color-red-800: #8f0926;
+
+	--color-yellow-50:  #fef7e4;
+	--color-yellow-100: #fdeec6;
+	--color-yellow-200: #f9d784;
+	--color-yellow-700: #df8e1d;  /* Catppuccin Yellow */
+	--color-yellow-800: #b87316;
+}
+
+[data-theme="catppuccin-dark"] {
+	color-scheme: dark;
+
+	--color-white:     #313244;  /* Surface 0 */
+	--color-gray-50:   #1e1e2e;  /* Base */
+	--color-gray-100:  #313244;  /* Surface 0 — inputs */
+	--color-gray-200:  #45475a;  /* Surface 1 — borders */
+	--color-gray-300:  #585b70;  /* Surface 2 */
+	--color-gray-400:  #6c7086;  /* Overlay 0 */
+	--color-gray-500:  #7f849c;  /* Overlay 1 */
+	--color-gray-600:  #9399b2;  /* Overlay 2 */
+	--color-gray-700:  #a6adc8;  /* Subtext 1 */
+	--color-gray-800:  #bac2de;  /* Subtext 0 */
+	--color-gray-900:  #cdd6f4;  /* Text */
+	--color-gray-950:  #e4e8ff;
+
+	--color-indigo-50:  #1c1a30;
+	--color-indigo-100: #2a2445;
+	--color-indigo-200: #b4befe;  /* Lavender — bright focus ring on dark */
+	--color-indigo-300: #cba6f7;  /* Mauve */
+	--color-indigo-400: #c09ef5;
+	--color-indigo-500: #b4befe;  /* Lavender */
+	--color-indigo-600: #7c3aed;  /* Deep violet — buttons (white text OK) */
+	--color-indigo-700: #6d28d9;
+	--color-indigo-800: #b4befe;
+	--color-indigo-900: #cdd6f4;
+
+	--color-green-50:  #122417;
+	--color-green-100: #1c3323;
+	--color-green-200: #2e5436;
+	--color-green-600: #40a02b;
+	--color-green-700: #a6e3a1;  /* Catppuccin Mocha Green — light for badge text */
+
+	--color-red-50:  #1e0f14;
+	--color-red-100: #2d1520;
+	--color-red-200: #4a2030;
+	--color-red-300: #f38ba8;
+	--color-red-600: #e64553;
+	--color-red-700: #f38ba8;    /* light for badge text */
+	--color-red-800: #f5c2c2;
+
+	--color-yellow-50:  #1e1200;
+	--color-yellow-100: #2e1c00;
+	--color-yellow-200: #9e6a00;
+	--color-yellow-700: #f9e2af;  /* light for badge text */
+	--color-yellow-800: #f5e0c0;
+}
+
+@media (prefers-color-scheme: dark) {
+	[data-theme="catppuccin-system"] {
+		color-scheme: dark;
+
+		--color-white:     #313244;
+		--color-gray-50:   #1e1e2e;
+		--color-gray-100:  #313244;
+		--color-gray-200:  #45475a;
+		--color-gray-300:  #585b70;
+		--color-gray-400:  #6c7086;
+		--color-gray-500:  #7f849c;
+		--color-gray-600:  #9399b2;
+		--color-gray-700:  #a6adc8;
+		--color-gray-800:  #bac2de;
+		--color-gray-900:  #cdd6f4;
+		--color-gray-950:  #e4e8ff;
+
+		--color-indigo-50:  #1c1a30;
+		--color-indigo-100: #2a2445;
+		--color-indigo-200: #b4befe;
+		--color-indigo-300: #cba6f7;
+		--color-indigo-400: #c09ef5;
+		--color-indigo-500: #b4befe;
+		--color-indigo-600: #7c3aed;
+		--color-indigo-700: #6d28d9;
+		--color-indigo-800: #b4befe;
+		--color-indigo-900: #cdd6f4;
+
+		--color-green-50:  #122417;
+		--color-green-100: #1c3323;
+		--color-green-200: #2e5436;
+		--color-green-600: #40a02b;
+		--color-green-700: #a6e3a1;
+
+		--color-red-50:  #1e0f14;
+		--color-red-100: #2d1520;
+		--color-red-200: #4a2030;
+		--color-red-300: #f38ba8;
+		--color-red-600: #e64553;
+		--color-red-700: #f38ba8;
+		--color-red-800: #f5c2c2;
+
+		--color-yellow-50:  #1e1200;
+		--color-yellow-100: #2e1c00;
+		--color-yellow-200: #9e6a00;
+		--color-yellow-700: #f9e2af;
+		--color-yellow-800: #f5e0c0;
+	}
+}
