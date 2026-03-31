@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fieldColors } from '$lib/constants';
   import type { HTMLInputAttributes } from 'svelte/elements';
 
   interface Props extends HTMLInputAttributes {
@@ -9,6 +10,7 @@
   let {
     label,
     id,
+    type = 'text',
     value = $bindable(),
     ...rest
   }: Props = $props()
@@ -19,8 +21,8 @@
   <input
     {...rest}
     {id}
-    type="text"
-    class="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+    {type}
+    class={[fieldColors, "rounded-lg border px-3 py-2 text-sm  outline-none"]}
     bind:value
   />
 </div>

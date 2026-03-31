@@ -1,4 +1,5 @@
 <script lang="ts" module>
+  import { fieldColors } from '$lib/constants';
   import type { HTMLSelectAttributes } from "svelte/elements";
   import type { Options } from "$lib/types";
 
@@ -31,7 +32,7 @@
     {...rest}
     {id}
     bind:value
-    class="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+    class={[fieldColors, "rounded-lg border px-3 py-2 text-sm  outline-none"]}
   >
     {#each optionsLocal as [value, label]}
       <option {value}>{label}</option>

@@ -3,6 +3,8 @@
 	import { authClient } from '$lib/auth-client'
 	import * as m from '$lib/paraglide/messages'
 	import { localizeHref } from '$lib/paraglide/runtime'
+	import Button from '$lib/components/Button.svelte'
+	import InputText from '$lib/components/InputText.svelte'
 
 	let login = $state('')
 	let password = $state('')
@@ -44,7 +46,7 @@
 	}
 </script>
 
-<h1 class="mb-6 text-2xl font-semibold text-gray-900">{m.auth_login_title()}</h1>
+<h1 class="mb-6 text-2xl font-semibold">{m.auth_login_title()}</h1>
 
 {#if error}
 	<p class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -53,37 +55,10 @@
 {/if}
 
 <form onsubmit={(e) => { e.preventDefault(); submit() }} class="flex flex-col gap-4">
-	<div class="flex flex-col gap-1">
-		<label class="text-sm font-medium text-gray-700" for="login">{m.auth_field_login()}</label>
-		<input
-			id="login"
-			type="text"
-			bind:value={login}
-			required
-			autocomplete="email"
-			class="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-		/>
-	</div>
+	<InputText id="login" label={m.auth_field_login()} bind:value={login} required autocomplete="email" />
+	<InputText id="password" label={m.auth_field_password()} type="password" bind:value={password} required autocomplete="current-password" />
 
-	<div class="flex flex-col gap-1">
-		<label class="text-sm font-medium text-gray-700" for="password">{m.auth_field_password()}</label>
-		<input
-			id="password"
-			type="password"
-			bind:value={password}
-			required
-			autocomplete="current-password"
-			class="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-		/>
-	</div>
-
-	<button
-		type="submit"
-		disabled={loading}
-		class="mt-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-	>
-		{m.auth_login_submit()}
-	</button>
+	<Button class="mt-2 w-full px-4 py-2" type="submit" label={m.auth_login_submit()} disabled={loading} />
 </form>
 
 <p class="mt-6 text-center text-sm text-gray-500">
