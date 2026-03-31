@@ -1,4 +1,17 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from ru!"
+	"auth_login_title": "Войти",
+	"auth_login_submit": "Войти",
+	"auth_login_no_account": "Нет аккаунта?",
+	"auth_login_register_link": "Зарегистрироваться",
+	"auth_register_title": "Создать аккаунт",
+	"auth_register_submit": "Создать аккаунт",
+	"auth_register_have_account": "Уже есть аккаунт?",
+	"auth_register_login_link": "Войти",
+	"auth_field_name": "Имя",
+	"auth_field_email": "Email",
+	"auth_field_password": "Пароль",
+	"auth_error_invalid_credentials": "Неверный email или пароль",
+	"auth_error_email_taken": "Email уже используется",
+	"auth_error_generic": "Что-то пошло не так, попробуйте снова"
 }

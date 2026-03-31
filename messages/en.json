@@ -1,4 +1,17 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from en!"
+	"auth_login_title": "Sign in",
+	"auth_login_submit": "Sign in",
+	"auth_login_no_account": "Don't have an account?",
+	"auth_login_register_link": "Register",
+	"auth_register_title": "Create account",
+	"auth_register_submit": "Create account",
+	"auth_register_have_account": "Already have an account?",
+	"auth_register_login_link": "Sign in",
+	"auth_field_name": "Name",
+	"auth_field_email": "Email",
+	"auth_field_password": "Password",
+	"auth_error_invalid_credentials": "Invalid email or password",
+	"auth_error_email_taken": "Email is already in use",
+	"auth_error_generic": "Something went wrong, please try again"
 }
