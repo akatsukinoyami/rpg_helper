@@ -1,0 +1,9 @@
+node_modules
+.git
+.env
+.env.local
+build
+.svelte-kit
+drizzle
+docker-compose.yml
+postgres_data
