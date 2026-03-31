@@ -12,24 +12,30 @@
 	let error = $state<string | null>(null)
 	let loading = $state(false)
 
-	const errorMessage = (code: string) => {
-		if (code === 'USER_ALREADY_EXISTS') return m.auth_error_email_taken()
+	function errorMessage(code: string) {
+		if (code === 'USER_ALREADY_EXISTS' || code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') return m.auth_error_email_taken()
+		if (code === 'PASSWORD_TOO_SHORT') return m.auth_error_password_too_short()
+		if (code === 'PASSWORD_TOO_LONG') return m.auth_error_password_too_long()
 		return m.auth_error_generic()
 	}
 
 	async function submit() {
+		if (password.length < 8) {
+			error = 'PASSWORD_TOO_SHORT'
+			return
+		}
 		loading = true
 		error = null
 		try {
 			const result = await authClient.signUp.email({ name, email, password })
 			if (result.error) {
-				error = result.error.code ?? 'generic'
+				error = result.error.code ?? 'GENERIC'
 			} else {
 				goto('/games')
 			}
 		} catch (e) {
 			console.error('sign-up error', e)
-			error = 'generic'
+			error = 'GENERIC'
 		} finally {
 			loading = false
 		}
@@ -47,7 +53,7 @@
 <form onsubmit={(e) => { e.preventDefault(); submit() }} class="flex flex-col gap-4">
 	<InputText id="name" label={m.auth_field_name()} bind:value={name} required autocomplete="name" />
 	<InputText id="email" label={m.auth_field_email()} type="email" bind:value={email} required autocomplete="email" />
-	<InputText id="password" label={m.auth_field_password()} type="password" bind:value={password} required autocomplete="new-password" />
+	<InputText id="password" label={m.auth_field_password()} type="password" bind:value={password} required autocomplete="new-password" minlength={8} />
 
 	<Button class="mt-2 w-full px-4 py-2" type="submit" label={m.auth_register_submit()} disabled={loading} />
 </form>

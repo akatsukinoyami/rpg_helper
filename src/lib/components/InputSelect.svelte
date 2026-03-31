@@ -2,6 +2,7 @@
   import { fieldColors } from '$lib/constants';
   import type { HTMLSelectAttributes } from "svelte/elements";
   import type { Options } from "$lib/types";
+  import Label from '$lib/components/Label.svelte';
 
   export interface Props extends HTMLSelectAttributes {
     label?: string;
@@ -16,6 +17,7 @@
     options = {}, 
     value = $bindable(),
     id,
+    required,
     ...rest 
   }: Props = $props();
 
@@ -23,14 +25,11 @@
 </script>
 
 <div class="flex flex-col gap-1">
-  {#if label}
-    <label class="text-sm font-medium text-gray-700" for={id}>
-      {label}
-    </label>
-  {/if}
+  <Label for={id} {label} {required} />
   <select
     {...rest}
     {id}
+    {required}
     bind:value
     class={[fieldColors, "rounded-lg border px-3 py-2 text-sm  outline-none"]}
   >

@@ -50,17 +50,19 @@
 			label={m.char_field_gender()} 
 			id="gender" 
 			name="gender" 
+			required
 			options={{ none: m.char_gender_none(), male: m.char_gender_male(), female: m.char_gender_female(), both: m.char_gender_both() }}
 		/>
 
 		<!-- Race -->
 		<div class="flex flex-col gap-1">
 			<InputSelect 
-					label={m.char_field_race()}
-					id="raceId"
-					name="raceId"
-					bind:value={selectedRaceId}
-					options={data.races.map(race => [race.id, localize(race.name, getLocale())] as [string, string])}
+				label={m.char_field_race()}
+				id="raceId"
+				name="raceId"
+				required
+				bind:value={selectedRaceId}
+				options={data.races.map(race => [race.id, localize(race.name, getLocale())] as [string, string])}
 			/>
 
 			{#if selectedRace}
@@ -77,14 +79,14 @@
 		<InputNumber id="age" name="age" min="1" max="9999" label={m.char_field_age()} />
 
 		<InputTextArea
-			rows="4"
+			rows={4}
 			id="bodyDescription"
 			name="bodyDescription" 
 			label={m.char_field_body()}
 		/>
 
 		<InputTextArea
-			rows="4"
+			rows={4}
 			id="prehistory"
 			name="prehistory" 
 			label={m.char_field_prehistory()}

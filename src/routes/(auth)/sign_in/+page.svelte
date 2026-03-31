@@ -8,7 +8,7 @@
 
 	let login = $state('')
 	let password = $state('')
-	let error = $state(false)
+	let error = $state<string | null>(null)
 	let loading = $state(false)
 
 	async function resolveEmail(nameOrEmail: string): Promise<string | null> {
@@ -24,25 +24,30 @@
 
 	async function submit() {
 		loading = true
-		error = false
+		error = null
 		try {
 			const email = await resolveEmail(login)
 			if (!email) {
-				error = true
+				error = 'USER_NOT_FOUND'
 				return
 			}
 			const result = await authClient.signIn.email({ email, password })
 			if (result.error) {
-				error = true
+				error = result.error.code ?? 'GENERIC'
 			} else {
 				goto('/games')
 			}
 		} catch (e) {
 			console.error('sign-in error', e)
-			error = true
+			error = 'GENERIC'
 		} finally {
 			loading = false
 		}
+	}
+
+	function errorMessage(code: string) {
+		if (code === 'USER_NOT_FOUND') return m.auth_error_user_not_found()
+		return m.auth_error_invalid_credentials()
 	}
 </script>
 
@@ -50,7 +55,7 @@
 
 {#if error}
 	<p class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-		{m.auth_error_invalid_credentials()}
+		{errorMessage(error)}
 	</p>
 {/if}
 
