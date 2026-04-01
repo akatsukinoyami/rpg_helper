@@ -4,19 +4,29 @@
 
 	export const kinds = {
 		primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-		selected: 'border-indigo-500 bg-indigo-50 text-indigo-700',
-		secondary: 'border-gray-200 text-gray-600 hover:border-gray-300',
+		selected: 'bg-indigo-50 text-indigo-700 border-indigo-500',
 		danger: 'bg-red-600 text-red-900 hover:bg-red-700',
 		success: 'bg-green-600 text-green-900 hover:bg-green-700',
+		secondary: 'text-gray-600 border-gray-200 hover:border-gray-300',
 		ghost: 'text-gray-500 hover:text-gray-900 border-0!'
 	} as const;
 
 	export type ButtonKind = keyof typeof kinds;
 
+	export const iconKinds = {
+		primary: 	'fill-white',
+		selected: 'fill-indigo-700',
+		danger: 	'fill-red-900',
+		success: 	'fill-green-900',
+		secondary:'fill-gray-600',
+		ghost: 		'fill-gray-500'
+	} satisfies Record<ButtonKind, string>;
+
 	interface Props {
 		label?: string;
 		kind?: ButtonKind;
 		children?: Snippet;
+		icon?: string;
 	}
 
 	type asAnchor = HTMLAnchorAttributes & { href: string };
@@ -24,11 +34,14 @@
 </script>
 
 <script lang="ts">
+	import Icon from './Icon.svelte';
+
   let { 
     label = '', 
     kind = 'primary', 
     href,
-    class: className = 'px-4 py-2', 
+		icon,
+    class: className = label ? 'px-4 py-2' : 'p-2', 
     children, 
     ...rest 
   }: Props & (asAnchor | asButton) = $props();
@@ -40,10 +53,10 @@
   {#if children}
     {@render children()}
   {:else}
-    {label}
+    {#if label}{label}{/if}
+		{#if icon}<Icon path={icon} pathClass={iconKinds[kind]}/>{/if}
   {/if}
 {/snippet}
-
 
 {#if href}
   <a {href} class={classLocal} {...rest as HTMLAnchorAttributes}>{@render content()}</a>
