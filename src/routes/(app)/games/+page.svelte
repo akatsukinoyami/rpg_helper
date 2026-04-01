@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import InputText from '$lib/components/InputText.svelte';
-	import InputTextArea from '$lib/components/InputTextArea.svelte';
-    import Tile from '$lib/components/Tile.svelte';
+	import Tile from '$lib/components/Tile.svelte';
+	import GameForm from '$lib/partials/GameForm.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import type { ActionData, PageData } from './$types';
@@ -24,19 +22,11 @@
 </div>
 
 {#if showCreateForm}
-	<div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-gray-200">
-		<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_create_title()}</h2>
-		<form method="post" action="?/create" use:enhance class="flex flex-col gap-4">
-			<AvatarUpload name="image" type="game" label={m.game_field_avatar()} size={64} />
-			<InputText id="name" name="name" label={m.game_field_name()} />
-			<InputTextArea id="description" name="description" label={m.game_field_description()} />
-
-			<div class="flex justify-end gap-2">
-				<Button label={m.game_create_reset()} type="reset" onclick={() => (showCreateForm = false)} kind="secondary" />
-				<Button label={m.game_create_submit()} type="submit" />
-			</div>
-		</form>
-	</div>
+	<GameForm 
+		action="?/create" 
+		label={m.game_create_title()} 
+		onclickReset={() => showCreateForm = false} 
+	/>
 {/if}
 
 <div class="mt-6 flex flex-col gap-3">

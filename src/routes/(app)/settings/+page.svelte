@@ -88,7 +88,7 @@
 		method="post"
 		action="?/theme"
 		use:enhance={forceReload}
-		class={["flex-col gap-4 rounded-2xl bg-white p-6 ring-1 ring-gray-200", selectedPage === 'style' ? 'flex' : 'hidden']}
+		class={["flex-col gap-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200", selectedPage === 'style' ? 'flex' : 'hidden']}
 	>
 		<ButtonRadioSet label={m.settings_lang_label()} name="locale" options={langLabels} bind:group={selectedLocale} labelClass="w-50" inline />
 		<ButtonRadioSet label={m.settings_scheme_label()} name="scheme" options={schemeLabels} bind:group={previewScheme} labelClass="w-50" inline />
@@ -107,7 +107,7 @@
 			method="post"
 			action="?/account"
 			use:enhance
-			class="flex flex-col gap-4 rounded-2xl bg-white p-6 ring-1 ring-gray-200"
+			class="flex flex-col gap-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200"
 		>
 			<AvatarUpload name="image" value={data.user.image} type="user" label={m.settings_avatar_label()} size={40} />
 			{#if form?.accountError}

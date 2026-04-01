@@ -41,7 +41,7 @@
 	<form
 		method="post"
 		use:enhance
-		class="flex flex-col gap-6 rounded-2xl bg-white p-6 ring-1 ring-gray-200"
+		class="flex flex-col gap-6 rounded-2xl bg-white p-4 ring-1 ring-gray-200"
 	>
 		<!-- Avatar -->
 		<AvatarUpload name="image" type="character" label={m.char_field_avatar()} />

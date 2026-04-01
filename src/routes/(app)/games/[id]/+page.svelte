@@ -46,7 +46,10 @@
 		</div>
 	</div>
 	{#if data.isGm}
-		<Badge label={m.games_gm_badge()} />
+		<div class="flex items-center gap-2">
+			<Button href={localizeHref(`/games/${data.game.id}/edit`)} label={m.game_edit_button()} kind="secondary" />
+			<Badge label={m.games_gm_badge()} />
+		</div>
 	{/if}
 </div>
 
