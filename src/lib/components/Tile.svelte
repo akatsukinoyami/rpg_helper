@@ -1,15 +1,60 @@
-<script lang="ts">
-	let { title, subtitle, children } = $props();
+<script lang="ts" module>
+  import type { Snippet } from "svelte";
+	import type { HTMLAnchorAttributes, HTMLButtonAttributes, HTMLAttributes } from 'svelte/elements';
+  import type { BadgeKind } from "./Badge.svelte";
+
+  export interface Props {
+    class?: string;
+    title?: string;
+    subtitle?: string | null;
+    kind?: BadgeKind;
+    children?: Snippet;
+  }
+
+	type asAnchor = HTMLAnchorAttributes & { href: string; onclick?: never; };
+	type asButton = HTMLButtonAttributes & { href?: never; onclick?: (e: MouseEvent) => void; };
+  type asDiv = HTMLAttributes<HTMLDivElement> & { href?: never; onclick?: never; };
 </script>
 
+<script lang="ts">
+  import { kinds } from "./Badge.svelte";
+    
+	let { 
+    class: className, 
+    title, 
+    subtitle, 
+    kind = 'secondary', 
+    href,
+    onclick,
+    children,
+    ...rest
+  }: Props & (asAnchor | asButton | asDiv) = $props();
 
-<div class="flex items-center justify-between rounded-2xl bg-white px-6 py-4 ring-1 ring-gray-200">
+  let classLocal = $derived(`${className} ${kinds[kind]} flex items-center justify-between rounded-2xl px-6 py-4 ring-1`);
+</script>
+
+{#snippet content()}
   <div>
-    <p class="font-medium text-gray-900">{title}</p>
+    {#if title}<p class="font-medium text-gray-900">{title}</p>{/if}
     {#if subtitle}<p class="text-sm text-gray-500">{subtitle}</p>{/if}
   </div>
 
   <div class="flex items-center gap-3">
     {@render children?.()}
   </div>
-</div>
+{/snippet}
+
+
+{#if href}
+  <a {href} class="{classLocal} cursor-pointer" {...rest as HTMLAnchorAttributes}>
+    {@render content()}
+  </a>
+{:else if onclick}
+  <button {onclick} class="{classLocal} cursor-pointer" {...rest as HTMLButtonAttributes}>
+    {@render content()}
+  </button>
+{:else}
+  <div class={classLocal} {...rest as HTMLAttributes<HTMLDivElement>}>
+    {@render content()}
+  </div>
+{/if}

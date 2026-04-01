@@ -47,23 +47,13 @@
 
 <!-- No character yet — prompt to create one -->
 {#if !data.myCharacter}
-	<div class="mt-6 flex items-center justify-between rounded-2xl bg-indigo-50 px-6 py-4 ring-1 ring-indigo-200">
-		<p class="text-sm text-indigo-800">{m.char_no_character()}</p>
-		<a
-			href={localizeHref(`/games/${data.game.id}/characters/new`)}
-			class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-		>
-			{m.char_create_button()}
-		</a>
-	</div>
+	<Tile class="mt-6" title={m.char_no_character()} kind="info">
+		<Button href={localizeHref(`/games/${data.game.id}/characters/new`)} label={m.char_create_button()} />
+	</Tile>
 {:else if data.myCharacter.status === 'pending'}
-	<div class="mt-6 rounded-2xl bg-yellow-50 px-6 py-4 ring-1 ring-yellow-200">
-		<p class="text-sm text-yellow-800">{m.char_status_pending_info()}</p>
-	</div>
+	<Tile class="mt-6" title={m.char_status_pending_info()} kind="warn" />
 {:else if data.myCharacter.status === 'rejected'}
-	<div class="mt-6 rounded-2xl bg-red-50 px-6 py-4 ring-1 ring-red-200">
-		<p class="text-sm text-red-800">{m.char_status_rejected_info()}</p>
-	</div>
+	<Tile class="mt-6" title={m.char_status_rejected_info()} kind="danger" />
 {/if}
 
 <!-- Characters -->

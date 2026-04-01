@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
+    import Tile from '$lib/components/Tile.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import type { ActionData, PageData } from './$types';
@@ -38,19 +39,9 @@
 
 <div class="mt-6 flex flex-col gap-3">
 	{#each data.gmGames as game}
-		<a
-			href={localizeHref(`/games/${game.id}`)}
-			class="flex items-center justify-between rounded-2xl bg-white px-6 py-4 ring-1 ring-gray-200 hover:ring-indigo-300"
-		>
-			<div>
-				<p class="font-medium text-gray-900">{game.name}</p>
-				{#if game.description}
-					<p class="mt-1 text-sm text-gray-500">{game.description}</p>
-				{/if}
-			</div>
-
+		<Tile title={game.name} subtitle={game.description} href={localizeHref(`/games/${game.id}`)}>
 			<Badge label={m.games_gm_badge()} />
-		</a>
+		</Tile>
 	{/each}
 
 	{#each data.playerGames as game}
