@@ -41,20 +41,29 @@
     kind = 'primary', 
     href,
 		icon,
-    class: className = label ? 'px-4 py-2' : 'p-2', 
+    class: className, 
     children, 
     ...rest 
   }: Props & (asAnchor | asButton) = $props();
 
-  let classLocal = $derived([className, kinds[kind], 'border rounded-lg text-sm font-medium']);
+  let classLocal = $derived([
+		className, 
+		kinds[kind], 
+		'flex border rounded-lg text-sm font-medium',
+		label && icon 
+			? 'justify-between' 
+			: `${label ? 'px-4 py-2' : 'p-2'} justify-center`, 
+	]);
 </script>
 
 {#snippet content()}
   {#if children}
     {@render children()}
   {:else}
-    {#if label}{label}{/if}
-		{#if icon}<Icon path={icon} pathClass={iconKinds[kind]}/>{/if}
+    {#if label}
+			<span>{label}</span>
+		{/if}
+		<Icon path={icon} pathClass={iconKinds[kind]}/>
   {/if}
 {/snippet}
 

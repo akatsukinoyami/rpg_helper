@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiPencil } from '@mdi/js';
+	import { mdiAlertOctagonOutline, mdiCheck, mdiPencil, mdiTrashCan } from '@mdi/js';
 	import { invalidateAll } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
 	import InputSelect from '$lib/components/InputSelect.svelte';
@@ -88,31 +88,38 @@
 					stats={full || vis?.showStats ? char.stats : null}
 					age={full || vis?.showAge ? char.age : null}
 					gender={full || vis?.showAge ? char.gender : null}
-					editHref={canEdit ? localizeHref(`/games/${data.game.id}/characters/${char.id}/edit`) : undefined}
 				>
 					{#snippet actions()}
-						{#if data.isGm && char.status === 'pending'}
-							<Button
-								label={m.game_dashboard_approve()}
-								kind="success"
-								class="w-full px-3 py-1.5"
-								onclick={() => run(() => approve({ gameId: data.game.id, characterId: char.id }))}
-							/>
-							<Button
-								label={m.game_dashboard_reject()}
-								kind="danger"
-								class="w-full px-3 py-1.5"
-								onclick={() => run(() => reject({ gameId: data.game.id, characterId: char.id }))}
-							/>
-						{/if}
-						{#if canEdit}
-							<Button
-								label={m.char_delete()}
-								kind="danger"
-								class="w-full px-3 py-1.5"
-								onclick={() => run(() => deleteChar({ gameId: data.game.id, characterId: char.id }))}
-							/>
-						{/if}
+						<div class="flex gap-1">
+							{#if data.isGm && char.status === 'pending'}
+								<Button
+									icon={mdiCheck}
+									kind="success"
+									class="w-full px-3 py-1.5"
+									onclick={() => run(() => approve({ gameId: data.game.id, characterId: char.id }))}
+								/>
+								<Button
+									icon={mdiAlertOctagonOutline}
+									kind="danger"
+									class="w-full px-3 py-1.5"
+									onclick={() => run(() => reject({ gameId: data.game.id, characterId: char.id }))}
+								/>
+							{/if}
+							{#if canEdit}
+								<Button
+									icon={mdiPencil}
+									kind="primary"
+									class="w-full px-3 py-1.5"
+									href={localizeHref(`/games/${data.game.id}/characters/${char.id}/edit`)}
+								/>
+								<Button
+									icon={mdiTrashCan}
+									kind="danger"
+									class="w-full px-3 py-1.5"
+									onclick={() => run(() => deleteChar({ gameId: data.game.id, characterId: char.id }))}
+								/>
+							{/if}
+						</div>
 					{/snippet}
 				</CharacterCard>
 			{/each}

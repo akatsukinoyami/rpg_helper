@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
-	import { mdiPencil } from '@mdi/js';
-	import Button from '$lib/components/Button.svelte';
 	import type { Locale, Stats } from '$lib/server/db/schema';
 	import { localize } from '$lib/localize';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -20,23 +18,10 @@
 		age?: number | null;
 		gender?: 'male' | 'female' | 'none' | 'both' | null;
 		// Actions
-		editHref?: string;
 		actions?: Snippet;
 	}
 
-	let { 
-		name, 
-		playerName, 
-		race, 
-		image, 
-		status, 
-		bodyDescription, 
-		stats, 
-		age, 
-		gender, 
-		editHref, 
-		actions 
-	}: Props =
+	let { name, playerName, race, image, status, bodyDescription, stats, age, gender, actions }: Props =
 		$props();
 
 	const statusColor = {
@@ -116,14 +101,9 @@
 				<p class="shrink-0 text-xs text-gray-400">{meta}</p>
 			{/if}
 
-			{#if editHref || actions}
+			{#if actions}
 				<div class="shrink-0 flex flex-col gap-1">
-					{#if editHref}
-						<Button href={editHref} icon={mdiPencil} kind="secondary" class="w-full px-3 py-1.5" />
-					{/if}
-					{#if actions}
-						{@render actions()}
-					{/if}
+					{@render actions()}
 				</div>
 			{/if}
 		</div>

@@ -34,25 +34,27 @@
   }: Props = $props();
 </script>
 
-<svg
-  class={className}
-  {width}
-  {height}
-  {fill}
-  {viewBox}
-  {stroke}
-  stroke-width={strokeWidth}
-  xmlns="http://www.w3.org/2000/svg"
-  style:min-width={width}
-  style:min-height={height}
->
-  {#if children}
-    {@render children()}
-  {:else if Array.isArray(path)}
-    {#each path as d}
-      <path {d} {...rest} class={pathClass} />
-    {/each}
-  {:else}
-    <path d={path} {...rest} class={pathClass} />
-  {/if}
-</svg>
+{#if path || children}
+  <svg
+    class={className}
+    {width}
+    {height}
+    {fill}
+    {viewBox}
+    {stroke}
+    stroke-width={strokeWidth}
+    xmlns="http://www.w3.org/2000/svg"
+    style:min-width={width}
+    style:min-height={height}
+  >
+    {#if children}
+      {@render children()}
+    {:else if Array.isArray(path)}
+      {#each path as d}
+        <path {d} {...rest} class={pathClass} />
+      {/each}
+    {:else}
+      <path d={path} {...rest} class={pathClass} />
+    {/if}
+  </svg>
+{/if}
