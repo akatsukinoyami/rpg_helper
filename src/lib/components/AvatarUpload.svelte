@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { mdiCamera, mdiAccount } from '@mdi/js';
+	import { untrack } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
 	import Icon from './Icon.svelte';
 	import Label from './Label.svelte';
 
@@ -13,7 +15,7 @@
 
 	let { name, value: initialValue = null, type, label, size = 80 }: Props = $props();
 
-	let currentValue = $state(initialValue);
+	let currentValue = $state(untrack(() => initialValue));
 	let fileInput: HTMLInputElement;
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
@@ -33,7 +35,7 @@
 			const res = await fetch('/api/upload', { method: 'POST', body: fd });
 			if (!res.ok) {
 				const text = await res.text();
-				uploadError = text || 'Upload failed';
+				uploadError = text || m.avatar_error_upload();
 				return;
 			}
 
@@ -49,9 +51,7 @@
 </script>
 
 <div class="flex flex-col gap-1">
-	{#if label}
-		<Label {label} />
-	{/if}
+	<Label {label} />
 
 	<div class="flex items-center gap-3">
 		<button
@@ -88,7 +88,7 @@
 				onclick={() => (currentValue = null)}
 				class="text-xs text-red-500 hover:text-red-700"
 			>
-				Remove
+				{m.avatar_remove()}
 			</button>
 		{/if}
 	</div>
