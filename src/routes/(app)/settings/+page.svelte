@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
-	import * as m from '$lib/paraglide/messages';
-	import type { ActionData, PageData } from './$types';
-
 	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import Palette from '$lib/components/Palette.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { saveTheme, saveAccount } from '$lib/remote/settings.remote';
+	import type { PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const schemeLabels = {
 		github: m.settings_scheme_github,
@@ -46,13 +45,6 @@
 		goto('/sign_in');
 	}
 
-	const forceReload = () =>
-		async ({ result }: { result: { type: string; location?: string } }) => {
-			if (result.type === 'redirect') {
-				window.location.href = result.location!;
-			}
-		};
-
 	const errorMsg = (key: string | undefined) => {
 		if (key === 'wrong_password') return m.settings_error_wrong_password();
 		if (key === 'name_taken') return m.settings_error_name_taken();
@@ -70,6 +62,13 @@
 	$effect(() => {
 		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`);
 	});
+
+	// Full reload after theme save so the new cookie is picked up by SSR
+	$effect(() => {
+		if (saveTheme.result?.success) {
+			window.location.href = `${window.location.pathname}?saved=1`;
+		}
+	});
 </script>
 
 <Container class="flex flex-col gap-4">
@@ -85,9 +84,7 @@
 
 	<!-- Style tab -->
 	<form
-		method="post"
-		action="?/theme"
-		use:enhance={forceReload}
+		{...saveTheme}
 		class={["flex-col gap-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200", selectedPage === 'style' ? 'flex' : 'hidden']}
 	>
 		<ButtonRadioSet label={m.settings_lang_label()} name="locale" options={langLabels} bind:group={selectedLocale} labelClass="w-50" inline />
@@ -104,14 +101,12 @@
 	<!-- Account tab -->
 	{#if selectedPage === 'account'}
 		<form
-			method="post"
-			action="?/account"
-			use:enhance
+			{...saveAccount}
 			class="flex flex-col gap-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200"
 		>
 			<AvatarUpload name="image" value={data.user.image} type="user" label={m.settings_avatar_label()} size={40} />
-			{#if form?.accountError}
-				<p class="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{errorMsg(form.accountError)}</p>
+			{#if saveAccount.result?.accountError}
+				<p class="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{errorMsg(saveAccount.result.accountError)}</p>
 			{/if}
 
 			<InputText id="account-name" name="name" label={m.settings_new_username()} placeholder={data.user.name} />

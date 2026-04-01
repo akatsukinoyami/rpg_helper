@@ -1,8 +1,8 @@
-import { error, fail } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { error } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characterVisibility, characters, games } from '$lib/server/db/schema';
-import type { Actions, PageServerLoad } from './$types';
+import { characterVisibility, games } from '$lib/server/db/schema';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const userId = locals.user!.id;
@@ -33,34 +33,4 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		: [];
 
 	return { game, isGm, myCharacter, visibilityGrants };
-};
-
-const assertGm = async (gameId: string, userId: string) => {
-	const [game] = await db
-		.select({ gmUserId: games.gmUserId })
-		.from(games)
-		.where(eq(games.id, gameId))
-		.limit(1);
-
-	if (!game || game.gmUserId !== userId) return false;
-	return true;
-};
-
-export const actions: Actions = {
-	transfer: async ({ locals, params, request }) => {
-		if (!(await assertGm(params.id, locals.user!.id))) return fail(403);
-
-		const form = await request.formData();
-		const newGmUserId = form.get('newGmUserId') as string;
-
-		const [character] = await db
-			.select({ id: characters.id })
-			.from(characters)
-			.where(and(eq(characters.userId, newGmUserId), eq(characters.gameId, params.id)))
-			.limit(1);
-
-		if (!character) return fail(400, { transferError: 'user_not_in_game' });
-
-		await db.update(games).set({ gmUserId: newGmUserId }).where(eq(games.id, params.id));
-	}
 };

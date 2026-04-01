@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Tile from '$lib/components/Tile.svelte';
 	import GameForm from '$lib/partials/GameForm.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
+	import { createGame } from '$lib/remote/games.remote';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	let showCreateForm = $state(false);
 </script>
@@ -22,11 +22,11 @@
 </div>
 
 {#if showCreateForm}
-	<GameForm 
-		action='c'
-		path="?/create" 
-		label={m.game_create_title()} 
-		onclickReset={() => showCreateForm = false} 
+	<GameForm
+		remoteForm={createGame}
+		submitLabel={m.game_create_submit()}
+		label={m.game_create_title()}
+		onclickReset={() => showCreateForm = false}
 	/>
 {/if}
 

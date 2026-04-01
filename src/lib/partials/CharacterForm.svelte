@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { enhance } from '$app/forms';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { localize } from '$lib/localize';
 	import * as m from '$lib/paraglide/messages';
@@ -22,7 +21,7 @@
 	}
 
 	interface Props {
-		action?: string;
+		remoteForm: Record<string, unknown>;
 		label?: string;
 		races: RaceOption[];
 		name?: string;
@@ -36,7 +35,7 @@
 	}
 
 	let {
-		action = 'default',
+		remoteForm,
 		label,
 		races,
 		name = '',
@@ -58,7 +57,7 @@
 		<h2 class="text-lg font-medium text-gray-900">{label}</h2>
 	{/if}
 
-	<form method="post" {action} use:enhance class="flex flex-col gap-6">
+	<form {...remoteForm} class="flex flex-col gap-6">
 		<AvatarUpload name="image" type="character" label={m.char_field_avatar()} value={image} />
 
 		<InputText label={m.char_field_name()} id="name" name="name" value={name} required />

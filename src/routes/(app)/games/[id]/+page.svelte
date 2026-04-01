@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { mdiPencil } from '@mdi/js';
-	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
 	import InputSelect from '$lib/components/InputSelect.svelte';
@@ -9,7 +8,8 @@
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import type { PageData } from './$types';
-	import { approve, reject, deleteChar } from './characters.remote';
+	import { approve, reject, deleteChar } from '$lib/remote/characters.remote';
+	import { transfer } from '$lib/remote/games.remote';
 
 	let { data }: { data: PageData } = $props();
 
@@ -124,7 +124,7 @@
 {#if data.isGm && otherPlayers.length > 0}
 	<section class="mt-10 border-t border-gray-200 pt-8">
 		<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_transfer_gm()}</h2>
-		<form method="post" action="?/transfer" use:enhance class="flex items-end gap-3">
+		<form {...transfer} class="flex items-end gap-3">
 			<InputSelect
 				id="newGmUserId"
 				name="newGmUserId"

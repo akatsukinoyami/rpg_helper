@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 
 	import Button from '$lib/components/Button.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import GameForm from '$lib/partials/GameForm.svelte';
+	import { editGame } from '$lib/remote/games.remote';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 </script>
 
 <Container>
@@ -18,10 +18,11 @@
 		<h1 class="mt-2 text-2xl font-semibold text-gray-900">{m.game_edit_title()}</h1>
 	</div>
 
-	<GameForm 	
-		action='e'
-		name={data.game.name} 
-		description={data.game.description} 
+	<GameForm
+		remoteForm={editGame}
+		submitLabel={m.game_edit_submit()}
+		name={data.game.name}
+		description={data.game.description}
 		image={data.game.image}
 	/>
 </Container>

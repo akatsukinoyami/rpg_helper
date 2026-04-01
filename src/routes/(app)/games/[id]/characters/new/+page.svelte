@@ -1,12 +1,13 @@
 <script lang="ts">
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import Button from '$lib/components/Button.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import CharacterForm from '$lib/partials/CharacterForm.svelte';
+	import { createCharacter } from '$lib/remote/characters.remote';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 </script>
 
 <Container>
@@ -20,11 +21,5 @@
 		<p class="mt-1 text-sm text-gray-500">{data.game.name}</p>
 	</div>
 
-	{#if form?.error === 'name_required'}
-		<div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-			{m.char_error_name_required()}
-		</div>
-	{/if}
-
-	<CharacterForm races={data.races} submitLabel={m.char_create_submit()} />
+	<CharacterForm remoteForm={createCharacter} races={data.races} submitLabel={m.char_create_submit()} />
 </Container>
