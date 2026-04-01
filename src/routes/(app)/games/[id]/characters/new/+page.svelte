@@ -4,6 +4,7 @@
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import { localize } from '$lib/localize';
 	import type { ActionData, PageData } from './$types';
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import InputNumber from '$lib/components/InputNumber.svelte';
@@ -42,6 +43,9 @@
 		use:enhance
 		class="flex flex-col gap-6 rounded-2xl bg-white p-6 ring-1 ring-gray-200"
 	>
+		<!-- Avatar -->
+		<AvatarUpload name="image" type="character" label={m.char_field_avatar()} />
+
 		<!-- Name -->
 		<InputText label={m.char_field_name()} id="name" name="name" required />
 

@@ -65,6 +65,7 @@ export const actions: Actions = {
 		const raceId = (form.get('raceId') as string | null) || null;
 		const ageRaw = form.get('age') as string | null;
 		const age = ageRaw ? parseInt(ageRaw) : null;
+		const image = ((form.get('image') as string) || '').trim() || null;
 		const bodyDescription = (form.get('bodyDescription') as string | null)?.trim() || null;
 		const prehistory = (form.get('prehistory') as string | null)?.trim() || null;
 
@@ -94,6 +95,7 @@ export const actions: Actions = {
 				name,
 				gender,
 				age,
+				image,
 				bodyDescription,
 				prehistory,
 				stats

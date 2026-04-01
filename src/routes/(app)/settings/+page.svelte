@@ -7,6 +7,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import type { PageData } from './$types';
 
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
 	import Container from '$lib/components/Container.svelte';
@@ -34,44 +35,41 @@
 
 	const saved = $derived(page.url.searchParams.get('saved') === '1');
 
-	// Initialize from server-loaded values, not from client-side getLocale().
-	// getLocale() on the client reads document.cookie, which may not reflect
-	// the saved cookie until the next full navigation.
 	async function signOut() {
 		await authClient.signOut();
 		goto('/sign_in');
 	}
 
+	const forceReload = () =>
+		async ({ result }: { result: { type: string; location?: string } }) => {
+			if (result.type === 'redirect') {
+				window.location.href = result.location!;
+			}
+		};
+
 	let selectedLocale = $state(untrack(() => data.locale));
 	let previewScheme = $state(untrack(() => data.prefs.scheme));
 	let previewMode = $state(untrack(() => data.prefs.mode));
 
-	// Live preview — update data-theme immediately as user picks
 	$effect(() => {
 		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`);
 	});
 </script>
 
-<Container>
-	<h1 class="mb-6 text-2xl font-semibold text-gray-900">{m.settings_title()}</h1>
+<Container class="flex flex-col gap-6">
+	<h1 class="text-2xl font-semibold text-gray-900">{m.settings_title()}</h1>
 
 	{#if saved}
-		<div class="mb-6 rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700">
+		<div class="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700">
 			{m.settings_saved()}
 		</div>
 	{/if}
 
+	<!-- Theme & locale -->
 	<form
 		method="post"
-		use:enhance={() => {
-			// Force a full navigation so the server re-reads both cookies
-			// (PARAGLIDE_LOCALE and rph_theme) and re-runs handleParaglide + handleTheme.
-			return async ({ result }) => {
-				if (result.type === 'redirect') {
-					window.location.href = result.location
-				}
-			}
-		}}
+		action="?/theme"
+		use:enhance={forceReload}
 		class="flex flex-col gap-6 rounded-2xl bg-white p-6 ring-1 ring-gray-200"
 	>
 		<ButtonRadioSet label={m.settings_lang_label()} name="locale" options={langLabels} bind:group={selectedLocale} />
@@ -80,9 +78,28 @@
 
 		<Palette />
 
+		<div class="flex justify-end">
+			<Button label={m.settings_save()} type="submit" />
+		</div>
+	</form>
+
+	<!-- Avatar -->
+	<form
+		method="post"
+		action="?/avatar"
+		use:enhance={forceReload}
+		class="flex flex-col gap-4 rounded-2xl bg-white p-6 ring-1 ring-gray-200"
+	>
+		<AvatarUpload
+			name="image"
+			value={data.user.image}
+			type="user"
+			label={m.settings_avatar_label()}
+			size={80}
+		/>
 		<div class="flex justify-between">
 			<Button label={m.nav_signout()} onclick={signOut} kind="danger" />
-			<Button	label={m.settings_save()} type="submit"	/>
+			<Button label={m.settings_save()} type="submit" />
 		</div>
 	</form>
 </Container>

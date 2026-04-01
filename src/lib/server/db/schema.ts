@@ -101,6 +101,7 @@ export const games = pgTable('games', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
+	image: text('image'),
 	gmUserId: text('gm_user_id')
 		.notNull()
 		.references(() => user.id),
@@ -160,6 +161,7 @@ export const characters = pgTable('characters', {
 		.default('none')
 		.notNull(),
 	age: integer('age'),
+	image: text('image'),
 	bodyDescription: text('body_description'),
 	prehistory: text('prehistory'),
 	stats: jsonb('stats').$type<Stats>().notNull(),

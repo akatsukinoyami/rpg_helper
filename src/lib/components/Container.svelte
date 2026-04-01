@@ -3,12 +3,13 @@
 
 	interface Props {
 		maxWidth?: `max-w-${string}`;
+		class?: string;
 		children?: Snippet;
 	}
 
-	let { maxWidth = 'max-w-lg', children }: Props = $props();
+	let { maxWidth = 'max-w-lg', class: className, children }: Props = $props();
 </script>
 
-<div class={["mx-auto", maxWidth]}>
+<div class={["mx-auto", maxWidth, className]}>
   {@render children?.()}
 </div>

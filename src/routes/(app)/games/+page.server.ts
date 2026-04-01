@@ -35,12 +35,13 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const name = (form.get('name') as string)?.trim();
 		const description = (form.get('description') as string)?.trim() || null;
+		const image = ((form.get('image') as string) || '').trim() || null;
 
 		if (!name) return fail(400, { error: 'name_required' });
 
 		const [game] = await db
 			.insert(games)
-			.values({ name, description, gmUserId: userId })
+			.values({ name, description, image, gmUserId: userId })
 			.returning({ id: games.id });
 
 		redirect(303, `/games/${game.id}`);

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
@@ -26,8 +27,9 @@
 	<div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-gray-200">
 		<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_create_title()}</h2>
 		<form method="post" action="?/create" use:enhance class="flex flex-col gap-4">
+			<AvatarUpload name="image" type="game" label={m.game_field_avatar()} size={64} />
 			<InputText id="name" name="name" label={m.game_field_name()} />
-			<InputTextArea id="name" name="name" label={m.game_field_description()} />
+			<InputTextArea id="description" name="description" label={m.game_field_description()} />
 
 			<div class="flex justify-end gap-2">
 				<Button label={m.game_create_reset()} type="reset" onclick={() => (showCreateForm = false)} kind="secondary" />
@@ -39,7 +41,7 @@
 
 <div class="mt-6 flex flex-col gap-3">
 	{#each data.gmGames as game}
-		<Tile title={game.name} subtitle={game.description} href={localizeHref(`/games/${game.id}`)}>
+		<Tile title={game.name} subtitle={game.description} image={game.image} href={localizeHref(`/games/${game.id}`)}>
 			<Badge label={m.games_gm_badge()} />
 		</Tile>
 	{/each}
@@ -49,11 +51,16 @@
 			href={localizeHref(`/games/${game.id}`)}
 			class="flex items-center justify-between rounded-2xl bg-white px-6 py-4 ring-1 ring-gray-200 hover:ring-indigo-300"
 		>
-			<div>
-				<p class="font-medium text-gray-900">{game.name}</p>
-				{#if game.description}
-					<p class="mt-1 text-sm text-gray-500">{game.description}</p>
+			<div class="flex items-center gap-3">
+				{#if game.image}
+					<img src={game.image} alt="" class="h-10 w-10 shrink-0 rounded-full object-cover" />
 				{/if}
+				<div>
+					<p class="font-medium text-gray-900">{game.name}</p>
+					{#if game.description}
+						<p class="mt-1 text-sm text-gray-500">{game.description}</p>
+					{/if}
+				</div>
 			</div>
 			<span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
 				{m.games_player_badge()}

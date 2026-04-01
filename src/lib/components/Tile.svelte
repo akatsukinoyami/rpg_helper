@@ -8,6 +8,7 @@
     title?: string;
     subtitle?: string | null;
     kind?: BadgeKind;
+    image?: string | null;
     children?: Snippet;
   }
 
@@ -19,11 +20,12 @@
 <script lang="ts">
   import { kinds } from "./Badge.svelte";
     
-	let { 
-    class: className, 
-    title, 
-    subtitle, 
-    kind = 'secondary', 
+	let {
+    class: className,
+    title,
+    subtitle,
+    kind = 'secondary',
+    image,
     href,
     onclick,
     children,
@@ -34,9 +36,14 @@
 </script>
 
 {#snippet content()}
-  <div>
-    {#if title}<p class="font-medium text-gray-900">{title}</p>{/if}
-    {#if subtitle}<p class="text-sm text-gray-500">{subtitle}</p>{/if}
+  <div class="flex items-center gap-3">
+    {#if image}
+      <img src={image} alt="" class="h-10 w-10 shrink-0 rounded-full object-cover" />
+    {/if}
+    <div>
+      {#if title}<p class="font-medium text-gray-900">{title}</p>{/if}
+      {#if subtitle}<p class="text-sm text-gray-500">{subtitle}</p>{/if}
+    </div>
   </div>
 
   <div class="flex items-center gap-3">

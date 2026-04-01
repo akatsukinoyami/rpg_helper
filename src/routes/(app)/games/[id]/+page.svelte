@@ -31,14 +31,19 @@
 </script>
 
 <div class="flex items-start justify-between">
-	<div>
-		<h1 class="text-2xl font-semibold text-gray-900">{data.game.name}</h1>
-		{#if data.game.description}
-			<p class="mt-1 text-gray-500">{data.game.description}</p>
+	<div class="flex items-start gap-4">
+		{#if data.game.image}
+			<img src={data.game.image} alt="" class="h-16 w-16 shrink-0 rounded-full object-cover" />
 		{/if}
-		<p class="mt-2 text-sm text-gray-400">
-			GM: <span class="font-medium text-gray-600">{data.game.gm.name}</span>
-		</p>
+		<div>
+			<h1 class="text-2xl font-semibold text-gray-900">{data.game.name}</h1>
+			{#if data.game.description}
+				<p class="mt-1 text-gray-500">{data.game.description}</p>
+			{/if}
+			<p class="mt-2 text-sm text-gray-400">
+				GM: <span class="font-medium text-gray-600">{data.game.gm.name}</span>
+			</p>
+		</div>
 	</div>
 	{#if data.isGm}
 		<Badge label={m.games_gm_badge()} />

@@ -1,4 +1,7 @@
 import { redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { user } from '$lib/server/db/schema';
 import { COOKIE_NAME, buildTheme, parseTheme, type Mode, type Scheme } from '$lib/theme';
 import { getLocale, locales } from '$lib/paraglide/runtime';
 import type { Actions, PageServerLoad } from './$types';
@@ -6,16 +9,12 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ locals }) => {
 	return {
 		prefs: parseTheme(locals.theme),
-		// Pass server-determined locale so the client initializes correctly.
-		// getLocale() here reads from paraglide's AsyncLocalStorage (set by
-		// handleParaglide in hooks), which is always correct regardless of
-		// whether the cookie is readable by JS.
 		locale: getLocale()
 	};
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	theme: async ({ request, cookies, url }) => {
 		const form = await request.formData();
 
 		const scheme = form.get('scheme') as Scheme;
@@ -30,12 +29,21 @@ export const actions: Actions = {
 				path: '/',
 				maxAge: 60 * 60 * 24 * 365,
 				sameSite: 'lax',
-				// Must NOT be httpOnly — paraglide reads this client-side via
-				// document.cookie in getLocale(). httpOnly would make it invisible
-				// to JS and the locale would fall back to 'en' after hydration.
 				httpOnly: false
 			});
 		}
+
+		redirect(303, url.pathname + '?saved=1');
+	},
+
+	avatar: async ({ locals, request, url }) => {
+		const form = await request.formData();
+		const image = ((form.get('image') as string) || '').trim() || null;
+
+		await db
+			.update(user)
+			.set({ image, updatedAt: new Date() })
+			.where(eq(user.id, locals.user!.id));
 
 		redirect(303, url.pathname + '?saved=1');
 	}
