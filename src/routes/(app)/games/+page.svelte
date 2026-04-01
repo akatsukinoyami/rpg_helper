@@ -23,7 +23,8 @@
 
 {#if showCreateForm}
 	<GameForm 
-		action="?/create" 
+		action='c'
+		path="?/create" 
 		label={m.game_create_title()} 
 		onclickReset={() => showCreateForm = false} 
 	/>

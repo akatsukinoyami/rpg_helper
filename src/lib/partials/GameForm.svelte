@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { enhance } from '$app/forms';
+	import { enhance } from '$app/forms';
 	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
@@ -7,7 +7,8 @@
 	import * as m from '$lib/paraglide/messages';
 
 	interface Props {
-		action?: string; 
+		action?: 'c' | 'e';
+		path?: string; 
 		label?: string;
 		name?: string;
 		description?: string | null;
@@ -16,13 +17,19 @@
 	}
 
 	let { 
-		action = 'default',
+		action = 'c',
+		path = undefined,
 		label = '',
 		name = '', 
 		description = '', 
 		image = null, 
 		onclickReset 
 	}: Props = $props();
+
+	const submit = {
+		c: m.game_create_submit,
+		e: m.game_edit_submit
+	};
 </script>
 
 
@@ -40,7 +47,7 @@
 			{#if onclickReset}
 				<Button label={m.game_create_reset()} type="reset" onclick={onclickReset} kind="secondary" />
 			{/if}
-			<Button label={m.game_create_submit()} type="submit" />
+			<Button label={submit[action]()} type="submit" />
 		</div>
 	</form>
 </div>

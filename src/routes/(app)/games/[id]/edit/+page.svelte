@@ -18,7 +18,8 @@
 		<h1 class="mt-2 text-2xl font-semibold text-gray-900">{m.game_edit_title()}</h1>
 	</div>
 
-	<GameForm 
+	<GameForm 	
+		action='e'
 		name={data.game.name} 
 		description={data.game.description} 
 		image={data.game.image}
