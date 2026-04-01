@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characters, games } from '$lib/server/db/schema';
+import { characterVisibility, characters, games } from '$lib/server/db/schema';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -25,7 +25,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const isGm = game.gmUserId === userId;
 	const myCharacter = game.characters.find((c) => c.userId === userId) ?? null;
 
-	return { game, isGm, myCharacter };
+	const visibilityGrants = myCharacter
+		? await db
+				.select()
+				.from(characterVisibility)
+				.where(eq(characterVisibility.visibleToCharacterId, myCharacter.id))
+		: [];
+
+	return { game, isGm, myCharacter, visibilityGrants };
 };
 
 const assertGm = async (gameId: string, userId: string) => {
