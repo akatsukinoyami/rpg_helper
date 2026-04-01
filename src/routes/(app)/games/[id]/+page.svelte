@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { mdiPencil } from '@mdi/js';
 	import { enhance } from '$app/forms';
-	import * as m from '$lib/paraglide/messages';
-	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
-	import { localize } from '$lib/localize';
-	import type { PageData } from './$types';
-	import Badge from '$lib/components/Badge.svelte';
+	import { invalidateAll } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
 	import InputSelect from '$lib/components/InputSelect.svelte';
 	import Tile from '$lib/components/Tile.svelte';
 	import CharacterCard from '$lib/partials/CharacterCard.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import type { PageData } from './$types';
+	import { approve, reject, deleteChar } from './characters.remote';
 
 	let { data }: { data: PageData } = $props();
 
@@ -22,9 +23,14 @@
 		data.isGm || data.myCharacter?.id === charId;
 
 	const visibilityFor = (charId: string) => {
-		if (canSeeAll(charId)) return null; // null = full access
+		if (canSeeAll(charId)) return null;
 		return data.visibilityGrants.find((g) => g.characterId === charId) ?? null;
 	};
+
+	async function run(fn: () => Promise<unknown>) {
+		await fn();
+		await invalidateAll();
+	}
 </script>
 
 <div class="flex items-start justify-between">
@@ -44,8 +50,7 @@
 	</div>
 	{#if data.isGm}
 		<div class="flex items-center gap-2">
-			<Button href={localizeHref(`/games/${data.game.id}/edit`)} label={m.game_edit_button()} kind="secondary" />
-			<Badge label={m.games_gm_badge()} />
+			<Button href={localizeHref(`/games/${data.game.id}/edit`)} icon={mdiPencil} kind="secondary" />
 		</div>
 	{/if}
 </div>
@@ -72,29 +77,44 @@
 			{#each data.game.characters as char}
 				{@const vis = visibilityFor(char.id)}
 				{@const full = vis === null}
-				<div class="flex flex-col gap-2">
-					<CharacterCard
-						name={char.name}
-						playerName={char.user.name}
-						race={char.race}
-						image={char.image}
-						status={char.status}
-						bodyDescription={char.bodyDescription}
-						stats={full || vis?.showStats ? char.stats : null}
-						age={full || vis?.showAge ? char.age : null}
-						gender={full || vis?.showAge ? char.gender : null}
-					/>
-					{#if data.isGm && char.status === 'pending'}
-						<form method="post" action="?/approve" use:enhance>
-							<input type="hidden" name="characterId" value={char.id} />
-							<Button type="submit" label={m.game_dashboard_approve()} kind='success' class="w-full"/>
-						</form>
-						<form method="post" action="?/reject" use:enhance>
-							<input type="hidden" name="characterId" value={char.id} />
-							<Button type="submit" label={m.game_dashboard_reject()} kind='danger' class="w-full"/>
-						</form>
-					{/if}
-				</div>
+				{@const canEdit = data.isGm || char.userId === data.myCharacter?.userId}
+				<CharacterCard
+					name={char.name}
+					playerName={char.user.name}
+					race={char.race}
+					image={char.image}
+					status={char.status}
+					bodyDescription={char.bodyDescription}
+					stats={full || vis?.showStats ? char.stats : null}
+					age={full || vis?.showAge ? char.age : null}
+					gender={full || vis?.showAge ? char.gender : null}
+					editHref={canEdit ? localizeHref(`/games/${data.game.id}/characters/${char.id}/edit`) : undefined}
+				>
+					{#snippet actions()}
+						{#if data.isGm && char.status === 'pending'}
+							<Button
+								label={m.game_dashboard_approve()}
+								kind="success"
+								class="w-full px-3 py-1.5"
+								onclick={() => run(() => approve({ gameId: data.game.id, characterId: char.id }))}
+							/>
+							<Button
+								label={m.game_dashboard_reject()}
+								kind="danger"
+								class="w-full px-3 py-1.5"
+								onclick={() => run(() => reject({ gameId: data.game.id, characterId: char.id }))}
+							/>
+						{/if}
+						{#if canEdit}
+							<Button
+								label={m.char_delete()}
+								kind="danger"
+								class="w-full px-3 py-1.5"
+								onclick={() => run(() => deleteChar({ gameId: data.game.id, characterId: char.id }))}
+							/>
+						{/if}
+					{/snippet}
+				</CharacterCard>
 			{/each}
 		</div>
 	{/if}
@@ -105,11 +125,11 @@
 	<section class="mt-10 border-t border-gray-200 pt-8">
 		<h2 class="mb-4 text-lg font-medium text-gray-900">{m.game_transfer_gm()}</h2>
 		<form method="post" action="?/transfer" use:enhance class="flex items-end gap-3">
-			<InputSelect 
+			<InputSelect
 				id="newGmUserId"
 				name="newGmUserId"
 				label={m.game_transfer_gm_to()}
-				options={otherPlayers.map(player => [player.userId, player.user.name] as [string, string])} 
+				options={otherPlayers.map(player => [player.userId, player.user.name] as [string, string])}
 			/>
 			<Button type="submit" label={m.game_transfer_gm_submit()} kind='danger'/>
 		</form>

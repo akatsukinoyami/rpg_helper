@@ -7,16 +7,18 @@
 	import CharacterForm from '$lib/partials/CharacterForm.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	const submitLabel = data.isGm ? m.char_edit_submit_gm() : m.char_edit_submit_owner();
 </script>
 
 <Container>
 	<div class="mb-6">
 		<Button
 			href={localizeHref(`/games/${data.game.id}`)}
-			label="← {m.char_create_back()}"
+			label="← {m.char_edit_back()}"
 			kind="ghost"
 		/>
-		<h1 class="mt-2 text-2xl font-semibold text-gray-900">{m.char_create_title()}</h1>
+		<h1 class="mt-2 text-2xl font-semibold text-gray-900">{m.char_edit_title()}</h1>
 		<p class="mt-1 text-sm text-gray-500">{data.game.name}</p>
 	</div>
 
@@ -26,5 +28,15 @@
 		</div>
 	{/if}
 
-	<CharacterForm races={data.races} submitLabel={m.char_create_submit()} />
+	<CharacterForm
+		races={data.races}
+		name={data.character.name}
+		gender={data.character.gender}
+		raceId={data.character.raceId}
+		age={data.character.age}
+		image={data.character.image}
+		bodyDescription={data.character.bodyDescription}
+		prehistory={data.character.prehistory}
+		{submitLabel}
+	/>
 </Container>

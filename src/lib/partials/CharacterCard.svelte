@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { mdiAccount } from '@mdi/js';
+	import type { Snippet } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
-	import Icon from '$lib/components/Icon.svelte';
+	import { mdiPencil } from '@mdi/js';
+	import Button from '$lib/components/Button.svelte';
 	import type { Locale, Stats } from '$lib/server/db/schema';
 	import { localize } from '$lib/localize';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -18,9 +19,24 @@
 		stats?: Stats | null;
 		age?: number | null;
 		gender?: 'male' | 'female' | 'none' | 'both' | null;
+		// Actions
+		editHref?: string;
+		actions?: Snippet;
 	}
 
-	let { name, playerName, race, image, status, bodyDescription, stats, age, gender }: Props =
+	let { 
+		name, 
+		playerName, 
+		race, 
+		image, 
+		status, 
+		bodyDescription, 
+		stats, 
+		age, 
+		gender, 
+		editHref, 
+		actions 
+	}: Props =
 		$props();
 
 	const statusColor = {
@@ -49,22 +65,13 @@
 	>
 		<!-- Front -->
 		<div class="absolute inset-0 overflow-hidden rounded-2xl backface-hidden">
-			{#if image}
-				<img src={image} alt="" class="h-full w-full object-cover" />
-			{:else}
-				<div
-					class="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-300 to-purple-500"
-				>
-					<!-- <Icon path={mdiAccount} size={72} pathClass="fill-white/40" /> -->
-					<img src='/fallback/{race?.name?.en?.toLowerCase()}_{gender}.png' alt="" class="h-full w-full object-cover opacity-30 " />
-
-				</div>
-			{/if}
+			<div class="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-300 to-purple-500">
+				<!-- <Icon path={mdiAccount} size={72} pathClass="fill-white/40" /> -->
+				<img src={image ?? `/fallback/${race?.name?.en?.toLowerCase()}_${gender}.png`} alt="" class="h-full w-full object-cover opacity-30 " />
+			</div>
 
 			<!-- Status dot -->
-			<div
-				class="absolute right-3 top-3 h-3 w-3 rounded-full ring-2 ring-white {statusColor[status]}"
-			></div>
+			<div class="absolute right-3 top-3 h-3 w-3 rounded-full ring-2 ring-white {statusColor[status]}"></div>
 
 			<!-- Bottom overlay -->
 			<div
@@ -107,6 +114,17 @@
 
 			{#if meta}
 				<p class="shrink-0 text-xs text-gray-400">{meta}</p>
+			{/if}
+
+			{#if editHref || actions}
+				<div class="shrink-0 flex flex-col gap-1">
+					{#if editHref}
+						<Button href={editHref} icon={mdiPencil} kind="secondary" class="w-full px-3 py-1.5" />
+					{/if}
+					{#if actions}
+						{@render actions()}
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</div>

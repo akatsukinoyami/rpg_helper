@@ -47,30 +47,6 @@ const assertGm = async (gameId: string, userId: string) => {
 };
 
 export const actions: Actions = {
-	approve: async ({ locals, params, request }) => {
-		if (!(await assertGm(params.id, locals.user!.id))) return fail(403);
-
-		const form = await request.formData();
-		const characterId = form.get('characterId') as string;
-
-		await db
-			.update(characters)
-			.set({ status: 'approved' })
-			.where(and(eq(characters.id, characterId), eq(characters.gameId, params.id)));
-	},
-
-	reject: async ({ locals, params, request }) => {
-		if (!(await assertGm(params.id, locals.user!.id))) return fail(403);
-
-		const form = await request.formData();
-		const characterId = form.get('characterId') as string;
-
-		await db
-			.update(characters)
-			.set({ status: 'rejected' })
-			.where(and(eq(characters.id, characterId), eq(characters.gameId, params.id)));
-	},
-
 	transfer: async ({ locals, params, request }) => {
 		if (!(await assertGm(params.id, locals.user!.id))) return fail(403);
 
