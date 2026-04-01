@@ -6,7 +6,6 @@ import { skillsSeed } from './skills';
 
 const db = drizzle(postgres(process.env.DATABASE_URL!), { schema: { races, raceSkills, skills } });
 
-
 async function seed() {
 	console.log('Seeding skills...');
 	const insertedSkills = await db

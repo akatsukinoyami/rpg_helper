@@ -14,12 +14,12 @@
 	export type ButtonKind = keyof typeof kinds;
 
 	export const iconKinds = {
-		primary: 	'fill-white',
+		primary: 'fill-white',
 		selected: 'fill-indigo-700',
-		danger: 	'fill-red-900',
-		success: 	'fill-green-900',
-		secondary:'fill-gray-600',
-		ghost: 		'fill-gray-500'
+		danger: 'fill-red-900',
+		success: 'fill-green-900',
+		secondary: 'fill-gray-600',
+		ghost: 'fill-gray-500'
 	} satisfies Record<ButtonKind, string>;
 
 	interface Props {

@@ -9,7 +9,7 @@
 		// Front — always visible
 		name: string;
 		playerName: string;
-		race?: { id: string; name: Partial<Record<Locale, string>>; } | null;
+		race?: { id: string; name: Partial<Record<Locale, string>> } | null;
 		image?: string | null;
 		status: 'pending' | 'approved' | 'rejected';
 		// Back — visibility-controlled (null = hidden from this character)
@@ -21,8 +21,18 @@
 		actions?: Snippet;
 	}
 
-	let { name, playerName, race, image, status, bodyDescription, stats, age, gender, actions }: Props =
-		$props();
+	let {
+		name,
+		playerName,
+		race,
+		image,
+		status,
+		bodyDescription,
+		stats,
+		age,
+		gender,
+		actions
+	}: Props = $props();
 
 	const statusColor = {
 		approved: 'bg-green-500',
@@ -33,11 +43,11 @@
 	const statKeys = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 
 	const genderLabel = {
-			male: m.char_gender_male,
-			female: m.char_gender_female,
-			both: m.char_gender_both,
-			none: m.char_gender_none
-		};
+		male: m.char_gender_male,
+		female: m.char_gender_female,
+		both: m.char_gender_both,
+		none: m.char_gender_none
+	};
 
 	const meta = $derived(
 		[age != null ? String(age) : null, gender && genderLabel[gender]()].filter(Boolean).join(' · ')

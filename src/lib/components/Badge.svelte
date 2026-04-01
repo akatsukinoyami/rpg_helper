@@ -7,7 +7,7 @@
 		warn: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
 		danger: 'bg-red-100 text-red-700 ring-red-200',
 		info: 'bg-indigo-100 text-indigo-700 ring-indigo-950',
-		secondary: 'bg-white text-gray-900 ring-gray-200 hover:ring-gray-400',
+		secondary: 'bg-white text-gray-900 ring-gray-200 hover:ring-gray-400'
 	} as const;
 
 	export type BadgeKind = keyof typeof kinds;

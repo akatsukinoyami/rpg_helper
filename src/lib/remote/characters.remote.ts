@@ -26,7 +26,10 @@ const assertGm = async (gameId: string, userId: string) => {
 const CharacterSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	gender: v.picklist(['male', 'female', 'none', 'both']),
-	raceId: v.pipe(v.string(), v.transform((s) => s || null)),
+	raceId: v.pipe(
+		v.string(),
+		v.transform((s) => s || null)
+	),
 	age: v.pipe(
 		v.optional(v.string()),
 		v.transform((s) => (s ? parseInt(s) : null))

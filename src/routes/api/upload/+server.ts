@@ -5,13 +5,7 @@ import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
 import type { RequestHandler } from './$types';
 
-const ALLOWED_TYPES = new Set([
-	'image/jpeg',
-	'image/png',
-	'image/webp',
-	'image/gif',
-	'image/avif'
-]);
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']);
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const VALID_UPLOAD_TYPES = new Set(['user', 'game', 'character']);
@@ -26,7 +20,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!(file instanceof File)) error(400, 'No file provided');
 	if (!uploadType || typeof uploadType !== 'string' || !VALID_UPLOAD_TYPES.has(uploadType))
 		error(400, 'Invalid type');
-	if (!ALLOWED_TYPES.has(file.type)) error(400, 'Invalid file type — only JPEG, PNG, WebP, GIF, AVIF allowed');
+	if (!ALLOWED_TYPES.has(file.type))
+		error(400, 'Invalid file type — only JPEG, PNG, WebP, GIF, AVIF allowed');
 	if (file.size > MAX_SIZE) error(400, 'File too large — maximum 10 MB');
 
 	const raw = Buffer.from(await file.arrayBuffer());

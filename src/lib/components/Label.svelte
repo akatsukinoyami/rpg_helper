@@ -4,7 +4,7 @@
 	interface Props extends HTMLLabelAttributes {
 		label?: string;
 		required?: boolean | null | undefined;
-    inline?: boolean;
+		inline?: boolean;
 	}
 	let { label, for: id, class: className, required, inline }: Props = $props();
 </script>

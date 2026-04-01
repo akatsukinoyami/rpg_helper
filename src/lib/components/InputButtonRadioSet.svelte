@@ -1,16 +1,15 @@
 <script lang="ts" module>
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import type { Options } from '$lib/types';
-  import type { ButtonKind } from "$lib/components/Button.svelte";
-
+	import type { ButtonKind } from '$lib/components/Button.svelte';
 
 	export interface Props extends HTMLInputAttributes {
 		label?: string;
 		options: Options;
 		group: string;
-    inline?: boolean;
-    labelClass?: string;
-    kind?: ButtonKind;
+		inline?: boolean;
+		labelClass?: string;
+		kind?: ButtonKind;
 	}
 </script>
 

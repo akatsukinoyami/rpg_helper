@@ -97,15 +97,29 @@ export const saveAccount = form(AccountSchema, async (data) => {
 			return { accountError: 'wrong_password' as const };
 
 		if (changeName) {
-			const [taken] = await db.select({ id: user.id }).from(user).where(eq(user.name, name!)).limit(1);
+			const [taken] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(eq(user.name, name!))
+				.limit(1);
+
 			if (taken) return { accountError: 'name_taken' as const };
 			await auth.api.updateUser({ body: { name: name! }, headers: request.headers });
 		}
 
 		if (changeEmail) {
-			const [taken] = await db.select({ id: user.id }).from(user).where(eq(user.email, email!)).limit(1);
+			const [taken] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(eq(user.email, email!))
+				.limit(1);
+
 			if (taken) return { accountError: 'email_taken' as const };
-			await db.update(user).set({ email: email!, updatedAt: new Date() }).where(eq(user.id, currentUser.id));
+
+			await db
+				.update(user)
+				.set({ email: email!, updatedAt: new Date() })
+				.where(eq(user.id, currentUser.id));
 		}
 
 		if (changePassword) {

@@ -1,20 +1,20 @@
 <script lang="ts" module>
-  import type { Snippet } from "svelte";
+	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes, HTMLAttributes } from 'svelte/elements';
-  import type { BadgeKind } from "./Badge.svelte";
+	import type { BadgeKind } from './Badge.svelte';
 
-  export interface Props {
-    class?: string;
-    title?: string;
-    subtitle?: string | null;
-    kind?: BadgeKind;
-    image?: string | null;
-    children?: Snippet;
-  }
+	export interface Props {
+		class?: string;
+		title?: string;
+		subtitle?: string | null;
+		kind?: BadgeKind;
+		image?: string | null;
+		children?: Snippet;
+	}
 
-	type asAnchor = HTMLAnchorAttributes & { href: string; onclick?: never; };
-	type asButton = HTMLButtonAttributes & { href?: never; onclick?: (e: MouseEvent) => void; };
-  type asDiv = HTMLAttributes<HTMLDivElement> & { href?: never; onclick?: never; };
+	type asAnchor = HTMLAnchorAttributes & { href: string; onclick?: never };
+	type asButton = HTMLButtonAttributes & { href?: never; onclick?: (e: MouseEvent) => void };
+	type asDiv = HTMLAttributes<HTMLDivElement> & { href?: never; onclick?: never };
 </script>
 
 <script lang="ts">

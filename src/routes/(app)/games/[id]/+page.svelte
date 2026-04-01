@@ -19,8 +19,7 @@
 		)
 	);
 
-	const canSeeAll = (charId: string) =>
-		data.isGm || data.myCharacter?.id === charId;
+	const canSeeAll = (charId: string) => data.isGm || data.myCharacter?.id === charId;
 
 	const visibilityFor = (charId: string) => {
 		if (canSeeAll(charId)) return null;
