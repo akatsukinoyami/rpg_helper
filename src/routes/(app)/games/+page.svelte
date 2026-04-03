@@ -30,7 +30,7 @@
 	/>
 {/if}
 
-<div class="mt-6 flex flex-col gap-3">
+<div class="mt-6 grid grid-cols-3 gap-3">
 	{#each data.gmGames as game}
 		<Tile title={game.name} subtitle={game.description} image={game.image} href={localizeHref(`/games/${game.id}`)}>
 			<Badge label={m.games_gm_badge()} />

@@ -5,7 +5,7 @@
 
 	interface Props extends HTMLTextareaAttributes {
 		label?: string;
-		value?: string;
+		value?: string | number;
 	}
 
 	let { label, id, value = $bindable(), required, ...rest }: Props = $props();

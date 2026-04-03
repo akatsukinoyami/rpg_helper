@@ -32,7 +32,7 @@
     ...rest
   }: Props & (asAnchor | asButton | asDiv) = $props();
 
-  let classLocal = $derived(`${className} ${kinds[kind]} flex items-center justify-between rounded-2xl px-6 py-4 ring-1`);
+  let classLocal = $derived(`${className} ${kinds[kind]} flex items-center justify-between rounded-xl px-2 py-1 ring-1`);
 </script>
 
 {#snippet content()}
@@ -41,8 +41,8 @@
       <img src={image} alt="" class="h-10 w-10 shrink-0 rounded-full object-cover" />
     {/if}
     <div>
-      {#if title}<p class="font-medium text-gray-900">{title}</p>{/if}
-      {#if subtitle}<p class="text-sm text-gray-500">{subtitle}</p>{/if}
+      {#if title}<p class="text-sm font-medium text-gray-900">{title}</p>{/if}
+      {#if subtitle}<p class="text-xs text-gray-500">{subtitle}</p>{/if}
     </div>
   </div>
 

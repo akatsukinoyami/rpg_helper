@@ -31,17 +31,17 @@
 
 ---
 
-## 1. DB Schema Extensions 🔨
+## 1. DB Schema Extensions ✅
 
-### 1a. Games — configurable HP/MP labels
+### 1a. Games — configurable HP/MP labels ✅
 
 ```text
 games
   + hpLabel  text  default 'HP'
   + mpLabel  text  default 'MP'
-```text
+```
 
-### 1b. Characters — vital stats & location
+### 1b. Characters — vital stats & location ✅
 
 ```text
 characters
@@ -50,9 +50,9 @@ characters
   + mp                 int   default 0
   + maxMp              int   default 0
   + currentLocationId  text  FK → locations.id  nullable
-```text
+```
 
-### 1c. Locations
+### 1c. Locations ✅
 
 ```text
 locations
@@ -64,9 +64,9 @@ locations
   image        text  nullable
   hidden       bool  default false
   createdAt    timestamp
-```text
+```
 
-### 1d. Messages
+### 1d. Messages ✅
 
 ```text
 messages
@@ -80,9 +80,9 @@ messages
   referencedCharIds text[]  nullable  (array of character IDs, for @mentions)
   gmAnnotation      text  nullable
   createdAt         timestamp
-```text
+```
 
-### 1e. Stat change proposals (HP/MP edits pending GM approval)
+### 1e. Stat change proposals (HP/MP edits pending GM approval) ✅
 
 ```text
 statProposals
@@ -94,13 +94,13 @@ statProposals
   reason       text  nullable  (e.g. "used 1 Potion")
   status       enum('pending', 'approved', 'rejected')  default 'pending'
   createdAt    timestamp
-```text
+```
 
 - On approval: apply delta to character, emit feed event, delete proposal
 - On rejection: delete proposal silently
 - Feed shows approved proposals only: `{charName} lost 1 Potion, received 10 HP`
 
-### 1f. Item change proposals (inventory edits pending GM approval)
+### 1f. Item change proposals (inventory edits pending GM approval) ✅
 
 ```text
 itemProposals
@@ -114,9 +114,9 @@ itemProposals
   reason       text  nullable
   status       enum('pending', 'approved', 'rejected')  default 'pending'
   createdAt    timestamp
-```text
+```
 
-### 1g. Item types (game library + optional premade)
+### 1g. Item types (game library + optional premade) ✅
 
 ```text
 itemTypes
@@ -137,11 +137,11 @@ charItems
   durability   int   nullable
   quantity     int   nullable
   createdAt    timestamp
-```text
+```
 
 Money = ItemType with `trackingMode = quantity`, created by GM.
 
-### 1h. Skill types (game library + optional premade)
+### 1h. Skill types (game library + optional premade) ✅
 
 ```text
 skillTypes
@@ -155,24 +155,26 @@ charSkills
   characterId  text  FK → characters.id
   skillTypeId  text  FK → skillTypes.id
   PRIMARY KEY (characterId, skillTypeId)
-```text
+```
 
 GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking needed.
 
 ---
 
-## 2. Real-time WebSocket Infrastructure ⬜
+## 2. Real-time WebSocket Infrastructure ✅
 
-### 2a. Server setup
+### 2a. Server setup ✅
 
-- Research WS approach based on chosen production adapter (deferred — do before implementation)
-- Rooms keyed by `gameId`
-- Auth handshake: validate session cookie on WS upgrade
+- `svelte-adapter-bun` in prod (native Bun WS via `export const websocket` + `handleWs` hook)
+- `ws` npm package + Vite plugin (`ws-dev.ts`) in dev (attaches to Node HTTP server)
+- Thin adapter interface: `setWsAdapter` / `broadcast()` — same call site regardless of env
+- Rooms keyed by `gameId`; auth handshake validates session cookie on WS upgrade
 
-### 2b. Event types broadcast per game room
+### 2b. Event types broadcast per game room ✅
 
 | Event | Payload |
 | --- | --- |
+| `game:updated` | updated game object |
 | `message:created` | full message object |
 | `message:edited` | messageId, content, gmAnnotation |
 | `message:deleted` | messageId |
@@ -182,11 +184,11 @@ GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking
 | `dice:roll` | characterId, formula, rolls, total |
 | `location:revealed` | locationId |
 
-### 2c. Client store
+### 2c. Client store ✅
 
-- Svelte store `wsStore` — singleton per game layout, reconnects on disconnect
-- Each component subscribes to relevant event types
-- On reconnect: re-fetch stale data via `invalidateAll()`
+- `WsStore` Svelte 5 class — singleton per game layout via context
+- Typed `.on(type, handler)` subscriptions, exponential backoff reconnect
+- On reconnect: `invalidateAll()` to re-fetch stale data
 
 ---
 
@@ -322,14 +324,14 @@ GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking
 
 ---
 
-## 8. Items ⬜
+## 8. Items 🔨
 
-### 8a. GM: item type library (`/games/[id]/library/items`)
+### 8a. GM: item type library ✅
 
-- CRUD for ItemTypes: name, description, image, weight, trackingMode, maxDurability
-- Option to include premade global ItemTypes when creating game (toggle on game creation form)
+- CRUD for ItemTypes at `/games/[id]/items`: name, description, weight, trackingMode, maxDurability
+- Create form via `+` button in tab nav, edit page at `/games/[id]/items/[itemId]/edit`
 
-### 8b. Character inventory
+### 8b. Character inventory ⬜
 
 - Listed on character detail page
 - Quantity items: show count, +/- proposes `itemProposal`
@@ -337,26 +339,24 @@ GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking
 - Total carried weight shown at bottom
 - GM can directly add/remove items (bypasses proposal)
 
-### 8c. Money
+### 8c. Money ⬜
 
 - Just an ItemType with `trackingMode = quantity` (GM creates it, e.g. "Gold Coins")
 - No special treatment in schema
 
 ---
 
-## 9. Skills ⬜
+## 9. Skills 🔨
 
-### 9a. GM: skill type library (`/games/[id]/library/skills`)
+### 9a. GM: skill type library ✅
 
-- CRUD for SkillTypes: name, description, levels JSON
-- Option to include premade global SkillTypes when creating game
+- CRUD for SkillTypes at `/games/[id]/skills`: name, description
+- Create form via `+` button in tab nav, edit page at `/games/[id]/skills/[skillId]/edit`
 
-### 9b. Character skills
+### 9b. Character skills ⬜
 
 - Listed on character detail page
-- Shows current level + level description from SkillType.levels
-- GM can add/remove skills and set level directly
-- Player can edit through approve
+- GM can add/remove skills directly
 
 ---
 
@@ -370,8 +370,8 @@ GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking
 
 ## Implementation order (suggested)
 
-1. **DB migrations** — all schema extensions (§1)
-2. **WS infrastructure** (§2) — research adapter first, then implement
+1. **DB migrations** — all schema extensions (§1) ✅
+2. **WS infrastructure** (§2) ✅
 3. **Locations** (§4) — foundation for messages
 4. **Messages** (§5) — core gameplay loop
 5. **Character vitals + proposal queue** (§7) — HP/MP display, proposals, GM queue

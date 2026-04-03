@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import * as v from 'valibot';
 import { getRequestEvent } from "$app/server";
 import { db } from "$lib/server/db";
 import { games } from "$lib/server/db/schema";
@@ -23,3 +24,5 @@ export async function isGm(gameId: string, userId: string = '') {
 export async function assertGm(gameId: string, userId: string = '') {
   if (!(await isGm(gameId, userId))) error(403);
 }
+
+export const DeleteSchema = v.object({ id: v.pipe(v.string(), v.trim(), v.minLength(1)) });

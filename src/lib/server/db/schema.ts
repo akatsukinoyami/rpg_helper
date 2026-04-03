@@ -324,8 +324,8 @@ export const trackingModeEnum = pgEnum('tracking_mode', ['durability', 'quantity
 export const itemTypes = pgTable('item_types', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
-	name: jsonb('name').$type<LocalizedText>().notNull(),
-	description: jsonb('description').$type<LocalizedText>(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
 	image: text('image'),
 	weight: numeric('weight', { precision: 10, scale: 3 }).default('0').notNull(),
 	trackingMode: trackingModeEnum('tracking_mode').notNull(),
@@ -376,8 +376,8 @@ export const itemProposals = pgTable('item_proposals', {
 export const skillTypes = pgTable('skill_types', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
-	name: jsonb('name').$type<LocalizedText>().notNull(),
-	description: jsonb('description').$type<LocalizedText>(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 

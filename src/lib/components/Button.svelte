@@ -30,6 +30,7 @@
 		icon?: Paths;
 		iconProps?: IconProps;
 		href?: string;
+		hidden?: boolean;
 		onclick?: (e: MouseEvent) => void;
 	}
 
@@ -46,6 +47,7 @@
     href,
 		icon,
 		iconProps,
+		hidden = false,
     class: className = label ? 'px-4 py-2' : 'p-2', 
     children, 
     ...rest 
@@ -62,19 +64,21 @@
 	]);
 </script>
 
-{#snippet content()}
-  {#if children}
-    {@render children()}
-  {:else}
-    {#if label}
-			<span>{label}</span>
+{#if !hidden}
+	{#snippet content()}
+		{#if children}
+			{@render children()}
+		{:else}
+			{#if label}
+				<span>{label}</span>
+			{/if}
+			<Icon {...iconProps} path={icon} pathClass={iconKinds[kind]} />
 		{/if}
-		<Icon {...iconProps} path={icon} pathClass={iconKinds[kind]} />
-  {/if}
-{/snippet}
+	{/snippet}
 
-{#if href}
-  <a {href} class={classLocal} {...rest as HTMLAnchorAttributes}>{@render content()}</a>
-{:else}
-  <button class={classLocal} {...rest as HTMLButtonAttributes}>{@render content()}</button>
+	{#if href}
+		<a {href} class={classLocal} {...rest as HTMLAnchorAttributes}>{@render content()}</a>
+	{:else}
+		<button class={classLocal} {...rest as HTMLButtonAttributes}>{@render content()}</button>
+	{/if}
 {/if}

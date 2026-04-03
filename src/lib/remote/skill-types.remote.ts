@@ -1,51 +1,65 @@
-import { command, form, getRequestEvent } from '$app/server';
-import { redirect } from '@sveltejs/kit';
+import { command, form, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { skillTypes } from '$lib/server/db/schema';
-import { assertGm } from './utils';
+import { assertGm, DeleteSchema } from './utils';
 
-const SkillTypeSchema = v.object({
+export const index = query(async () => {
+	const { params } = getRequestEvent();
+	
+	return await db
+		.select()
+		.from(skillTypes)
+		.where(eq(skillTypes.gameId, params.id));
+});
+
+const SkillTypeCreateSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	description: v.optional(v.pipe(v.string(), v.trim()))
 });
 
-export const createSkillType = form(SkillTypeSchema, async (data) => {
+export const create = form(SkillTypeCreateSchema, async (data) => {
 	const { params } = getRequestEvent();
 	const gameId = params.id!;
 	await assertGm(gameId);
 
 	await db.insert(skillTypes).values({
 		gameId,
-		name: { en: data.name },
-		description: data.description ? { en: data.description } : null
+		name: data.name,
+		description: data.description || null
 	});
-
-	redirect(303, `/games/${gameId}/skills`);
+	await index().refresh();
 });
 
-export const editSkillType = form(SkillTypeSchema, async (data) => {
+const SkillTypeEditSchema = v.object({
+	id: v.pipe(v.string(), v.trim(), v.minLength(1)),
+	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
+	description: v.optional(v.pipe(v.string(), v.trim()))
+});
+
+export const edit = form(SkillTypeEditSchema, async (data) => {
 	const { params } = getRequestEvent();
 	const gameId = params.id!;
-	const skillTypeId = params.skillId!;
 	await assertGm(gameId);
 
 	await db
 		.update(skillTypes)
 		.set({
-			name: { en: data.name },
-			description: data.description ? { en: data.description } : null
+			name: data.name,
+			description: data.description || null
 		})
-		.where(and(eq(skillTypes.id, skillTypeId), eq(skillTypes.gameId, gameId)));
-
-	redirect(303, `/games/${gameId}/skills`);
+		.where(and(eq(skillTypes.id, data.id), eq(skillTypes.gameId, gameId)));
+	await index().refresh();	
 });
 
-export const deleteSkillType = command(async ({ skillTypeId }: { skillTypeId: string }) => {
+export const remove = command(DeleteSchema, async ({ id }: { id: string }) => {
 	const { params } = getRequestEvent();
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	await db.delete(skillTypes).where(and(eq(skillTypes.id, skillTypeId), eq(skillTypes.gameId, gameId)));
+	await db
+		.delete(skillTypes)
+		.where(and(eq(skillTypes.id, id), eq(skillTypes.gameId, gameId)));
+	await index().refresh();
 });

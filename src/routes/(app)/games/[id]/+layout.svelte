@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { setContext, onDestroy, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { browser } from '$app/environment';
+	import { invalidateAll, afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button, { type Props as ButtonProps } from '$lib/components/Button.svelte';
 	import Container from '$lib/components/Container.svelte';
@@ -18,14 +17,14 @@
 
 	const ws = new WsStore(untrack(() => data.gameId));
 	setContext(WS_CONTEXT_KEY, ws);
-
-	let addFormState = $state({ open: false });
-	setContext('addFormState', addFormState);
-
 	const unsub = ws.on('game:updated', () => invalidateAll());
 	onDestroy(() => { unsub(); ws.destroy(); });
 
-	const base = $derived(localizeHref(`/games/${data.game.id}`));
+	let addFormState = $state({ open: false });
+	setContext('addFormState', addFormState);
+	afterNavigate(() => { addFormState.open = false; });
+
+	const base = $derived(localizeHref(`/games/${data.gameId}`));
 </script>
 
 <Container class="flex flex-col gap-4">
@@ -57,10 +56,6 @@
 			{ icon: mdiPlus,							 onclick: () => addFormState.open = true }
 		]} 
 		isActive={({ href = '' }: ButtonProps) => href === base ? page.url.pathname === href : page.url.pathname.startsWith(href)}
-		onclick={(e: MouseEvent) => {
-			const btn = (e.target as HTMLElement).closest('a, button');
-			if (!btn || btn.hasAttribute('href')) addFormState.open = false;
-		}}
 	/>
 
 	{@render children()}
