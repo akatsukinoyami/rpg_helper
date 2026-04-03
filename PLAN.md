@@ -20,12 +20,14 @@
 
 ---
 
-## 0. OAuth ⬜
+## 0. OAuth 🔨
 
-- Add Google, Discord, and Telegram OAuth providers via better-auth
-- Sign-in page: show OAuth buttons alongside existing email/password form
-- On first OAuth login: prompt to pick a display name if not provided by provider
-- Settings page: show connected providers, allow linking/unlinking additional providers
+✅ Add Google, Discord, and Telegram OAuth providers via better-auth
+✅ Sign-in page: show OAuth buttons alongside existing email/password form
+✅ On first OAuth login: prompt to pick a display name if not provided by provider
+✅ Settings page: show connected providers, allow linking/unlinking additional providers
+
+🔨 Setup inside providers  
 
 ---
 
@@ -33,26 +35,26 @@
 
 ### 1a. Games — configurable HP/MP labels
 
-```
+```text
 games
   + hpLabel  text  default 'HP'
   + mpLabel  text  default 'MP'
-```
+```text
 
 ### 1b. Characters — vital stats & location
 
-```
+```text
 characters
   + hp                 int   default 0
   + maxHp              int   default 0
   + mp                 int   default 0
   + maxMp              int   default 0
   + currentLocationId  text  FK → locations.id  nullable
-```
+```text
 
 ### 1c. Locations
 
-```
+```text
 locations
   id           text  PK
   gameId       text  FK → games.id
@@ -62,11 +64,11 @@ locations
   image        text  nullable
   hidden       bool  default false
   createdAt    timestamp
-```
+```text
 
 ### 1d. Messages
 
-```
+```text
 messages
   id                text  PK
   locationId        text  FK → locations.id
@@ -78,11 +80,11 @@ messages
   referencedCharIds text[]  nullable  (array of character IDs, for @mentions)
   gmAnnotation      text  nullable
   createdAt         timestamp
-```
+```text
 
 ### 1e. Stat change proposals (HP/MP edits pending GM approval)
 
-```
+```text
 statProposals
   id           text  PK
   characterId  text  FK → characters.id
@@ -92,7 +94,7 @@ statProposals
   reason       text  nullable  (e.g. "used 1 Potion")
   status       enum('pending', 'approved', 'rejected')  default 'pending'
   createdAt    timestamp
-```
+```text
 
 - On approval: apply delta to character, emit feed event, delete proposal
 - On rejection: delete proposal silently
@@ -100,7 +102,7 @@ statProposals
 
 ### 1f. Item change proposals (inventory edits pending GM approval)
 
-```
+```text
 itemProposals
   id           text  PK
   characterId  text  FK → characters.id
@@ -112,11 +114,11 @@ itemProposals
   reason       text  nullable
   status       enum('pending', 'approved', 'rejected')  default 'pending'
   createdAt    timestamp
-```
+```text
 
 ### 1g. Item types (game library + optional premade)
 
-```
+```text
 itemTypes
   id            text  PK
   gameId        text  FK → games.id  nullable  (null = premade/global)
@@ -135,13 +137,13 @@ charItems
   durability   int   nullable
   quantity     int   nullable
   createdAt    timestamp
-```
+```text
 
 Money = ItemType with `trackingMode = quantity`, created by GM.
 
 ### 1h. Skill types (game library + optional premade)
 
-```
+```text
 skillTypes
   id          text  PK
   gameId      text  FK → games.id  nullable  (null = premade/global)
@@ -153,7 +155,7 @@ charSkills
   characterId  text  FK → characters.id
   skillTypeId  text  FK → skillTypes.id
   PRIMARY KEY (characterId, skillTypeId)
-```
+```text
 
 GM names skills however they like (e.g. "Flip L1", "Flip L2"). No level tracking needed.
 
