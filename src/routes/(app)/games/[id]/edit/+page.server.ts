@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { games } from '$lib/server/db/schema';
+import { characters, games } from '$lib/server/db/schema';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -15,5 +15,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!game) error(404);
 	if (game.gmUserId !== locals.user!.id) error(403);
 
-	return { game };
+	const players = await db.query.characters.findMany({
+		where: eq(characters.gameId, params.id),
+		with: { user: { columns: { id: true, name: true } } },
+		columns: { id: true, userId: true }
+	});
+
+	const otherPlayers = players.filter(
+		(c) => c.userId !== game.gmUserId && c.userId !== locals.user!.id
+	);
+
+	return { game, otherPlayers };
 };

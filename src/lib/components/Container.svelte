@@ -7,7 +7,7 @@
 		children?: Snippet;
 	}
 
-	let { maxWidth = 'max-w-lg', class: className, children }: Props = $props();
+	let { maxWidth = 'max-w-xl', class: className, children }: Props = $props();
 </script>
 
 <div class={["mx-auto", maxWidth, className]}>

@@ -15,7 +15,7 @@
 <Container>
 	<div class="mb-6">
 		<Button
-			href={localizeHref(`/games/${data.game.id}`)}
+			href={localizeHref(`/games/${data.game.id}/characters`)}
 			label="← {m.char_edit_back()}"
 			kind="ghost"
 		/>

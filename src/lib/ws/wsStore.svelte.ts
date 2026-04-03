@@ -15,6 +15,8 @@ export class WsStore {
 	}
 
 	#connect() {
+		if (typeof window === 'undefined') return;
+		
 		const origin = window.location.origin.replace(/^https/, 'wss').replace(/^http/, 'ws');
 		const ws = new WebSocket(`${origin}/ws/game/${this.gameId}`);
 

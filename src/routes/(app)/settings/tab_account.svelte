@@ -47,7 +47,12 @@
 	}
 
 	async function link(provider: keyof typeof providerIcons) {
-		await authClient.linkSocial({ provider, callbackURL: window.location.href });
+    const options = { provider, callbackURL: '' };
+    if (typeof window !== 'undefined') {
+      options.callbackURL = window?.location?.href;
+    }
+
+		await authClient.linkSocial(options);
 	}
 
 	onMount(fetchAccounts);
@@ -123,7 +128,11 @@
         <Button 
           class='p-2 grayscale-100'
           kind="secondary"
-          onclick={() => window.location.href = 'https://youtu.be/dQw4w9WgXcQfor'}
+          onclick={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = 'https://youtu.be/dQw4w9WgXcQfor'
+            }
+          }}
         ><img {src} {alt} width="24px"/></Button>
       {/each}
     </div>

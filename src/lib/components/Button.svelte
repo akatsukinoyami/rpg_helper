@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements';
+	import type { HTMLButtonAttributes, HTMLAnchorAttributes, HTMLAttributes } from 'svelte/elements';
 	import type { Props as IconProps, Paths } from '$lib/components/Icon.svelte';
 
 	export const kinds = {
@@ -23,12 +23,14 @@
 		ghost: 'fill-gray-500'
 	} satisfies Record<ButtonKind, string>;
 
-	interface Props {
+	export interface Props extends HTMLAttributes<HTMLElement> {
 		label?: string;
 		kind?: ButtonKind;
 		children?: Snippet;
 		icon?: Paths;
 		iconProps?: IconProps;
+		href?: string;
+		onclick?: (e: MouseEvent) => void;
 	}
 
 	type asAnchor = HTMLAnchorAttributes & { href: string };
