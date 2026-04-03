@@ -1,16 +1,10 @@
 import { command, form, getRequestEvent } from '$app/server';
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { games, skillTypes } from '$lib/server/db/schema';
-
-const assertGm = async (gameId: string) => {
-	const { locals } = getRequestEvent();
-	const userId = locals.user!.id;
-	const [game] = await db.select({ gmUserId: games.gmUserId }).from(games).where(eq(games.id, gameId)).limit(1);
-	if (!game || game.gmUserId !== userId) error(403);
-};
+import { skillTypes } from '$lib/server/db/schema';
+import { assertGm } from './utils';
 
 const SkillTypeSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),

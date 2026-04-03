@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { characterSkills, characters, games, races } from '$lib/server/db/schema';
+import { assertGm, isGm } from './utils';
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -11,15 +12,6 @@ const CharacterInGame = v.object({
 	gameId: v.string(),
 	characterId: v.string()
 });
-
-const assertGm = async (gameId: string, userId: string) => {
-	const [game] = await db
-		.select({ gmUserId: games.gmUserId })
-		.from(games)
-		.where(eq(games.id, gameId))
-		.limit(1);
-	return game?.gmUserId === userId;
-};
 
 // ── Forms ─────────────────────────────────────────────────────────────────────
 
@@ -187,11 +179,7 @@ export const editCharacter = form(CharacterSchema, async (data) => {
 // ── Commands ──────────────────────────────────────────────────────────────────
 
 export const approve = command(CharacterInGame, async ({ gameId, characterId }) => {
-	const { locals } = getRequestEvent();
-	const userId = locals.user!.id;
-
-	if (!(await assertGm(gameId, userId))) throw new Error('Forbidden');
-
+	await assertGm(gameId);
 	await db
 		.update(characters)
 		.set({ status: 'approved' })
@@ -199,11 +187,7 @@ export const approve = command(CharacterInGame, async ({ gameId, characterId }) 
 });
 
 export const reject = command(CharacterInGame, async ({ gameId, characterId }) => {
-	const { locals } = getRequestEvent();
-	const userId = locals.user!.id;
-
-	if (!(await assertGm(gameId, userId))) throw new Error('Forbidden');
-
+	await assertGm(gameId);
 	await db
 		.update(characters)
 		.set({ status: 'rejected' })
@@ -222,7 +206,7 @@ export const deleteChar = command(CharacterInGame, async ({ gameId, characterId 
 
 	if (!character) throw new Error('Not found');
 
-	const isGm = await assertGm(gameId, userId);
+	const gm = await isGm(gameId, userId);
 	const isOwner = character.userId === userId;
 
 	if (!isGm && !isOwner) throw new Error('Forbidden');
