@@ -98,6 +98,8 @@
 	"location_no_items": "No locations yet.",
 	"location_field_name": "Name",
 	"location_field_desc": "Description",
+	"location_field_parent": "Parent location",
+	"location_field_parent_none": "— None (top level) —",
 	"game_dashboard_no_characters": "No characters yet.",
 	"game_dashboard_pending": "Pending",
 	"game_dashboard_reject": "Reject",

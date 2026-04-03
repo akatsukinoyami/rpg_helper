@@ -48,7 +48,7 @@
 
 	<TabNav 
 		options={[
-			{ href: base,   							 label: m.game_nav_locations() },
+			{ href: `${base}/locations`,   label: m.game_nav_locations() },
 			{ href: `${base}/feed`,        label: m.game_nav_feed() },
 			{ href: `${base}/characters`,  label: m.game_nav_characters() },
 			{ href: `${base}/items`,       label: m.game_nav_items() },

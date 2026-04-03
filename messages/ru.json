@@ -98,6 +98,8 @@
 	"location_no_items": "Локаций пока нет.",
 	"location_field_name": "Название",
 	"location_field_desc": "Описание",
+	"location_field_parent": "Родительская локация",
+	"location_field_parent_none": "— Нет (верхний уровень) —",
 	"game_dashboard_no_characters": "Персонажей пока нет.",
 	"game_dashboard_pending": "Ожидает",
 	"game_dashboard_reject": "Отклонить",

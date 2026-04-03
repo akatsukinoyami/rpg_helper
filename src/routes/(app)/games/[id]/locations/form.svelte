@@ -3,6 +3,7 @@
   import * as m from '$lib/paraglide/messages';
   import InputText from '$lib/components/InputText.svelte';
   import InputTextArea from '$lib/components/InputTextArea.svelte';
+  import InputSelect from '$lib/components/InputSelect.svelte';
   import TypeForm from '$lib/partials/TypeForm.svelte';
 
   interface Props {
@@ -12,6 +13,35 @@
   }
 
   let { action, entity, open = $bindable() }: Props = $props();
+
+  const allQuery = remoteFunctions.all();
+
+  function buildTree(
+    all: { id: string; parentId: string | null; name: string }[], 
+    excludeId?: string
+  ): [string, string][] {
+    const byParent = new Map<string | null, typeof all>();
+    for (const loc of all) {
+      if (loc.id === excludeId) continue;
+      const key = loc.parentId ?? null;
+      if (!byParent.has(key)) byParent.set(key, []);
+      byParent.get(key)!.push(loc);
+    }
+    const result: [string, string][] = [];
+    function walk(parentId: string | null, depth: number) {
+      for (const loc of byParent.get(parentId) ?? []) {
+        result.push([loc.id, `${'– '.repeat(depth)}${loc.name}`]);
+        walk(loc.id, depth + 1);
+      }
+    }
+    walk(null, 0);
+    return result;
+  }
+
+  const parentOptions = $derived([
+    ['', m.location_field_parent_none()] as [string, string],
+    ...buildTree(allQuery.current ?? [], entity?.id)
+  ]);
 </script>
 
 <TypeForm
@@ -34,5 +64,13 @@
     name="description"
     label={m.location_field_desc()}
     value={entity?.description}
+  />
+
+  <InputSelect
+    id="location-parent"
+    name="parentId"
+    label={m.location_field_parent()}
+    value={entity?.parentId ?? ''}
+    options={parentOptions}
   />
 </TypeForm>

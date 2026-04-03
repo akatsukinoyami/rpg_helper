@@ -6,6 +6,7 @@
   import Button from "$lib/components/Button.svelte";
   import * as ItemTypeRemoteFuncs from "$lib/remote/item-types.remote";
   import * as SkillTypeRemoteFuncs from "$lib/remote/skill-types.remote";
+  import * as LocationTypeRemoteFuncs from "$lib/remote/locations.remote";
 
   async function remove(id: string) {
     if (!id) return;
@@ -20,7 +21,7 @@
     class?: string;
     entity?: Record<string, any>;
     children?: Snippet;
-    remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs;
+    remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs | typeof LocationTypeRemoteFuncs;
     titles?: Partial<Record<keyof typeof ItemTypeRemoteFuncs, string>>;
   }
 

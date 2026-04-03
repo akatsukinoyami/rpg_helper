@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	import { type Snippet } from 'svelte';
   import SkillForm from '../../routes/(app)/games/[id]/skills/form.svelte';
   import ItemForm from '../../routes/(app)/games/[id]/items/form.svelte';
   import LocationForm from '../../routes/(app)/games/[id]/locations/form.svelte';
@@ -16,64 +15,74 @@
       loading?: string;
       empty?: string;
     }
-    titleGetter?: (e: any) => string
-    subtitleGetter?: (e: any) => string
+    titleGetter?: (e: any) => string;
+    subtitleGetter?: (e: any) => string;
+    hrefGetter?: (e: any) => string;
+    itemsGetter?: (current: any) => any[];
   }
-
 </script>
 
 <script lang="ts">
   import { mdiPencil } from '@mdi/js';
-	import { getContext } from 'svelte';
+  import { getContext } from 'svelte';
   import Tile from '$lib/components/Tile.svelte';
   import Button from '$lib/components/Button.svelte';
 
-	let { 
-    isGm, 
+  let {
+    isGm,
     index,
-    Form, 
+    Form,
     dict = {},
     titleGetter = (e) => e.name,
-    subtitleGetter = (e) => e.description
+    subtitleGetter = (e) => e.description,
+    hrefGetter,
+    itemsGetter = (c) => c ?? []
   }: Props = $props();
 
-	const query = index();
-  let { 
-    error = "Error on load", 
-    loading = "Loading", 
+  const query = index();
+  const items = $derived(itemsGetter(query.current));
+  let {
+    error = "Error on load",
+    loading = "Loading",
     empty = "No anything here"
   } = $derived(dict);
-	let addFormState = getContext<{ open: boolean }>('addFormState');
-	let edits = $state<Record<string, boolean>>({});
+  let addFormState = getContext<{ open: boolean }>('addFormState');
+  let edits = $state<Record<string, boolean>>({});
 </script>
 
 {#if isGm}
-	<Form action="create" bind:open={addFormState.open} />
+  <Form action="create" bind:open={addFormState.open} />
 {/if}
 
 {#if query.error}
-	<p class="text-sm text-gray-400">{error}</p>
+  <p class="text-sm text-gray-400">{error}</p>
 {:else if query.loading}
-	<p class="text-sm text-gray-400">{loading}</p>
+  <p class="text-sm text-gray-400">{loading}</p>
 {:else}
-	{#if query.current?.length === 0}
-		<p class="text-sm text-gray-400">{empty}</p>
-	{:else}
-		<div class="grid grid-cols-2 items-start gap-2">
-			{#each query.current as entity (entity.id)}
-        {#if !edits[entity.id]}
-          <Tile title={titleGetter(entity)} subtitle={subtitleGetter(entity)}>
-            <Button 
-              icon={mdiPencil} 
-              kind="ghost" 
-              onclick={() => edits[entity.id] = true} 
-              hidden={!isGm}
-            />
+  {#if items.length === 0}
+    <p class="text-sm text-gray-400">{empty}</p>
+  {:else}
+    <div class="grid grid-cols-2 items-start gap-2">
+      {#each items as entity (entity.id)}
+        {#if !edits[entity.id] || hrefGetter}
+          <Tile
+            title={titleGetter(entity)}
+            subtitle={subtitleGetter(entity)}
+            href={hrefGetter?.(entity)}
+          >
+            {#if !hrefGetter}
+              <Button
+                icon={mdiPencil}
+                kind="ghost"
+                onclick={() => edits[entity.id] = true}
+                hidden={!isGm}
+              />
+            {/if}
           </Tile>
         {:else if isGm}
           <Form action="edit" {entity} bind:open={edits[entity.id]} />
         {/if}
-			{/each}
-		</div>
-	{/if}
+      {/each}
+    </div>
+  {/if}
 {/if}
