@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fieldColors } from '$lib/constants';
+	import { fieldColors } from '$lib/constants/styles';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	interface Props extends HTMLInputAttributes {

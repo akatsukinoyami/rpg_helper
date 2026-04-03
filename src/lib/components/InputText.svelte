@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { fieldColors } from '$lib/constants';
+	import { fieldColors } from '$lib/constants/styles';
 	import Label from '$lib/components/Label.svelte';
 
 	interface Props extends HTMLInputAttributes {

@@ -3,6 +3,8 @@ import {
 	boolean,
 	integer,
 	jsonb,
+	numeric,
+	pgEnum,
 	pgTable,
 	primaryKey,
 	text,
@@ -105,6 +107,8 @@ export const games = pgTable('games', {
 	gmUserId: text('gm_user_id')
 		.notNull()
 		.references(() => user.id),
+	hpLabel: varchar('hp_label', { length: 50 }).default('HP').notNull(),
+	mpLabel: varchar('mp_label', { length: 50 }).default('MP').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
@@ -168,6 +172,11 @@ export const characters = pgTable('characters', {
 	status: varchar('status', { enum: ['pending', 'approved', 'rejected'] })
 		.default('pending')
 		.notNull(),
+	hp: integer('hp').default(0).notNull(),
+	maxHp: integer('max_hp').default(0).notNull(),
+	mp: integer('mp').default(0).notNull(),
+	maxMp: integer('max_mp').default(0).notNull(),
+	currentLocationId: uuid('current_location_id').references(() => locations.id, { onDelete: 'set null' }),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -249,12 +258,152 @@ export const diceRolls = pgTable('dice_rolls', {
 });
 
 // ---------------------------------------------------------------------------
+// Locations
+// ---------------------------------------------------------------------------
+
+export const locations = pgTable('locations', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	gameId: uuid('game_id')
+		.notNull()
+		.references(() => games.id, { onDelete: 'cascade' }),
+	parentId: uuid('parent_id'), // self-ref FK added in migration SQL
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	image: text('image'),
+	hidden: boolean('hidden').default(false).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// ---------------------------------------------------------------------------
+// Messages
+// ---------------------------------------------------------------------------
+
+export const messages = pgTable('messages', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	locationId: uuid('location_id')
+		.notNull()
+		.references(() => locations.id, { onDelete: 'cascade' }),
+	characterId: uuid('character_id').references(() => characters.id, { onDelete: 'set null' }),
+	content: text('content').notNull(),
+	replyToId: uuid('reply_to_id'), // self-ref FK added in migration SQL
+	referencedCharIds: uuid('referenced_char_ids').array(),
+	gmAnnotation: text('gm_annotation'),
+	editedAt: timestamp('edited_at'),
+	deletedAt: timestamp('deleted_at'),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// ---------------------------------------------------------------------------
+// Stat change proposals
+// ---------------------------------------------------------------------------
+
+export const statFieldEnum = pgEnum('stat_field', ['hp', 'mp', 'maxHp', 'maxMp']);
+export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
+
+export const statProposals = pgTable('stat_proposals', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	characterId: uuid('character_id')
+		.notNull()
+		.references(() => characters.id, { onDelete: 'cascade' }),
+	proposedBy: text('proposed_by')
+		.notNull()
+		.references(() => user.id),
+	field: statFieldEnum('field').notNull(),
+	delta: integer('delta').notNull(),
+	reason: text('reason'),
+	status: proposalStatusEnum('status').default('pending').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// ---------------------------------------------------------------------------
+// Item types + character inventory (game library)
+// ---------------------------------------------------------------------------
+
+export const trackingModeEnum = pgEnum('tracking_mode', ['durability', 'quantity']);
+
+export const itemTypes = pgTable('item_types', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	name: jsonb('name').$type<LocalizedText>().notNull(),
+	description: jsonb('description').$type<LocalizedText>(),
+	image: text('image'),
+	weight: numeric('weight', { precision: 10, scale: 3 }).default('0').notNull(),
+	trackingMode: trackingModeEnum('tracking_mode').notNull(),
+	maxDurability: integer('max_durability'),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+export const charItems = pgTable('char_items', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	characterId: uuid('character_id')
+		.notNull()
+		.references(() => characters.id, { onDelete: 'cascade' }),
+	itemTypeId: uuid('item_type_id')
+		.notNull()
+		.references(() => itemTypes.id, { onDelete: 'cascade' }),
+	durability: integer('durability'),
+	quantity: integer('quantity'),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// ---------------------------------------------------------------------------
+// Item change proposals
+// ---------------------------------------------------------------------------
+
+export const itemProposals = pgTable('item_proposals', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	characterId: uuid('character_id')
+		.notNull()
+		.references(() => characters.id, { onDelete: 'cascade' }),
+	proposedBy: text('proposed_by')
+		.notNull()
+		.references(() => user.id),
+	charItemId: uuid('char_item_id').references(() => charItems.id, { onDelete: 'set null' }),
+	itemTypeId: uuid('item_type_id')
+		.notNull()
+		.references(() => itemTypes.id, { onDelete: 'cascade' }),
+	deltaQty: integer('delta_qty'),
+	deltaDur: integer('delta_dur'),
+	reason: text('reason'),
+	status: proposalStatusEnum('status').default('pending').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// ---------------------------------------------------------------------------
+// Skill types + character skills (game library)
+// ---------------------------------------------------------------------------
+
+export const skillTypes = pgTable('skill_types', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	name: jsonb('name').$type<LocalizedText>().notNull(),
+	description: jsonb('description').$type<LocalizedText>(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+export const charSkills = pgTable(
+	'char_skills',
+	{
+		characterId: uuid('character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		skillTypeId: uuid('skill_type_id')
+			.notNull()
+			.references(() => skillTypes.id, { onDelete: 'cascade' })
+	},
+	(t) => [primaryKey({ columns: [t.characterId, t.skillTypeId] })]
+);
+
+// ---------------------------------------------------------------------------
 // Relations
 // ---------------------------------------------------------------------------
 
 export const gamesRelations = relations(games, ({ one, many }) => ({
 	gm: one(user, { fields: [games.gmUserId], references: [user.id] }),
 	characters: many(characters),
+	locations: many(locations),
+	itemTypes: many(itemTypes),
+	skillTypes: many(skillTypes),
 	diceRolls: many(diceRolls)
 }));
 
@@ -281,8 +430,14 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
 	user: one(user, { fields: [characters.userId], references: [user.id] }),
 	game: one(games, { fields: [characters.gameId], references: [games.id] }),
 	race: one(races, { fields: [characters.raceId], references: [races.id] }),
+	currentLocation: one(locations, { fields: [characters.currentLocationId], references: [locations.id] }),
 	characterSkills: many(characterSkills),
 	characterItems: many(characterItems),
+	charItems: many(charItems),
+	charSkills: many(charSkills),
+	statProposals: many(statProposals),
+	itemProposals: many(itemProposals),
+	messages: many(messages),
 	editProposals: many(characterEditProposals),
 	// Fields this character exposes to others
 	visibilityGranted: many(characterVisibility, { relationName: 'visibilitySource' }),
@@ -329,4 +484,52 @@ export const characterVisibilityRelations = relations(characterVisibility, ({ on
 export const diceRollsRelations = relations(diceRolls, ({ one }) => ({
 	game: one(games, { fields: [diceRolls.gameId], references: [games.id] }),
 	user: one(user, { fields: [diceRolls.userId], references: [user.id] })
+}));
+
+export const locationsRelations = relations(locations, ({ one, many }) => ({
+	game: one(games, { fields: [locations.gameId], references: [games.id] }),
+	parent: one(locations, { fields: [locations.parentId], references: [locations.id], relationName: 'locationTree' }),
+	children: many(locations, { relationName: 'locationTree' }),
+	messages: many(messages),
+	characters: many(characters)
+}));
+
+export const messagesRelations = relations(messages, ({ one, many }) => ({
+	location: one(locations, { fields: [messages.locationId], references: [locations.id] }),
+	character: one(characters, { fields: [messages.characterId], references: [characters.id] }),
+	replyTo: one(messages, { fields: [messages.replyToId], references: [messages.id], relationName: 'messageReplies' }),
+	replies: many(messages, { relationName: 'messageReplies' })
+}));
+
+export const statProposalsRelations = relations(statProposals, ({ one }) => ({
+	character: one(characters, { fields: [statProposals.characterId], references: [characters.id] }),
+	proposedBy: one(user, { fields: [statProposals.proposedBy], references: [user.id] })
+}));
+
+export const itemTypesRelations = relations(itemTypes, ({ one, many }) => ({
+	game: one(games, { fields: [itemTypes.gameId], references: [games.id] }),
+	charItems: many(charItems),
+	itemProposals: many(itemProposals)
+}));
+
+export const charItemsRelations = relations(charItems, ({ one }) => ({
+	character: one(characters, { fields: [charItems.characterId], references: [characters.id] }),
+	itemType: one(itemTypes, { fields: [charItems.itemTypeId], references: [itemTypes.id] })
+}));
+
+export const itemProposalsRelations = relations(itemProposals, ({ one }) => ({
+	character: one(characters, { fields: [itemProposals.characterId], references: [characters.id] }),
+	proposedBy: one(user, { fields: [itemProposals.proposedBy], references: [user.id] }),
+	charItem: one(charItems, { fields: [itemProposals.charItemId], references: [charItems.id] }),
+	itemType: one(itemTypes, { fields: [itemProposals.itemTypeId], references: [itemTypes.id] })
+}));
+
+export const skillTypesRelations = relations(skillTypes, ({ one, many }) => ({
+	game: one(games, { fields: [skillTypes.gameId], references: [games.id] }),
+	charSkills: many(charSkills)
+}));
+
+export const charSkillsRelations = relations(charSkills, ({ one }) => ({
+	character: one(characters, { fields: [charSkills.characterId], references: [characters.id] }),
+	skillType: one(skillTypes, { fields: [charSkills.skillTypeId], references: [skillTypes.id] })
 }));

@@ -40,6 +40,7 @@ if (env.TELEGRAM_CLIENT_ID && env.TELEGRAM_CLIENT_SECRET) {
 export const auth = betterAuth({
 	baseURL: BETTER_AUTH_URL,
 	secret: BETTER_AUTH_SECRET,
+	trustedOrigins: [BETTER_AUTH_URL, BETTER_AUTH_URL.replace('localhost', '127.0.0.1')],
 	database: drizzleAdapter(db, {
 		provider: 'pg',
 		schema: { user, session, account, verification }

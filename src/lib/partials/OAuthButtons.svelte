@@ -2,6 +2,8 @@
 	import { authClient } from '$lib/auth-client';
 	import Button from '$lib/components/Button.svelte';
 	import { appDiscord, appGoogle, appTelegram } from '$lib/icons';
+	import appDia from '$lib/assets/appDia.svg';
+	import appMax from '$lib/assets/appMax.svg';
 	import * as m from '$lib/paraglide/messages';
 
 	interface Props {
@@ -56,21 +58,13 @@
 				/>
 			{/if}
 
+			{#each [[appDia, 'Dia'], [appMax, 'Max']] as [src, alt]}
 			<Button 
 				class='p-1'
 				kind="ghost"
-				href="https://youtu.be/dQw4w9WgXcQfor"
-			>
-				<img src="/icon/Diia.svg" alt="Diia" width="36px"/>
-			</Button>
-			
-			<Button 
-				class='p-1'
-				kind="ghost" 
-				href="https://youtu.be/dQw4w9WgXcQfor"
-			>
-				<img src="/icon/MAX.svg" alt="MAX" width="36px"/>
-			</Button>
+				onclick={() => window.location.href = 'https://youtu.be/dQw4w9WgXcQfor'}
+			><img {src} {alt} width="36px"/></Button>
+			{/each}
 		</div>
 	</div>
 {/if}

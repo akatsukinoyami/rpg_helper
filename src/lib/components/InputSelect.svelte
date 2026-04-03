@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { fieldColors } from '$lib/constants';
+	import { fieldColors } from '$lib/constants/styles';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import type { Options } from '$lib/types';
 	import Label from '$lib/components/Label.svelte';

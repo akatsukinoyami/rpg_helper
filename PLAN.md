@@ -22,7 +22,7 @@
 
 ## 0. OAuth 🔨
 
-✅ Add Google, Discord, and Telegram OAuth providers via better-auth
+✅ Add Google, Discord, and Telegram OAuth providers in better-auth
 ✅ Sign-in page: show OAuth buttons alongside existing email/password form
 ✅ On first OAuth login: prompt to pick a display name if not provided by provider
 ✅ Settings page: show connected providers, allow linking/unlinking additional providers
