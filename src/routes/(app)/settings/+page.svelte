@@ -59,6 +59,24 @@
 	let previewScheme = $state(untrack(() => data.prefs.scheme));
 	let previewMode = $state(untrack(() => data.prefs.mode));
 
+	const connectedAccounts = authClient.useListAccounts();
+
+	const providerLabels: Record<string, string> = {
+		google: 'Google',
+		discord: 'Discord',
+		telegram: 'Telegram',
+		credential: 'Email & password'
+	};
+
+	async function unlink(providerId: string) {
+		await authClient.unlinkAccount({ providerId });
+		await connectedAccounts.refetch();
+	}
+
+	async function link(provider: 'google' | 'discord' | 'telegram') {
+		await authClient.linkSocial({ provider, callbackURL: window.location.href });
+	}
+
 	$effect(() => {
 		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`);
 	});
@@ -126,5 +144,39 @@
 				<Button label={m.settings_save()} type="submit" />
 			</div>
 		</form>
+
+		<!-- Connected providers -->
+		<div class="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-gray-200">
+			<h2 class="text-sm font-medium text-gray-700">{m.settings_connected_providers()}</h2>
+
+			{#each connectedAccounts.data ?? [] as acc}
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-gray-900">{providerLabels[acc.provider] ?? acc.provider}</span>
+					{#if acc.provider !== 'credential'}
+						<Button
+							label={m.settings_unlink_provider()}
+							kind="secondary"
+							onclick={() => unlink(acc.provider)}
+						/>
+					{/if}
+				</div>
+			{/each}
+
+			<hr class="border-gray-100" />
+
+			{#each (['google', 'discord', 'telegram'] as const) as provider}
+				{@const linked = connectedAccounts.data?.some((a: { provider: string }) => a.provider === provider)}
+				{#if !linked}
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-gray-500">{providerLabels[provider]}</span>
+						<Button
+							label={m.settings_link_provider()}
+							kind="secondary"
+							onclick={() => link(provider)}
+						/>
+					</div>
+				{/if}
+			{/each}
+		</div>
 	{/if}
 </Container>

@@ -15,5 +15,9 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
 		})
-	]
+	],
+  server: {
+    host: '127.0.0.1',
+    // port: 5173 (optional: specify a port)
+  }
 });

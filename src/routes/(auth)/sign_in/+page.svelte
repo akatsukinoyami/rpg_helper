@@ -5,6 +5,10 @@
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
+	import OAuthButtons from '$lib/partials/OAuthButtons.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	let login = $state('');
 	let password = $state('');
@@ -65,6 +69,8 @@
 
 	<Button class="mt-2 w-full px-4 py-2" type="submit" label={m.auth_login_submit()} disabled={loading} />
 </form>
+
+<OAuthButtons providers={data.oauthProviders} />
 
 <p class="mt-6 text-center text-sm text-gray-500">
 	{m.auth_login_no_account()}
