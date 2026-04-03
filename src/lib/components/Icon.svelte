@@ -2,8 +2,11 @@
 	import type { SVGAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 
-	export interface Props extends SVGAttributes<SVGPathElement> {
-		path?: string;
+  export type Path = string | SVGAttributes<SVGPathElement>; 
+  export type Paths = Path | Path[];
+
+	export interface Props {
+		path?: Paths;
 		class?: string;
 		pathClass?: string;
 		size?: number;
@@ -34,6 +37,24 @@
   }: Props = $props();
 </script>
 
+{#snippet pathSnippet(path: Path)}
+  {#if typeof path === 'string'}
+    <path 
+      {...rest} 
+      d={path} 
+      {fill} 
+      class={pathClass} 
+    />
+  {:else}
+    <path 
+      {...rest}
+      d={path.d} 
+      fill={path.fill} 
+      class={[pathClass, path.class]} 
+    />
+  {/if}
+{/snippet}
+
 {#if path || children}
   <svg
     class={className}
@@ -51,10 +72,10 @@
       {@render children()}
     {:else if Array.isArray(path)}
       {#each path as d}
-        <path {d} {...rest} class={pathClass} />
+        {@render pathSnippet(d)}
       {/each}
     {:else}
-      <path d={path} {...rest} class={pathClass} />
+      {@render pathSnippet(path)}
     {/if}
   </svg>
 {/if}

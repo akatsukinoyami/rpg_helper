@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements';
+	import type { Props as IconProps, Paths } from '$lib/components/Icon.svelte';
 
 	export const kinds = {
 		primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
@@ -26,7 +27,8 @@
 		label?: string;
 		kind?: ButtonKind;
 		children?: Snippet;
-		icon?: string;
+		icon?: Paths;
+		iconProps?: IconProps;
 	}
 
 	type asAnchor = HTMLAnchorAttributes & { href: string };
@@ -34,25 +36,27 @@
 </script>
 
 <script lang="ts">
-	import Icon from './Icon.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
   let { 
     label = '', 
     kind = 'primary', 
     href,
 		icon,
-    class: className, 
+		iconProps,
+    class: className = label ? 'px-4 py-2' : 'p-2', 
     children, 
     ...rest 
   }: Props & (asAnchor | asButton) = $props();
 
   let classLocal = $derived([
-		className, 
 		kinds[kind], 
 		'flex border rounded-lg text-sm font-medium',
+		{ 'cursor-pointer': !!(href || rest.onclick) },
 		label && icon 
 			? 'justify-between' 
-			: `${label ? 'px-4 py-2' : 'p-2'} justify-center`, 
+			: `justify-center`, 
+		className, 
 	]);
 </script>
 
@@ -63,7 +67,7 @@
     {#if label}
 			<span>{label}</span>
 		{/if}
-		<Icon path={icon} pathClass={iconKinds[kind]}/>
+		<Icon {...iconProps} path={icon} pathClass={iconKinds[kind]} />
   {/if}
 {/snippet}
 
