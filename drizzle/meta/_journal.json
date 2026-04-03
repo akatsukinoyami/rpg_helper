@@ -15,6 +15,13 @@
       "when": 1775042189421,
       "tag": "0001_moaning_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775207415002,
+      "tag": "0002_curved_ego",
+      "breakpoints": true
     }
   ]
 }
