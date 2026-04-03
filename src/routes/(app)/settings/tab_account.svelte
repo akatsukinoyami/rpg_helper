@@ -8,7 +8,7 @@
   import Button from '$lib/components/Button.svelte';
   import HR from '$lib/components/HR.svelte';
   import InputText from '$lib/components/InputText.svelte';
-  import { errorMsgs, providerIcons, providerLabels } from '$lib/constants/labels';
+  import { providerIcons, providerLabels } from '$lib/constants/labels';
 	import * as m from '$lib/paraglide/messages';
 	import { saveAccount } from '$lib/remote/settings.remote';
   import { keys } from '$lib/utils';
@@ -17,12 +17,15 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const isErrorMsg = (key: string | undefined): key is keyof typeof errorMsgs => {
-		return key ? key in errorMsgs : false;
-	}
-
-	const errorMsg = (key: string | undefined) => {
-		return isErrorMsg(key) ? errorMsgs[key] : null;
+	const errorMsg = (key: string | undefined): string | null => {
+		const msgs: Partial<Record<string, () => string>> = {
+			wrong_password: m.settings_error_wrong_password,
+			name_taken: m.settings_error_name_taken,
+			email_taken: m.settings_error_email_taken,
+			mismatch: m.settings_error_password_mismatch,
+			too_short: m.settings_error_password_too_short,
+		};
+		return key ? (msgs[key]?.() ?? null) : null;
 	};
 
 	async function signOut() {

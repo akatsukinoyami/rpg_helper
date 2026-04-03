@@ -4,12 +4,14 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import devtoolsJson from 'vite-plugin-devtools-json';
 import mkcert from 'vite-plugin-mkcert';
+import { wsPlugin } from './ws-dev.ts';
 
 export default defineConfig({
 	plugins: [
 		mkcert(),
 		tailwindcss(),
 		sveltekit(),
+		wsPlugin(),
 		devtoolsJson(),
 		paraglideVitePlugin({
 			project: './project.inlang',

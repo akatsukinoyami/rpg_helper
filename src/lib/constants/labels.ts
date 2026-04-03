@@ -31,11 +31,3 @@ export const langLabels = {
   ru: 'Русский',
   ua: 'Українська'
 } as const;
-
-export const errorMsgs = {
-  wrong_password: m.settings_error_wrong_password,
-  name_taken: m.settings_error_name_taken,
-  email_taken: m.settings_error_email_taken,
-  mismatch: m.settings_error_password_mismatch,
-  too_short: m.settings_error_password_too_short,
-} as const;

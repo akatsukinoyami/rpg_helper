@@ -1,6 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"auth_error_email_taken": "Акаунт з таким email вже існує",
+	"auth_error_unauthorized": "Немає доступу",
+	"auth_error_bad_request": "Некоректний запит",
+	"auth_error_upgrade_failed": "Не вдалося встановити WebSocket з'єднання",
 	"auth_error_generic": "Щось пішло не так, спробуйте ще раз",
 	"auth_error_invalid_credentials": "Невірний email або пароль",
 	"auth_error_password_too_long": "Пароль занадто довгий (макс. 128 символів)",

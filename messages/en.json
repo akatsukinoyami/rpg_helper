@@ -1,6 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"auth_error_email_taken": "An account with this email already exists",
+	"auth_error_unauthorized": "Unauthorized",
+	"auth_error_bad_request": "Bad request",
+	"auth_error_upgrade_failed": "WebSocket upgrade failed",
 	"auth_error_generic": "Something went wrong, please try again",
 	"auth_error_invalid_credentials": "Invalid email or password",
 	"auth_error_password_too_long": "Password is too long (max 128 characters)",

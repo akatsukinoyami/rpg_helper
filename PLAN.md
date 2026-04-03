@@ -31,7 +31,7 @@
 
 ---
 
-## 1. DB Schema Extensions ⬜
+## 1. DB Schema Extensions 🔨
 
 ### 1a. Games — configurable HP/MP labels
 

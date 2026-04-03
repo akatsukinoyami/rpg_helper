@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { characters, games } from '$lib/server/db/schema';
+import { broadcast } from '$lib/server/ws/adapter';
 
 const GameSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
@@ -41,10 +42,13 @@ export const editGame = form(GameSchema, async (data) => {
 
 	if (!game || game.gmUserId !== userId) error(403);
 
-	await db
+	const [updated] = await db
 		.update(games)
 		.set({ name: data.name, description: data.description || null, image: data.image || null })
-		.where(eq(games.id, gameId));
+		.where(eq(games.id, gameId))
+		.returning({ name: games.name, description: games.description, image: games.image, hpLabel: games.hpLabel, mpLabel: games.mpLabel });
+
+	broadcast(gameId!, { type: 'game:updated', payload: updated });
 
 	redirect(303, `/games/${gameId}`);
 });
