@@ -15,7 +15,8 @@ import type { Mode, Scheme } from '$lib/theme';
 const ThemeSchema = v.object({
 	scheme: v.string(),
 	mode: v.string(),
-	locale: v.optional(v.string())
+	locale: v.optional(v.string()),
+	msgView: v.optional(v.string())
 });
 
 export const saveTheme = form(ThemeSchema, async (data) => {
@@ -33,8 +34,9 @@ export const saveTheme = form(ThemeSchema, async (data) => {
 		});
 	}
 
-	// Return success so the component can trigger a full page reload
-	// (needed to re-apply the theme from the updated cookie)
+	const msgView = data.msgView === 'forum' ? 'forum' : 'compact';
+	cookies.set('rph_msg_view', msgView, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax' });
+
 	return { success: true };
 });
 

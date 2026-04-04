@@ -11,12 +11,13 @@
 	import Tile from '$lib/components/Tile.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
+	import Message from '$lib/components/Message.svelte';
 	import Form from '../form.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	const query = $derived(locations.index(page.params.locationId!));
-	const messagesQuery = messages.index(page.params.locationId!);
+	const messagesQuery = $derived(messages.index(page.params.locationId!));
 
 	const ws = getContext<WsStore>(WS_CONTEXT_KEY);
 	const unsub = ws.on('message:created', (payload) => {
@@ -92,12 +93,9 @@
 				{#if messagesQuery.current?.length === 0}
 					<p class="text-sm text-gray-400">{m.message_no_messages()}</p>
 				{:else}
-					<div class="flex flex-col gap-2">
+					<div class="flex flex-col gap-1.5">
 						{#each messagesQuery.current as msg (msg.id)}
-							<div class="flex flex-col gap-0.5">
-								<span class="text-xs font-medium text-gray-500">{msg.characterName ?? m.message_gm()}</span>
-								<p class="text-sm text-gray-900">{msg.content}</p>
-							</div>
+							<Message {msg} view={data.msgView} />
 						{/each}
 					</div>
 				{/if}

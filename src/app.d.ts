@@ -9,6 +9,7 @@ declare global {
 			user: User | null;
 			session: Session | null;
 			theme: string;
+			msgView: 'compact' | 'forum';
 		}
 	}
 }

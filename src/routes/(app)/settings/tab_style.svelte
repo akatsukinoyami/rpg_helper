@@ -13,6 +13,7 @@
 	let selectedLocale = $state(untrack(() => data.locale));
 	let previewScheme = $state(untrack(() => data.prefs.scheme));
 	let previewMode = $state(untrack(() => data.prefs.mode));
+	let msgView = $state(untrack(() => data.msgView));
 
 	$effect(() => {
 		document.documentElement.setAttribute('data-theme', `${previewScheme}-${previewMode}`);
@@ -48,6 +49,15 @@
     bind:group={previewMode} 
     labelClass="w-50" 
     inline 
+  />
+
+  <ButtonRadioSet
+    label={m.settings_msg_view_label()}
+    name="msgView"
+    options={{ compact: m.settings_msg_view_compact, forum: m.settings_msg_view_forum }}
+    bind:group={msgView}
+    labelClass="w-50"
+    inline
   />
 
   <Palette />

@@ -2,7 +2,7 @@ import { command, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characters, messages } from '$lib/server/db/schema';
+import { characters, locations, messages } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 
 export const index = query(
@@ -21,6 +21,26 @@ export const index = query(
 			.orderBy(asc(messages.createdAt));
 	}
 );
+
+export const feed = query(async () => {
+	const { params } = getRequestEvent();
+	const gameId = params.id!;
+
+	return await db
+		.select({
+			id: messages.id,
+			content: messages.content,
+			createdAt: messages.createdAt,
+			locationId: messages.locationId,
+			locationName: locations.name,
+			characterName: characters.name
+		})
+		.from(messages)
+		.innerJoin(locations, eq(messages.locationId, locations.id))
+		.leftJoin(characters, eq(messages.characterId, characters.id))
+		.where(and(isNull(messages.deletedAt), eq(locations.gameId, gameId)))
+		.orderBy(asc(messages.createdAt));
+});
 
 export const send = command(
 	v.object({

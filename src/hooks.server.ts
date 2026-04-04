@@ -37,6 +37,10 @@ const handleTheme: Handle = ({ event, resolve }) => {
 	const raw = event.cookies.get('rph_theme') ?? '';
 	const theme = VALID_THEMES.has(raw) ? raw : 'github-light';
 	event.locals.theme = theme;
+
+	const rawView = event.cookies.get('rph_msg_view') ?? '';
+	event.locals.msgView = rawView === 'forum' ? 'forum' : 'compact';
+
 	return resolve(event, {
 		transformPageChunk: ({ html }) => html.replace('%rph.theme%', theme)
 	});
