@@ -41,26 +41,26 @@
 	);
 </script>
 
+{#snippet avatar()}
+	<span
+		class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+		style:background-color="hsl({hue} 50% 45%)"
+		style:background-image="url({msg?.characterImage})"
+	>{initials}</span>
+{/snippet}
+
 {#if view === 'compact'}
 	<div class="flex items-center-safe gap-1.5">
-		<span
-			class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-			style:background-color="hsl({hue} 50% 45%)"
-			style:background-image="url({msg?.characterImage})"
-		>{initials}</span>
-			<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
-			<span class="text-xs text-gray-900">{msg.content}</span>
-			{#if msg.locationName}
-				<span class="ml-1 text-[12px] text-gray-400">· {msg.locationName}</span>
-			{/if}
+		{@render avatar()}
+		<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
+		<span class="text-xs text-gray-900">{msg.content}</span>
+		{#if msg.locationName}
+			<span class="ml-1 text-[12px] text-gray-400">· {msg.locationName}</span>
+		{/if}
 	</div>
 {:else}
-	<div class="flex items-center gap-2">
-		<span
-			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-			style:background-color="hsl({hue} 50% 45%)"
-			style:background-image="url({msg?.characterImage})"
-		>{initials}</span>
+	<div class="flex items-start gap-2">		
+		{@render avatar()}
 
 		<div class="flex flex-col gap-0.5">
 			<div class="flex items-baseline gap-2">

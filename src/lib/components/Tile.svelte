@@ -10,6 +10,7 @@
 		kind?: BadgeKind;
 		image?: string | null;
 		children?: Snippet;
+    content?: Snippet;
 	}
 
 	type asAnchor = HTMLAnchorAttributes & { href: string; onclick?: never };
@@ -29,13 +30,15 @@
     href,
     onclick,
     children,
+    content,
     ...rest
   }: Props & (asAnchor | asButton | asDiv) = $props();
 
   let classLocal = $derived([className, kinds[kind], "flex items-center justify-between rounded-xl px-2 py-1 ring-1"]);
+  let contentRendered = $derived(content ?? contentLocal)
 </script>
 
-{#snippet content()}
+{#snippet contentLocal()}
   <div class="flex items-center gap-3">
     {#if image}
       <img src={image} alt="" class="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -54,14 +57,14 @@
 
 {#if href}
   <a {href} class={[classLocal, "cursor-pointer"]} {...rest as HTMLAnchorAttributes}>
-    {@render content()}
+    {@render contentRendered()}
   </a>
 {:else if onclick}
   <button {onclick} class={[classLocal, "cursor-pointer"]} {...rest as HTMLButtonAttributes}>
-    {@render content()}
+    {@render contentRendered()}
   </button>
 {:else}
   <div class={classLocal} {...rest as HTMLAttributes<HTMLDivElement>}>
-    {@render content()}
+    {@render contentRendered()}
   </div>
 {/if}

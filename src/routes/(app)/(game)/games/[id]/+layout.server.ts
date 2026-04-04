@@ -18,6 +18,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 	return {
 		gameId: params.id,
 		game,
-		isGm: game.gmUserId === userId
+		isGm: game.gmUserId === userId,
+		userId
 	};
 };

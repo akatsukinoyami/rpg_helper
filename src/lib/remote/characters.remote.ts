@@ -1,10 +1,74 @@
-import { command, form, getRequestEvent } from '$app/server';
+import { command, form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characterSkills, characters, games, races } from '$lib/server/db/schema';
+import { characterSkills, characters, games, races, user } from '$lib/server/db/schema';
 import { assertGm, isGm } from './utils';
+
+// ── Queries ───────────────────────────────────────────────────────────────────
+
+export const indexAll = query(async () => {
+	const { params } = getRequestEvent();
+	const rows = await db
+		.select({
+			id: characters.id,
+			name: characters.name,
+			image: characters.image,
+			status: characters.status,
+			userId: characters.userId,
+			userName: user.name
+		})
+		.from(characters)
+		.leftJoin(user, eq(characters.userId, user.id))
+		.where(eq(characters.gameId, params.id!));
+
+	return rows.map(({ userName, ...char }) => ({
+		...char,
+		user: { id: char.userId, name: userName ?? '' }
+	}));
+});
+
+export const index = query(
+	v.pipe(v.string(), v.trim(), v.minLength(1)),
+	async (charId) => {
+		const { params } = getRequestEvent();
+
+		const [row] = await db
+			.select({
+				id: characters.id,
+				userId: characters.userId,
+				gameId: characters.gameId,
+				raceId: characters.raceId,
+				name: characters.name,
+				gender: characters.gender,
+				age: characters.age,
+				image: characters.image,
+				bodyDescription: characters.bodyDescription,
+				prehistory: characters.prehistory,
+				stats: characters.stats,
+				status: characters.status,
+				hp: characters.hp,
+				maxHp: characters.maxHp,
+				mp: characters.mp,
+				maxMp: characters.maxMp,
+				userName: user.name,
+				raceName: races.name
+			})
+			.from(characters)
+			.leftJoin(user, eq(characters.userId, user.id))
+			.leftJoin(races, eq(characters.raceId, races.id))
+			.where(and(eq(characters.id, charId), eq(characters.gameId, params.id!)));
+
+		if (!row) return null;
+		const { userName, raceName, ...charData } = row;
+		return {
+			...charData,
+			user: { id: charData.userId, name: userName ?? '' },
+			race: charData.raceId ? { id: charData.raceId, name: raceName! } : null
+		};
+	}
+);
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -89,7 +153,8 @@ export const createCharacter = form(CharacterSchema, async (data) => {
 			.values(skillIds.map((skillId) => ({ characterId: character.id, skillId })));
 	}
 
-	redirect(303, `/games/${gameId}`);
+	await indexAll().refresh();
+	redirect(303, `/games/${gameId}/characters/${character.id}`);
 });
 
 export const editCharacter = form(CharacterSchema, async (data) => {
@@ -173,7 +238,9 @@ export const editCharacter = form(CharacterSchema, async (data) => {
 			.where(eq(characters.id, charId));
 	}
 
-	redirect(303, `/games/${gameId}`);
+	await indexAll().refresh();
+	await index(charId).refresh();
+	redirect(303, `/games/${gameId}/characters/${charId}`);
 });
 
 // ── Commands ──────────────────────────────────────────────────────────────────
@@ -184,6 +251,8 @@ export const approve = command(CharacterInGame, async ({ gameId, characterId }) 
 		.update(characters)
 		.set({ status: 'approved' })
 		.where(and(eq(characters.id, characterId), eq(characters.gameId, gameId)));
+	await indexAll().refresh();
+	await index(characterId).refresh();
 });
 
 export const reject = command(CharacterInGame, async ({ gameId, characterId }) => {
@@ -192,6 +261,8 @@ export const reject = command(CharacterInGame, async ({ gameId, characterId }) =
 		.update(characters)
 		.set({ status: 'rejected' })
 		.where(and(eq(characters.id, characterId), eq(characters.gameId, gameId)));
+	await indexAll().refresh();
+	await index(characterId).refresh();
 });
 
 export const deleteChar = command(CharacterInGame, async ({ gameId, characterId }) => {
@@ -212,4 +283,5 @@ export const deleteChar = command(CharacterInGame, async ({ gameId, characterId 
 	if (!isGm && !isOwner) throw new Error('Forbidden');
 
 	await db.delete(characters).where(eq(characters.id, characterId));
+	await indexAll().refresh();
 });

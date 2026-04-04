@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		.where(and(eq(characters.gameId, params.id), eq(characters.userId, userId)))
 		.limit(1);
 
-	if (existing.length > 0) redirect(303, `/games/${params.id}`);
+	if (existing.length > 0) redirect(303, `/games/${params.id}/characters/${existing[0].id}`);
 
 	const allRaces = await db.query.races.findMany({
 		with: {

@@ -1,32 +1,19 @@
-import { eq } from 'drizzle-orm';
+import { redirect } from '@sveltejs/kit';
+import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characterVisibility, games } from '$lib/server/db/schema';
+import { characters } from '$lib/server/db/schema';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const userId = locals.user!.id;
 
-	const game = await db.query.games.findFirst({
-		where: eq(games.id, params.id),
-		with: {
-			characters: {
-				with: {
-					user: { columns: { id: true, name: true } },
-					race: { columns: { id: true, name: true } }
-				}
-			}
-		},
-		columns: { id: true, gmUserId: true }
-	});
+	const [own] = await db
+		.select({ id: characters.id })
+		.from(characters)
+		.where(and(eq(characters.gameId, params.id), eq(characters.userId, userId)))
+		.limit(1);
 
-	const myCharacter = game?.characters.find((c) => c.userId === userId) ?? null;
+	if (own) redirect(302, `/games/${params.id}/characters/${own.id}`);
 
-	const visibilityGrants = myCharacter
-		? await db
-				.select()
-				.from(characterVisibility)
-				.where(eq(characterVisibility.visibleToCharacterId, myCharacter.id))
-		: [];
-
-	return { game, myCharacter, visibilityGrants };
+	return {};
 };
