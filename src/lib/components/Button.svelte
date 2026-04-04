@@ -48,7 +48,7 @@
 		icon,
 		iconProps,
 		hidden = false,
-    class: className = label ? 'px-4 py-2' : 'p-2', 
+    class: className = label ? 'px-2 py-1' : 'p-1', 
     children, 
     ...rest 
   }: Props & (asAnchor | asButton) = $props();

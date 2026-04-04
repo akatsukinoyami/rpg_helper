@@ -10,7 +10,7 @@
 </script>
 
 {#if label}
-  <label class={[className, "text-sm font-medium text-gray-700"]} for={id}>
+  <label class={[className, "text-[12px] font-medium text-gray-700"]} for={id}>
     {label}
     {#if required}<span class="text-red-900">*</span>{/if}
   </label>

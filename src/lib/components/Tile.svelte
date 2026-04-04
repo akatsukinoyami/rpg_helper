@@ -32,7 +32,7 @@
     ...rest
   }: Props & (asAnchor | asButton | asDiv) = $props();
 
-  let classLocal = $derived(`${className} ${kinds[kind]} flex items-center justify-between rounded-xl px-2 py-1 ring-1`);
+  let classLocal = $derived([className, kinds[kind], "flex items-center justify-between rounded-xl px-2 py-1 ring-1"]);
 </script>
 
 {#snippet content()}
@@ -42,7 +42,7 @@
     {/if}
     <div>
       {#if title}<p class="text-sm font-medium text-gray-900">{title}</p>{/if}
-      {#if subtitle}<p class="text-xs text-gray-500">{subtitle}</p>{/if}
+      {#if subtitle}<p class="text-[12px] text-gray-500 h-4 overflow-hidden text-ellipsis">{subtitle}</p>{/if}
     </div>
   </div>
 
@@ -53,11 +53,11 @@
 
 
 {#if href}
-  <a {href} class="{classLocal} cursor-pointer" {...rest as HTMLAnchorAttributes}>
+  <a {href} class={[classLocal, "cursor-pointer"]} {...rest as HTMLAnchorAttributes}>
     {@render content()}
   </a>
 {:else if onclick}
-  <button {onclick} class="{classLocal} cursor-pointer" {...rest as HTMLButtonAttributes}>
+  <button {onclick} class={[classLocal, "cursor-pointer"]} {...rest as HTMLButtonAttributes}>
     {@render content()}
   </button>
 {:else}

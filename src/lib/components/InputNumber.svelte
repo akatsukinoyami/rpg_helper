@@ -1,22 +1,24 @@
 <script lang="ts">
-	import { fieldColors } from '$lib/constants/styles';
+	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+    import Label from './Label.svelte';
 
 	interface Props extends HTMLInputAttributes {
 		label?: string;
 		value?: number;
 	}
 
-	let { label, id, value = $bindable(), ...rest }: Props = $props();
+	let { label, id, value = $bindable(), required, ...rest }: Props = $props();
 </script>
 
-<div class="flex flex-col gap-1">
-  <label class="text-sm font-medium text-gray-700" for={id}>{label}</label>
+<div class="flex flex-col gap-1">  
+  <Label for={id} {label} {required} />
   <input
     {...rest}
     {id}
+    {required}
     type="number"
-    class={[fieldColors, "rounded-lg border px-3 py-2 text-sm  outline-none"]}
+    class={[fieldColors, fieldSpacing, "rounded-md border text-xs outline-none"]}
     bind:value
   />
 </div>

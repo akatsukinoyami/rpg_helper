@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
-	import { fieldColors } from '$lib/constants/styles';
+	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import Label from '$lib/components/Label.svelte';
 
 	interface Props extends HTMLTextareaAttributes {
@@ -17,7 +17,7 @@
     {...rest}
     {id}  
     {required}
-    class={[fieldColors, "rounded-lg border px-2 py-1 text-sm outline-none"]}
+    class={[fieldColors, fieldSpacing, "rounded-md border text-xs outline-none"]}
     bind:value
   ></textarea>
 </div>
