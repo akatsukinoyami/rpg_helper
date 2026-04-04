@@ -13,7 +13,8 @@ export const index = query(
 				id: messages.id,
 				content: messages.content,
 				createdAt: messages.createdAt,
-				characterName: characters.name
+				characterName: characters.name,
+				characterImage: characters.image,
 			})
 			.from(messages)
 			.leftJoin(characters, eq(messages.characterId, characters.id))
@@ -33,7 +34,8 @@ export const feed = query(async () => {
 			createdAt: messages.createdAt,
 			locationId: messages.locationId,
 			locationName: locations.name,
-			characterName: characters.name
+			characterName: characters.name,
+			characterImage: characters.image,
 		})
 		.from(messages)
 		.innerJoin(locations, eq(messages.locationId, locations.id))

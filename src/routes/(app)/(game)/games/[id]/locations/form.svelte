@@ -67,14 +67,12 @@
     value={entity?.description}
   />
 
-  {#if action === 'create'}
-    <input type="hidden" name="parentId" value={defaultParentId} />
-  {:else if !isRoot}
+  {#if action === 'create' || !isRoot}
     <InputSelect
       id="location-parent"
       name="parentId"
       label={m.location_field_parent()}
-      value={entity?.parentId ?? ''}
+      value={action === 'create' ? (defaultParentId ?? '') : (entity?.parentId ?? '')}
       options={parentOptions}
     />
   {/if}

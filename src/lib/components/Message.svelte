@@ -6,6 +6,7 @@
 		content: string;
 		createdAt: Date | string;
 		characterName: string | null;
+		characterImage?: string | null;
 		locationName?: string;
 	}
 </script>
@@ -45,6 +46,7 @@
 		<span
 			class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
 			style:background-color="hsl({hue} 50% 45%)"
+			style:background-image="url({msg?.characterImage})"
 		>{initials}</span>
 			<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
 			<span class="text-xs text-gray-900">{msg.content}</span>
@@ -57,6 +59,7 @@
 		<span
 			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
 			style:background-color="hsl({hue} 50% 45%)"
+			style:background-image="url({msg?.characterImage})"
 		>{initials}</span>
 
 		<div class="flex flex-col gap-0.5">

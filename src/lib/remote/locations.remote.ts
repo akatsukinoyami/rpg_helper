@@ -1,7 +1,7 @@
 import { command, form, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
 import { and, eq, isNull } from 'drizzle-orm';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { locations } from '$lib/server/db/schema';
 import { assertGm, DeleteSchema } from './utils';
@@ -48,14 +48,15 @@ export const create = form(LocationCreateSchema, async (data) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	await db.insert(locations).values({
+	const [loc] = await db.insert(locations).values({
 		gameId,
 		name: data.name,
 		description: data.description || null,
 		parentId: data.parentId
-	});
+	}).returning({ id: locations.id });
 	await index(data.parentId).refresh();
 	await all().refresh();
+	redirect(303, `/games/${gameId}/locations/${loc.id}`);
 });
 
 const LocationEditSchema = v.object({
@@ -81,6 +82,7 @@ export const edit = form(LocationEditSchema, async (data) => {
 	await index(data.id).refresh();
 	if (data.parentId) await index(data.parentId).refresh();
 	await all().refresh();
+	redirect(303, `/games/${gameId}/locations/${data.id}`);
 });
 
 export const remove = command(DeleteSchema, async ({ id }: { id: string }) => {
