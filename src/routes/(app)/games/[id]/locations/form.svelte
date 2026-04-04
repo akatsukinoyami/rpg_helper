@@ -10,14 +10,15 @@
     action: 'create' | 'edit';
     open: boolean;
     entity?: Record<string, any>;
+    defaultParentId?: string;
   }
 
-  let { action, entity, open = $bindable() }: Props = $props();
+  let { action, entity, open = $bindable(), defaultParentId }: Props = $props();
 
   const allQuery = remoteFunctions.all();
 
   function buildTree(
-    all: { id: string; parentId: string | null; name: string }[], 
+    all: { id: string; parentId: string | null; name: string }[],
     excludeId?: string
   ): [string, string][] {
     const byParent = new Map<string | null, typeof all>();
@@ -38,10 +39,9 @@
     return result;
   }
 
-  const parentOptions = $derived([
-    ['', m.location_field_parent_none()] as [string, string],
-    ...buildTree(allQuery.current ?? [], entity?.id)
-  ]);
+  const parentOptions = $derived(buildTree(allQuery.current ?? [], entity?.id));
+
+  const isRoot = $derived(action === 'edit' && (entity?.parentId === null || entity?.parentId === undefined));
 </script>
 
 <TypeForm
@@ -49,6 +49,7 @@
   {remoteFunctions}
   {entity}
   bind:open
+  canDelete={!isRoot}
   titles={{ create: m.location_create(), edit: m.location_edit_title() }}
 >
   <InputText
@@ -66,11 +67,15 @@
     value={entity?.description}
   />
 
-  <InputSelect
-    id="location-parent"
-    name="parentId"
-    label={m.location_field_parent()}
-    value={entity?.parentId ?? ''}
-    options={parentOptions}
-  />
+  {#if action === 'create'}
+    <input type="hidden" name="parentId" value={defaultParentId} />
+  {:else if !isRoot}
+    <InputSelect
+      id="location-parent"
+      name="parentId"
+      label={m.location_field_parent()}
+      value={entity?.parentId ?? ''}
+      options={parentOptions}
+    />
+  {/if}
 </TypeForm>

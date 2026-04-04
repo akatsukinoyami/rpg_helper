@@ -21,6 +21,7 @@
     class?: string;
     entity?: Record<string, any>;
     children?: Snippet;
+    canDelete?: boolean;
     remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs | typeof LocationTypeRemoteFuncs;
     titles?: Partial<Record<keyof typeof ItemTypeRemoteFuncs, string>>;
   }
@@ -32,6 +33,7 @@
     open = $bindable(),
     titles,
     children,
+    canDelete = true,
     remoteFunctions,
   }: Props = $props();
 
@@ -46,7 +48,7 @@
       open = false;
     })}
     oninput={() => func.validate()}
-    class={[className, "flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-gray-200"]}
+    class={[className, "flex flex-col gap-2 rounded-xl bg-white p-3 ring-1 ring-gray-200"]}
   >
     <input type="hidden" name="id" value={entity?.id} />
 
@@ -68,7 +70,7 @@
     {@render children?.()}
 
     <div class={["flex", action === 'edit' ? 'justify-between' : 'justify-end']}>
-      {#if action === 'edit'}
+      {#if action === 'edit' && canDelete}
         <Button kind="danger" label={m.item_type_delete()} onclick={() => remove(entity?.id)} />
       {/if}
       <Button type="submit" label={m.item_type_save()} />

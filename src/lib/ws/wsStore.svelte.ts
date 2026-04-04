@@ -47,7 +47,7 @@ export class WsStore {
 	}
 
 	#dispatch(event: WsEvent) {
-		this.#handlers.get(event.type)?.forEach((h) => h(event));
+		this.#handlers.get(event.type)?.forEach((h) => h((event as any).payload));
 	}
 
 	on<T extends WsEventType>(type: T, handler: (payload: WsEventPayload<T>) => void): () => void {

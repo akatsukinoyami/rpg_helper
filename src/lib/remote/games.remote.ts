@@ -3,7 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { characters, games } from '$lib/server/db/schema';
+import { characters, games, locations } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 
 const GameSchema = v.object({
@@ -12,7 +12,7 @@ const GameSchema = v.object({
 	image: v.optional(v.pipe(v.string(), v.trim()))
 });
 
-export const createGame = form(GameSchema, async (data) => {
+export const create = form(GameSchema, async (data) => {
 	const { locals } = getRequestEvent();
 	const userId = locals.user!.id;
 
@@ -26,13 +26,21 @@ export const createGame = form(GameSchema, async (data) => {
 		})
 		.returning({ id: games.id });
 
+	await db
+		.insert(locations)
+		.values({ 
+			gameId: game.id, 
+			name: data.name, 
+			parentId: null 
+		});
+
 	redirect(303, `/games/${game.id}`);
 });
 
-export const editGame = form(GameSchema, async (data) => {
+export const edit = form(GameSchema, async (data) => {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
-	const gameId = params.id;
+	const gameId = params.id!;
 
 	const [game] = await db
 		.select({ gmUserId: games.gmUserId })
@@ -47,6 +55,15 @@ export const editGame = form(GameSchema, async (data) => {
 		.set({ name: data.name, description: data.description || null, image: data.image || null })
 		.where(eq(games.id, gameId))
 		.returning({ name: games.name, description: games.description, image: games.image, hpLabel: games.hpLabel, mpLabel: games.mpLabel });
+	
+	await db
+		.update(locations)
+		.set({ name: data.name })
+		.where(and(
+			eq(locations.gameId, gameId), 
+			eq(locations.parentId, null)
+		));
+
 
 	broadcast(gameId!, { type: 'game:updated', payload: updated });
 
@@ -73,10 +90,16 @@ export const transfer = form(TransferSchema, async (data) => {
 	const [character] = await db
 		.select({ id: characters.id })
 		.from(characters)
-		.where(and(eq(characters.userId, data.newGmUserId), eq(characters.gameId, gameId)))
+		.where(and(
+			eq(characters.userId, data.newGmUserId), 
+			eq(characters.gameId, gameId)
+		))
 		.limit(1);
 
 	if (!character) return { transferError: 'user_not_in_game' as const };
 
-	await db.update(games).set({ gmUserId: data.newGmUserId }).where(eq(games.id, gameId));
+	await db
+		.update(games)
+		.set({ gmUserId: data.newGmUserId })
+		.where(eq(games.id, gameId));
 });

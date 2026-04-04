@@ -31,7 +31,7 @@
     {id}
     {required}
     bind:value
-    class={[fieldColors, "rounded-lg border px-3 py-2 text-sm  outline-none"]}
+    class={[fieldColors, "rounded-lg border px-2 py-1 text-sm outline-none"]}
   >
     {#each optionsLocal as [value, label]}
       <option {value}>{label}</option>
