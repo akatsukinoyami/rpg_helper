@@ -2,8 +2,6 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
-	if (locals.user) {
-		redirect(303, '/games');
-	}
+	if (locals.user) redirect(303, '/games');
 	redirect(303, '/sign_in');
 };

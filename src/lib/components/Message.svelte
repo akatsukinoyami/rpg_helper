@@ -41,34 +41,33 @@
 </script>
 
 {#if view === 'compact'}
-	<div class="flex items-start gap-1.5">
+	<div class="flex items-center-safe gap-1.5">
 		<span
 			class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
 			style:background-color="hsl({hue} 50% 45%)"
 		>{initials}</span>
-		<p class="text-sm leading-snug">
-			<span class="font-semibold text-gray-700">{name}:&nbsp;</span><span class="text-gray-900">{msg.content}</span>
+			<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
+			<span class="text-xs text-gray-900">{msg.content}</span>
 			{#if msg.locationName}
-				<span class="ml-1 text-xs text-gray-400">· {msg.locationName}</span>
+				<span class="ml-1 text-[12px] text-gray-400">· {msg.locationName}</span>
 			{/if}
-		</p>
 	</div>
 {:else}
 	<div class="flex items-center gap-2">
 		<span
-			class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
 			style:background-color="hsl({hue} 50% 45%)"
 		>{initials}</span>
 
 		<div class="flex flex-col gap-0.5">
 			<div class="flex items-baseline gap-2">
-				<span class="text-sm font-semibold text-gray-800">{name}</span>
-				<span class="text-xs text-gray-400">{time}</span>
+				<span class="text-xs font-semibold text-gray-800">{name}</span>
+				<span class="text-[12px] text-gray-400">{time}</span>
 				{#if msg.locationName}
-					<span class="text-xs text-gray-400">· {msg.locationName}</span>
+					<span class="text-[12px] text-gray-400">{msg.locationName}</span>
 				{/if}
 			</div>
-			<p class="text-sm text-gray-900">{msg.content}</p>
+			<p class="text-xs text-gray-900">{msg.content}</p>
 		</div>
 	</div>
 {/if}

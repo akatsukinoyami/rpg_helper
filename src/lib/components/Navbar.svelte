@@ -35,8 +35,8 @@
 	let { title, titleHref, titleImage, tabs, onAdd, actions }: Props = $props();
 </script>
 
-<nav class="sticky top-0 z-10 border-b border-gray-200 bg-white">
-	<div class="mx-auto flex max-w-5xl items-center gap-3 px-3 py-1.5">
+<nav class="sticky top-0 z-10 border-b border-gray-200 bg-white h-9">
+	<div class="flex justify-between max-w-5xl mx-auto items-center gap-3 px-3 py-1.5">
 
 		<!-- Left -->
 		<div class="flex min-w-0 flex-1 items-center gap-2">
