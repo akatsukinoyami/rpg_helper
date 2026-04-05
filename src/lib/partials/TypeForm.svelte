@@ -7,6 +7,7 @@
   import * as ItemTypeRemoteFuncs from "$lib/remote/item-types.remote";
   import * as SkillTypeRemoteFuncs from "$lib/remote/skill-types.remote";
   import * as LocationTypeRemoteFuncs from "$lib/remote/locations.remote";
+  import * as RaceRemoteFuncs from "$lib/remote/races.remote";
 
   async function remove(id: string) {
     if (!id) return;
@@ -22,7 +23,7 @@
     entity?: Record<string, any>;
     children?: Snippet;
     canDelete?: boolean;
-    remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs | typeof LocationTypeRemoteFuncs;
+    remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs | typeof LocationTypeRemoteFuncs | typeof RaceRemoteFuncs;
     titles?: Partial<Record<keyof typeof ItemTypeRemoteFuncs, string>>;
   }
 

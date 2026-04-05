@@ -114,8 +114,9 @@ export const games = pgTable('games', {
 
 export const races = pgTable('races', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: jsonb('name').$type<LocalizedText>().notNull(),
-	description: jsonb('description').$type<LocalizedText>(),
+	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
 	baseStats: jsonb('base_stats').$type<Stats>().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
@@ -407,7 +408,8 @@ export const gamesRelations = relations(games, ({ one, many }) => ({
 	diceRolls: many(diceRolls)
 }));
 
-export const racesRelations = relations(races, ({ many }) => ({
+export const racesRelations = relations(races, ({ one, many }) => ({
+	game: one(games, { fields: [races.gameId], references: [games.id] }),
 	raceSkills: many(raceSkills),
 	characters: many(characters)
 }));

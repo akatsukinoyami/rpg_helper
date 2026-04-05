@@ -27,6 +27,7 @@
 		{ href: `${base}/locations`,  label: m.game_nav_locations,  active: page.url.pathname.startsWith(`${base}/locations`) },
 		{ href: `${base}/feed`,       label: m.game_nav_feed,       active: page.url.pathname.startsWith(`${base}/feed`) },
 		{ href: `${base}/characters`, label: m.game_nav_characters, active: page.url.pathname.startsWith(`${base}/characters`) },
+		{ href: `${base}/races`,      label: m.game_nav_races,      active: page.url.pathname.startsWith(`${base}/races`) },
 		{ href: `${base}/items`,      label: m.game_nav_items,      active: page.url.pathname.startsWith(`${base}/items`) },
 		{ href: `${base}/skills`,     label: m.game_nav_skills,     active: page.url.pathname.startsWith(`${base}/skills`) }
 	]);

@@ -29,6 +29,20 @@
       "when": 1775234306231,
       "tag": "0003_curved_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775402478654,
+      "tag": "0004_furry_bromley",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775402760299,
+      "tag": "0005_square_vance_astro",
+      "breakpoints": true
     }
   ]
 }

@@ -2,14 +2,16 @@
   import SkillForm from '../../routes/(app)/(game)/games/[id]/skills/form.svelte';
   import ItemForm from '../../routes/(app)/(game)/games/[id]/items/form.svelte';
   import LocationForm from '../../routes/(app)/(game)/games/[id]/locations/form.svelte';
+  import RaceForm from '../../routes/(app)/(game)/games/[id]/races/form.svelte';
   import * as item from '../remote/item-types.remote';
   import * as skill from '../remote/skill-types.remote';
   import * as location from '../remote/locations.remote';
+  import * as race from '../remote/races.remote';
 
   interface Props {
     isGm: boolean;
-    index: typeof item.index | typeof skill.index | typeof location.index;
-    Form: typeof ItemForm | typeof SkillForm | typeof LocationForm;
+    index: typeof item.index | typeof skill.index | typeof location.index | typeof race.index;
+    Form: typeof ItemForm | typeof SkillForm | typeof LocationForm | typeof RaceForm;
     dict?: {
       error?: string;
       loading?: string;
