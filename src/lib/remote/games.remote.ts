@@ -89,9 +89,7 @@ export const edit = form(GameBaseSchema, async (data) => {
 	redirect(303, `/games/${gameId}`);
 });
 
-const TransferSchema = v.object({
-	newGmUserId: v.pipe(v.string(), v.minLength(1))
-});
+const TransferSchema = v.object({ newGmUserId: v.pipe(v.string(), v.minLength(1)) });
 
 export const transfer = form(TransferSchema, async (data) => {
 	const { locals, params } = getRequestEvent();

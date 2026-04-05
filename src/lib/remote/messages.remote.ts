@@ -7,6 +7,7 @@ import { db } from '$lib/server/db';
 import { characters, locations, messages } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm, isGm } from '$lib/remote/utils';
+import { processDice } from '$lib/server/dice';
 
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
@@ -86,10 +87,12 @@ export const send = command(
 
 		if (!character) error(403, 'No character in this game');
 
+		const processed = processDice(content);
+
 		const [inserted] = await db.insert(messages).values({
 			locationId,
 			characterId: character?.id ?? null,
-			content,
+			content: processed,
 			replyToId: replyToId || null
 		}).returning({ id: messages.id, createdAt: messages.createdAt });
 
@@ -99,7 +102,7 @@ export const send = command(
 				messageId: inserted.id,
 				locationId,
 				characterId: character?.id ?? null,
-				content,
+				content: processed,
 				createdAt: inserted.createdAt.toISOString()
 			}
 		});
@@ -142,15 +145,16 @@ export const edit = command(
 	v.object({ messageId: messageIdSchema, content: contentSchema }),
 	async ({ messageId, content }) => {
 		const { msg, gameId } = await getMessageAndCheckAccess(messageId);
+		const processed = processDice(content);
 
 		await db
 			.update(messages)
-			.set({ content, editedAt: new Date() })
+			.set({ content: processed, editedAt: new Date() })
 			.where(eq(messages.id, messageId));
 
 		broadcast(gameId, {
 			type: 'message:edited',
-			payload: { messageId, content, gmAnnotation: null, editedAt: new Date().toISOString() }
+			payload: { messageId, content: processed, gmAnnotation: null, editedAt: new Date().toISOString() }
 		});
 
 		await index(msg.locationId).refresh();
@@ -189,9 +193,11 @@ export const annotate = command(
 
 		if (!msg) error(404, 'Message not found');
 
+		const processedAnnotation = annotation ? processDice(annotation) : null;
+
 		await db
 			.update(messages)
-			.set({ gmAnnotation: annotation || null })
+			.set({ gmAnnotation: processedAnnotation || null })
 			.where(eq(messages.id, messageId));
 
 		broadcast(gameId, {
@@ -199,7 +205,7 @@ export const annotate = command(
 			payload: {
 				messageId,
 				content: msg.content,
-				gmAnnotation: annotation || null,
+				gmAnnotation: processedAnnotation,
 				editedAt: msg.editedAt?.toISOString() ?? new Date().toISOString()
 			}
 		});

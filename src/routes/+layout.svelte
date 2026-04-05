@@ -15,8 +15,14 @@
 	});
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
-{@render children()}
+<svelte:head>
+	<link rel="icon" href={favicon} />
+</svelte:head>
+
+<div class="min-h-screen bg-gray-50">
+	{@render children()}
+</div>
+
 
 <div style="display:none">
 	{#each locales as locale}

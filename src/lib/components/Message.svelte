@@ -16,24 +16,25 @@
 		replyContent?: string | null;
 		replyCharacterName?: string | null;
 	}
-</script>
 
-<script lang="ts">
-	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
-	import Icon from '$lib/components/Icon.svelte';
-	import MessageForm from '$lib/components/MessageForm.svelte';
-	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
-	import { renderMarkdown } from '$lib/md';
-	import * as messages from '$lib/remote/messages.remote';
-	import * as m from '$lib/paraglide/messages';
-
-	interface Props {
+	export interface Props {
 		msg: MessageData;
 		view: MsgView;
 		isGm?: boolean;
 		myCharacterId?: string | null;
 		onReply?: (msg: MessageData) => void;
 	}
+</script>
+
+<script lang="ts">
+	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
+	import { untrack } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import MessageForm from '$lib/components/MessageForm.svelte';
+	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
+	import { renderMarkdown } from '$lib/md';
+	import * as messages from '$lib/remote/messages.remote';
+	import * as m from '$lib/paraglide/messages';
 
 	let { msg, view, isGm = false, myCharacterId = null, onReply }: Props = $props();
 
@@ -61,7 +62,7 @@
 
 	let editing = $state(false);
 	let annotating = $state(false);
-	let annotationDraft = $state(msg.gmAnnotation ?? '');
+	let annotationDraft = $state(untrack(() => msg.gmAnnotation ?? ''));
 	let deletePending = $state(false);
 
 	async function handleDelete() {

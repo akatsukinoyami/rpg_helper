@@ -59,6 +59,7 @@
           <Tile
             title={titleGetter(entity)}
             subtitle={subtitleGetter(entity)}
+            image={entity.image}
             href={hrefGetter?.(entity)}
           >
             {#if !hrefGetter}
