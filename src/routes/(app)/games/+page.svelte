@@ -47,3 +47,14 @@
 		<p class="mt-8 text-center text-sm text-gray-400">{m.games_no_games()}</p>
 	{/if}
 </div>
+
+{#if data.otherGames.length > 0}
+	<h2 class="mt-8 mb-3 text-lg font-semibold text-gray-700">{m.games_other_title()}</h2>
+	<div class="grid grid-cols-3 gap-3">
+		{#each data.otherGames as game}
+			<Tile title={game.name} subtitle={game.description} image={game.image} href={localizeHref(`/games/${game.id}`)}>
+				<Badge label={m.games_join_badge()} kind="secondary" />
+			</Tile>
+		{/each}
+	</div>
+{/if}

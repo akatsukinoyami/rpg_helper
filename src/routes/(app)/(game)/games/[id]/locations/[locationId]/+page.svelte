@@ -1,38 +1,31 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { getContext, onDestroy } from 'svelte';
-	import { mdiPencil, mdiSend } from '@mdi/js';
 	import * as locations from '$lib/remote/locations.remote';
 	import * as messages from '$lib/remote/messages.remote';
-	import { localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 	import { type PageData } from './$types';
 	import { WS_CONTEXT_KEY, type WsStore } from '$lib/ws/wsStore.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import InputTextArea from '$lib/components/InputTextArea.svelte';
-	import Message from '$lib/components/Message.svelte';
+	import Message, { type MessageData } from '$lib/components/Message.svelte';
+	import MessageForm, { type ReplyTarget } from '$lib/components/MessageForm.svelte';
 
-	let { data }: { data: PageData } = $props();
+	let { data }: { data: PageData & { myCharacterId: string | null; isGm: boolean } } = $props();
 
 	const query = $derived(locations.index(page.params.locationId!));
 	const messagesQuery = $derived(messages.index(page.params.locationId!));
 
 	const ws = getContext<WsStore>(WS_CONTEXT_KEY);
 	const unsub = ws.on('message:created', (payload) => {
-		if (payload.locationId === page.params.locationId) {
-			messagesQuery.refresh();
-		}
+		if (payload.locationId === page.params.locationId) messagesQuery.refresh();
 	});
-	onDestroy(unsub);
+	const unsubEdited = ws.on('message:edited', () => messagesQuery.refresh());
+	const unsubDeleted = ws.on('message:deleted', () => messagesQuery.refresh());
+	onDestroy(() => { unsub(); unsubEdited(); unsubDeleted(); });
 
-	let messageContent = $state('');
+	let replyTo = $state<ReplyTarget | null>(null);
 
-	async function sendMessage(e: SubmitEvent) {
-		e.preventDefault();
-		const content = messageContent.trim();
-		if (!content) return;
-		await messages.send({ locationId: page.params.locationId!, content });
-		messageContent = '';
+	function handleReply(msg: MessageData) {
+		replyTo = { id: msg.id, characterName: msg.characterName, content: msg.content };
 	}
 </script>
 
@@ -54,22 +47,26 @@
 				{#if messagesQuery.current?.length === 0}
 					<p class="text-sm text-gray-400 self-center">{m.message_no_messages()}</p>
 				{:else}
-					{#each [...messagesQuery.current].reverse() as msg (msg.id)}
-						<Message {msg} view={data.msgView} />
+					{#each [...(messagesQuery.current ?? [])].reverse() as msg (msg.id)}
+						<Message
+							{msg}
+							view={data.msgView}
+							isGm={data.isGm}
+							myCharacterId={data.myCharacterId}
+							onReply={data.myCharacterId ? handleReply : undefined}
+						/>
 					{/each}
 				{/if}
 			{/if}
 		</div>
 
-		<form onsubmit={sendMessage} class="shrink-0 flex items-end gap-2">
-			<div class="flex-1">
-				<InputTextArea
-					placeholder={m.message_placeholder()}
-					bind:value={messageContent}
-					rows={2}
-				/>
-			</div>
-			<Button type="submit" icon={mdiSend} kind="primary" />
-		</form>
+		<div class="shrink-0">
+			<MessageForm
+				locationId={page.params.locationId!}
+				myCharacterId={data.myCharacterId}
+				{replyTo}
+				onCancelReply={() => replyTo = null}
+			/>
+		</div>
 	</div>
 {/if}

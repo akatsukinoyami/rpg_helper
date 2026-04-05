@@ -1,14 +1,14 @@
 <script lang="ts" module>
-  import SkillForm from '../../routes/(app)/games/[id]/skills/form.svelte';
-  import ItemForm from '../../routes/(app)/games/[id]/items/form.svelte';
-  import LocationForm from '../../routes/(app)/games/[id]/locations/form.svelte';
-  import { index as indexItems } from '../remote/item-types.remote';
-  import { index as indexSkills } from '../remote/skill-types.remote';
-  import { index as indexLocations } from '../remote/locations.remote';
+  import SkillForm from '../../routes/(app)/(game)/games/[id]/skills/form.svelte';
+  import ItemForm from '../../routes/(app)/(game)/games/[id]/items/form.svelte';
+  import LocationForm from '../../routes/(app)/(game)/games/[id]/locations/form.svelte';
+  import * as item from '../remote/item-types.remote';
+  import * as skill from '../remote/skill-types.remote';
+  import * as location from '../remote/locations.remote';
 
   interface Props {
     isGm: boolean;
-    index: typeof indexItems | typeof indexSkills | typeof indexLocations;
+    index: typeof item.index | typeof skill.index | typeof location.index;
     Form: typeof ItemForm | typeof SkillForm | typeof LocationForm;
     dict?: {
       error?: string;

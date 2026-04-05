@@ -38,6 +38,10 @@
 	]);
 </script>
 
+<svelte:head>
+	<title>RPG | {data.game.name}</title>
+</svelte:head>
+
 <Navbar
 	title={data.game.name}
 	titleHref={base}

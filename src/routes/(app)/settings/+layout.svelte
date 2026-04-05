@@ -7,8 +7,11 @@
 
 	let { children }: { children: Snippet } = $props();
 	const base = $derived(localizeHref(`/settings`));
-
 </script>
+
+<svelte:head>
+	<title>RPG | Settings</title>
+</svelte:head>
 
 <Navbar
 	title={m.nav_settings()}
@@ -19,6 +22,6 @@
 	]}
 />
 
-<main class="mx-auto max-w-5xl p-4">
+<main class="mx-auto max-w-2xl p-4">
 	{@render children()}
 </main>

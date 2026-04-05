@@ -7,6 +7,10 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
+<svelte:head>
+	<title>RPG | Games</title>
+</svelte:head>
+
 <Navbar
 	title="RPG Helper"
 	titleHref={localizeHref('/')}

@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { games } from '$lib/server/db/schema';
+import { characters, games } from '$lib/server/db/schema';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
@@ -15,10 +15,17 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
 	if (!game) error(404);
 
+	const [myChar] = await db
+		.select({ id: characters.id })
+		.from(characters)
+		.where(and(eq(characters.gameId, params.id), eq(characters.userId, userId)))
+		.limit(1);
+
 	return {
 		gameId: params.id,
 		game,
 		isGm: game.gmUserId === userId,
-		userId
+		userId,
+		myCharacterId: myChar?.id ?? null
 	};
 };

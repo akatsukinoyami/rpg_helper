@@ -14,6 +14,7 @@
   import { keys } from '$lib/utils';
 
 	import type { PageData } from './$types';
+    import Label from '$lib/components/Label.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -62,7 +63,6 @@
   {...saveAccount}
   class="flex flex-col gap-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200"
 >
-  <AvatarUpload name="image" value={data.user.image} type="user" label={m.settings_avatar_label()} size={40} />
   {#if saveAccount.result?.accountError}
     <p class="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
       {errorMsg(saveAccount.result.accountError)}
@@ -111,30 +111,33 @@
 
   <HR />
 
-  <div class="flex justify-between items-center">
-    <h2 class="text-sm font-medium text-gray-700">{m.settings_connected_providers()}</h2>
-
-    <div class="flex gap-2">
-      {#each keys(providerIcons) as provider}
-        {@const linked = connectedAccounts.some((a) => a.providerId === provider)}
-        <Button
-          icon={providerIcons[provider]}
-          class={{ 'p-2': true, "grayscale-100": !linked }}
-          kind={linked ? 'success' : 'secondary'}
-          onclick={() => linked ? unlink(provider) : link(provider)}
-        />
-      {/each}
-      {#each [[appDia, 'Dia'], [appMax, 'Max']] as [src, alt]}
-        <Button 
-          class='p-2 grayscale-100'
-          kind="secondary"
-          onclick={() => {
-            if (typeof window !== 'undefined') {
-              window.location.href = 'https://youtu.be/dQw4w9WgXcQfor'
-            }
-          }}
-        ><img {src} {alt} width="24px"/></Button>
-      {/each}
+  <div class="flex justify-between">
+    <AvatarUpload name="image" value={data.user.image} type="user" label={m.settings_avatar_label()} size={40} />
+    <div class="flex flex-col gap-2">
+      <Label class="text-end" label={m.settings_connected_providers()} />
+  
+      <div class="flex gap-2">
+        {#each keys(providerIcons) as provider}
+          {@const linked = connectedAccounts.some((a) => a.providerId === provider)}
+          <Button
+            icon={providerIcons[provider]}
+            class={{ 'p-2': true, "grayscale-100": !linked }}
+            kind={linked ? 'success' : 'secondary'}
+            onclick={() => linked ? unlink(provider) : link(provider)}
+          />
+        {/each}
+        {#each [[appDia, 'Dia'], [appMax, 'Max']] as [src, alt]}
+          <Button 
+            class='p-2 grayscale-100'
+            kind="secondary"
+            onclick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = 'https://youtu.be/dQw4w9WgXcQfor'
+              }
+            }}
+          ><img {src} {alt} width="24px"/></Button>
+        {/each}
+      </div>
     </div>
   </div>
 

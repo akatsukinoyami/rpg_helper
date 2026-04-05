@@ -5,21 +5,36 @@
 		id: string;
 		content: string;
 		createdAt: Date | string;
+		editedAt?: Date | string | null;
+		gmAnnotation?: string | null;
+		characterId?: string | null;
 		characterName: string | null;
 		characterImage?: string | null;
 		locationName?: string;
+		locationId?: string;
+		replyToId?: string | null;
+		replyContent?: string | null;
+		replyCharacterName?: string | null;
 	}
 </script>
 
 <script lang="ts">
+	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
+	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
+	import MessageForm from '$lib/components/MessageForm.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 
 	interface Props {
 		msg: MessageData;
 		view: MsgView;
+		isGm?: boolean;
+		myCharacterId?: string | null;
+		onReply?: (msg: MessageData) => void;
 	}
 
-	let { msg, view }: Props = $props();
+	let { msg, view, isGm = false, myCharacterId = null, onReply }: Props = $props();
 
 	const name = $derived(msg.characterName ?? m.message_gm());
 
@@ -31,7 +46,6 @@
 			.join('')
 	);
 
-	// Deterministic hue from name so each character has a consistent colour
 	const hue = $derived(
 		[...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360
 	);
@@ -39,38 +53,159 @@
 	const time = $derived(
 		new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 	);
+
+	const isOwner = $derived(!!myCharacterId && myCharacterId === msg.characterId);
+	const canEdit = $derived(isOwner || isGm);
+
+	let editing = $state(false);
+	let annotating = $state(false);
+	let annotationDraft = $state(msg.gmAnnotation ?? '');
+	let deletePending = $state(false);
+
+	async function handleDelete() {
+		if (deletePending) return;
+		deletePending = true;
+		try {
+			await messages.remove(msg.id);
+		} finally {
+			deletePending = false;
+		}
+	}
+
+	async function saveAnnotation(e: SubmitEvent) {
+		e.preventDefault();
+		await messages.annotate({ messageId: msg.id, annotation: annotationDraft });
+		annotating = false;
+	}
 </script>
 
 {#snippet avatar()}
 	<span
 		class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
 		style:background-color="hsl({hue} 50% 45%)"
-		style:background-image="url({msg?.characterImage})"
+		style:background-image={msg.characterImage ? `url(${msg.characterImage})` : undefined}
 	>{initials}</span>
 {/snippet}
 
+{#snippet actions()}
+	{#if myCharacterId || canEdit}
+		<div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+			{#if myCharacterId && onReply}
+				<button
+					type="button"
+					title={m.message_reply()}
+					class="p-0.5 rounded text-gray-400 hover:text-gray-700 cursor-pointer"
+					onclick={() => onReply(msg)}
+				>
+					<Icon path={mdiReply} size={13} pathClass="fill-current" />
+				</button>
+			{/if}
+			{#if canEdit}
+				<button
+					type="button"
+					title={m.message_edit()}
+					class="p-0.5 rounded text-gray-400 hover:text-gray-700 cursor-pointer"
+					onclick={() => { editing = true; annotating = false; }}
+				>
+					<Icon path={mdiPencil} size={13} pathClass="fill-current" />
+				</button>
+				{#if isGm}
+					<button
+						type="button"
+						title={m.message_gm_comment()}
+						class="p-0.5 rounded text-gray-400 hover:text-indigo-600 cursor-pointer"
+						onclick={() => { annotating = !annotating; editing = false; annotationDraft = msg.gmAnnotation ?? ''; }}
+					>
+						<Icon path={mdiCommentEdit} size={13} pathClass="fill-current" />
+					</button>
+				{/if}
+				<button
+					type="button"
+					title={m.message_delete()}
+					class="p-0.5 rounded text-gray-400 hover:text-red-600 cursor-pointer"
+					onclick={handleDelete}
+					disabled={deletePending}
+				>
+					<Icon path={mdiDelete} size={13} pathClass="fill-current" />
+				</button>
+			{/if}
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet content()}
+	{#if editing}
+		<MessageForm
+			locationId={msg.locationId ?? ''}
+			messageId={msg.id}
+			initialContent={msg.content}
+			myCharacterId={myCharacterId ?? msg.characterId}
+			onDone={() => editing = false}
+		/>
+	{:else}
+		<p class="text-xs text-gray-900 whitespace-pre-wrap">{msg.content}</p>
+		{#if msg.editedAt}
+			<span class="text-[11px] text-gray-400 italic">{m.message_edited()}</span>
+		{/if}
+		{#if msg.gmAnnotation}
+			<p class="text-[11px] text-indigo-600 border-l-2 border-indigo-300 pl-1.5 mt-0.5 italic">
+				<span class="font-bold">ГМ:</span> 
+				{msg.gmAnnotation}
+			</p>
+		{/if}
+		{#if annotating && isGm}
+			<form onsubmit={saveAnnotation} class="flex items-center gap-1 mt-1">
+				<input
+					class={[fieldColors, fieldSpacing, 'rounded-md border text-xs outline-none flex-1']}
+					bind:value={annotationDraft}
+					placeholder={m.message_gm_comment_placeholder()}
+				/>
+				<button type="submit" class="p-1 rounded text-gray-400 hover:text-indigo-600 cursor-pointer">
+					<Icon path={mdiCheck} size={13} pathClass="fill-current" />
+				</button>
+				<button type="button" class="p-1 rounded text-gray-400 hover:text-gray-700 cursor-pointer" onclick={() => annotating = false}>
+					<Icon path={mdiClose} size={13} pathClass="fill-current" />
+				</button>
+			</form>
+		{/if}
+	{/if}
+{/snippet}
+
+{#snippet replyPreview()}
+	{#if msg.replyToId && msg.replyContent != null}
+		<div class="flex items-start gap-1 rounded bg-gray-100 border-l-2 border-gray-300 px-1.5 py-1 text-[11px] text-gray-500 max-w-full overflow-hidden">
+			<Icon path={mdiReply} size={11} pathClass="fill-gray-400 shrink-0 mt-0.5" />
+			<span class="font-semibold shrink-0">{msg.replyCharacterName ?? m.message_gm()}:</span>
+			<span class="truncate">{msg.replyContent}</span>
+		</div>
+	{/if}
+{/snippet}
+
 {#if view === 'compact'}
-	<div class="flex items-center-safe gap-1.5">
+	<div class="group flex items-center-safe gap-1.5">
 		{@render avatar()}
 		<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
 		<span class="text-xs text-gray-900">{msg.content}</span>
 		{#if msg.locationName}
 			<span class="ml-1 text-[12px] text-gray-400">· {msg.locationName}</span>
 		{/if}
+		{@render actions()}
 	</div>
 {:else}
-	<div class="flex items-start gap-2">		
+	<div class="group flex items-start gap-2">
 		{@render avatar()}
 
-		<div class="flex flex-col gap-0.5">
+		<div class="flex flex-col gap-0.5 min-w-0 flex-1">
 			<div class="flex items-baseline gap-2">
 				<span class="text-xs font-semibold text-gray-800">{name}</span>
 				<span class="text-[12px] text-gray-400">{time}</span>
 				{#if msg.locationName}
 					<span class="text-[12px] text-gray-400">{msg.locationName}</span>
 				{/if}
+				{@render actions()}
 			</div>
-			<p class="text-xs text-gray-900">{msg.content}</p>
+			{@render replyPreview()}
+			{@render content()}
 		</div>
 	</div>
 {/if}

@@ -50,7 +50,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-1">
+<div class="flex flex-col items-left gap-2">
 	<Label {label} />
 
 	<div class="flex items-center gap-3">

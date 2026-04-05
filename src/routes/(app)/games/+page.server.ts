@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne } from 'drizzle-orm';
+import { and, eq, inArray, ne, notInArray } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { characters, games } from '$lib/server/db/schema';
 import type { PageServerLoad } from './$types';
@@ -25,5 +25,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 					.where(and(inArray(games.id, playerGameIds), ne(games.gmUserId, userId)))
 			: [];
 
-	return { gmGames, playerGames };
+	const myGameIds = [...gmGames.map((g) => g.id), ...playerGameIds];
+
+	const otherGames =
+		myGameIds.length > 0
+			? await db.select().from(games).where(notInArray(games.id, myGameIds))
+			: await db.select().from(games);
+
+	return { gmGames, playerGames, otherGames };
 };
