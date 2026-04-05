@@ -3,6 +3,7 @@
 	import { authClient } from '$lib/auth-client';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
+	import { resolveLogin } from '$lib/remote/auth.remote';
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import OAuthButtons from '$lib/partials/OAuthButtons.svelte';
@@ -17,13 +18,8 @@
 
 	async function resolveEmail(nameOrEmail: string): Promise<string | null> {
 		if (nameOrEmail.includes('@')) return nameOrEmail;
-		const res = await fetch('/api/resolve-login', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ name: nameOrEmail })
-		});
-		const data = await res.json();
-		return data.email;
+		const result = await resolveLogin({ name: nameOrEmail });
+		return result.email;
 	}
 
 	async function submit() {

@@ -1,5 +1,8 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"load_error": "Ошибка загрузки",
+	"load_loading": "Загрузка…",
+	"load_empty": "Здесь пока ничего нет",
 	"auth_error_email_taken": "Аккаунт с таким email уже существует",
 	"auth_error_unauthorized": "Нет доступа",
 	"auth_error_bad_request": "Некорректный запрос",

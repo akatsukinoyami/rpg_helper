@@ -1,5 +1,8 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"load_error": "Failed to load",
+	"load_loading": "Loading…",
+	"load_empty": "Nothing here yet",
 	"auth_error_email_taken": "An account with this email already exists",
 	"auth_error_unauthorized": "Unauthorized",
 	"auth_error_bad_request": "Bad request",
