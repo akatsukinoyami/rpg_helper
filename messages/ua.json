@@ -178,5 +178,17 @@
 	"settings_scheme_gruvbox": "Gruvbox",
 	"settings_scheme_label": "Колірна схема",
 	"settings_theme_label": "Тема",
-	"settings_title": "Налаштування"
+	"settings_title": "Налаштування",
+	"transfer_title": "Імпорт / Експорт",
+	"transfer_export": "Експорт",
+	"transfer_export_all": "Все",
+	"transfer_export_races": "Раси",
+	"transfer_export_skills": "Типи навичок",
+	"transfer_export_items": "Типи предметів",
+	"transfer_export_locations": "Локації",
+	"transfer_import": "Імпорт",
+	"transfer_import_hint": "Завантажте YAML-файл, експортований з цієї або іншої гри. Існуючі дані зберігаються — імпортовані записи додаються.",
+	"transfer_import_button": "Обрати файл…",
+	"transfer_import_success": "Імпортовано",
+	"transfer_import_error": "Помилка імпорту. Переконайтеся, що файл є коректним YAML-експортом."
 }

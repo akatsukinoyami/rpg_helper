@@ -178,5 +178,17 @@
 	"settings_scheme_gruvbox": "Gruvbox",
 	"settings_scheme_label": "Color scheme",
 	"settings_theme_label": "Theme",
-	"settings_title": "Settings"
+	"settings_title": "Settings",
+	"transfer_title": "Import / Export",
+	"transfer_export": "Export",
+	"transfer_export_all": "All",
+	"transfer_export_races": "Races",
+	"transfer_export_skills": "Skill types",
+	"transfer_export_items": "Item types",
+	"transfer_export_locations": "Locations",
+	"transfer_import": "Import",
+	"transfer_import_hint": "Upload a YAML file exported from this or another game. Existing data is kept — imported entries are appended.",
+	"transfer_import_button": "Choose file…",
+	"transfer_import_success": "Imported",
+	"transfer_import_error": "Import failed. Make sure the file is a valid YAML export."
 }

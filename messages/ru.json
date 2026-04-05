@@ -178,5 +178,17 @@
 	"settings_scheme_gruvbox": "Gruvbox",
 	"settings_scheme_label": "Цветовая схема",
 	"settings_theme_label": "Тема",
-	"settings_title": "Настройки"
+	"settings_title": "Настройки",
+	"transfer_title": "Импорт / Экспорт",
+	"transfer_export": "Экспорт",
+	"transfer_export_all": "Всё",
+	"transfer_export_races": "Расы",
+	"transfer_export_skills": "Типы навыков",
+	"transfer_export_items": "Типы предметов",
+	"transfer_export_locations": "Локации",
+	"transfer_import": "Импорт",
+	"transfer_import_hint": "Загрузите YAML-файл, экспортированный из этой или другой игры. Существующие данные сохраняются — импортированные записи добавляются.",
+	"transfer_import_button": "Выбрать файл…",
+	"transfer_import_success": "Импортировано",
+	"transfer_import_error": "Ошибка импорта. Убедитесь, что файл является корректным YAML-экспортом."
 }

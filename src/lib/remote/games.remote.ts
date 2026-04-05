@@ -5,14 +5,16 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { characters, games, locations } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
+import { importGameYaml } from '$lib/server/game-import';
 
-const GameSchema = v.object({
+const GameBaseSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	description: v.optional(v.pipe(v.string(), v.trim())),
-	image: v.optional(v.pipe(v.string(), v.trim()))
+	image: v.optional(v.pipe(v.string(), v.trim())),
+	yaml: v.optional(v.string())
 });
 
-export const create = form(GameSchema, async (data) => {
+export const create = form(GameBaseSchema, async (data) => {
 	const { locals } = getRequestEvent();
 	const userId = locals.user!.id;
 
@@ -26,18 +28,30 @@ export const create = form(GameSchema, async (data) => {
 		})
 		.returning({ id: games.id });
 
-	await db
-		.insert(locations)
-		.values({ 
-			gameId: game.id, 
-			name: data.name, 
-			parentId: null 
+	let importedLocations = 0;
+	const yamlText = data.yaml?.trim();
+	if (yamlText) {
+		try {
+			const counts = await importGameYaml(game.id, yamlText);
+			importedLocations = counts.locations;
+		} catch {
+			// invalid YAML — game is still created, import skipped
+		}
+	}
+
+	// Only create the default root location if YAML didn't bring its own
+	if (!importedLocations) {
+		await db.insert(locations).values({
+			gameId: game.id,
+			name: data.name,
+			parentId: null
 		});
+	}
 
 	redirect(303, `/games/${game.id}`);
 });
 
-export const edit = form(GameSchema, async (data) => {
+export const edit = form(GameBaseSchema, async (data) => {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
 	const gameId = params.id!;
@@ -66,6 +80,11 @@ export const edit = form(GameSchema, async (data) => {
 
 
 	broadcast(gameId!, { type: 'game:updated', payload: updated });
+
+	const yamlText = data.yaml?.trim();
+	if (yamlText) {
+		await importGameYaml(gameId, yamlText);
+	}
 
 	redirect(303, `/games/${gameId}`);
 });
