@@ -43,6 +43,13 @@
       "when": 1775402760299,
       "tag": "0005_square_vance_astro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775403916315,
+      "tag": "0006_deep_devos",
+      "breakpoints": true
     }
   ]
 }

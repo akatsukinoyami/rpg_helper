@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AvatarUpload from "$lib/components/AvatarUpload.svelte";
   import InputSelect from "$lib/components/InputSelect.svelte";
   import InputText from "$lib/components/InputText.svelte";
   import InputTextArea from "$lib/components/InputTextArea.svelte";
@@ -31,13 +32,20 @@
   bind:open
   titles={{ create: m.item_type_create(), edit: m.item_type_edit_title() }}
 >
+  <AvatarUpload
+    name="image"
+    type="item"
+    value={entity?.image}
+    label={m.item_type_field_image()}
+  />
+
   <div class="grid grid-cols-2 gap-3">
-    <InputText 
-      id="item-name" 
-      name="name" 
-      label={m.item_type_field_name()} 
-      value={entity?.name} 
-      required 
+    <InputText
+      id="item-name"
+      name="name"
+      label={m.item_type_field_name()}
+      value={entity?.name}
+      required
     />
     <InputSelect
       id="item-tracking"

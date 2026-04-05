@@ -8,7 +8,7 @@
 	interface Props {
 		name: string;
 		value?: string | null;
-		type: 'user' | 'game' | 'character';
+		type: 'user' | 'game' | 'character' | 'race' | 'skill' | 'item';
 		label?: string;
 		size?: number;
 	}

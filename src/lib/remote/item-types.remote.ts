@@ -14,9 +14,12 @@ export const index = query(async () => {
 		.where(eq(itemTypes.gameId, params.id));
 });
 
+const imageField = v.optional(v.pipe(v.string(), v.trim()));
+
 const ItemTypeCreateSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	description: v.optional(v.pipe(v.string(), v.trim())),
+	image: imageField,
 	trackingMode: v.picklist(['quantity', 'durability'] as const),
 	weight: v.optional(v.pipe(v.string(), v.trim())),
 	maxDurability: v.optional(v.pipe(v.string(), v.trim(), v.transform((v) => (v ? Number(v) : null))))
@@ -31,6 +34,7 @@ export const create = form(ItemTypeCreateSchema, async (data) => {
 		gameId,
 		name: data.name,
 		description: data.description || null,
+		image: data.image || null,
 		trackingMode: data.trackingMode,
 		weight: data.weight || '0',
 		maxDurability: data.trackingMode === 'durability' ? (data.maxDurability ?? null) : null
@@ -42,6 +46,7 @@ const ItemTypeEditSchema = v.object({
 	id: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	description: v.optional(v.pipe(v.string(), v.trim())),
+	image: imageField,
 	trackingMode: v.picklist(['quantity', 'durability'] as const),
 	weight: v.optional(v.pipe(v.string(), v.trim())),
 	maxDurability: v.optional(v.pipe(v.string(), v.trim(), v.transform((v) => (v ? Number(v) : null))))
@@ -52,18 +57,17 @@ export const edit = form(ItemTypeEditSchema, async (data) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	console.log('edit', data);
-
 	await db
 		.update(itemTypes)
 		.set({
 			name: data.name,
 			description: data.description || null,
+			image: data.image || null,
 			trackingMode: data.trackingMode,
 			weight: data.weight || '0',
 			maxDurability: data.trackingMode === 'durability' ? (data.maxDurability ?? null) : null
 		})
-		.where(and(eq(itemTypes.id,  data.id), eq(itemTypes.gameId, gameId)));
+		.where(and(eq(itemTypes.id, data.id), eq(itemTypes.gameId, gameId)));
 
 	await index().refresh();
 });

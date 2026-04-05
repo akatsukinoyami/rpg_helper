@@ -13,7 +13,7 @@
 	let showCreateForm = $state(false);
 </script>
 
-<div class="flex items-center justify-between">
+<div class="flex items-center justify-between mb-3">
 	<h1 class="text-2xl font-semibold text-gray-900">{m.games_title()}</h1>
 	<Button
 		onclick={() => (showCreateForm = !showCreateForm)}
@@ -30,7 +30,7 @@
 	/>
 {/if}
 
-<div class="mt-6 grid grid-cols-3 gap-3">
+<div class="mt-3 grid grid-cols-3 gap-3">
 	{#each data.gmGames as game}
 		<Tile title={game.name} subtitle={game.description} image={game.image} href={localizeHref(`/games/${game.id}`)}>
 			<Badge label={m.games_gm_badge()} />

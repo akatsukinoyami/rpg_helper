@@ -16,6 +16,7 @@ const numStat = v.pipe(v.string(), v.transform(Number), v.number(), v.integer(),
 const RaceSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	description: v.optional(v.pipe(v.string(), v.trim())),
+	image: v.optional(v.pipe(v.string(), v.trim())),
 	str: numStat,
 	dex: numStat,
 	con: numStat,
@@ -41,6 +42,7 @@ export const create = form(RaceSchema, async (data) => {
 		gameId,
 		name: data.name,
 		description: data.description || null,
+		image: data.image || null,
 		baseStats: buildStats(data)
 	});
 	await index().refresh();
@@ -52,7 +54,7 @@ export const edit = form(RaceEditSchema, async (data) => {
 	await assertGm(gameId);
 	await db
 		.update(races)
-		.set({ name: data.name, description: data.description || null, baseStats: buildStats(data) })
+		.set({ name: data.name, description: data.description || null, image: data.image || null, baseStats: buildStats(data) })
 		.where(and(eq(races.id, data.id), eq(races.gameId, gameId)));
 	await index().refresh();
 });

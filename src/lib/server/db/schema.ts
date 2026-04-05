@@ -117,6 +117,7 @@ export const races = pgTable('races', {
 	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
+	image: text('image'),
 	baseStats: jsonb('base_stats').$type<Stats>().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
@@ -379,6 +380,7 @@ export const skillTypes = pgTable('skill_types', {
 	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
+	image: text('image'),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 

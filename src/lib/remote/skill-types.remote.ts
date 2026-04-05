@@ -14,9 +14,12 @@ export const index = query(async () => {
 		.where(eq(skillTypes.gameId, params.id));
 });
 
+const imageField = v.optional(v.pipe(v.string(), v.trim()));
+
 const SkillTypeCreateSchema = v.object({
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
-	description: v.optional(v.pipe(v.string(), v.trim()))
+	description: v.optional(v.pipe(v.string(), v.trim())),
+	image: imageField
 });
 
 export const create = form(SkillTypeCreateSchema, async (data) => {
@@ -27,7 +30,8 @@ export const create = form(SkillTypeCreateSchema, async (data) => {
 	await db.insert(skillTypes).values({
 		gameId,
 		name: data.name,
-		description: data.description || null
+		description: data.description || null,
+		image: data.image || null
 	});
 	await index().refresh();
 });
@@ -35,7 +39,8 @@ export const create = form(SkillTypeCreateSchema, async (data) => {
 const SkillTypeEditSchema = v.object({
 	id: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
-	description: v.optional(v.pipe(v.string(), v.trim()))
+	description: v.optional(v.pipe(v.string(), v.trim())),
+	image: imageField
 });
 
 export const edit = form(SkillTypeEditSchema, async (data) => {
@@ -47,10 +52,11 @@ export const edit = form(SkillTypeEditSchema, async (data) => {
 		.update(skillTypes)
 		.set({
 			name: data.name,
-			description: data.description || null
+			description: data.description || null,
+			image: data.image || null
 		})
 		.where(and(eq(skillTypes.id, data.id), eq(skillTypes.gameId, gameId)));
-	await index().refresh();	
+	await index().refresh();
 });
 
 export const remove = command(DeleteSchema, async ({ id }: { id: string }) => {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as remoteFunctions from "$lib/remote/skill-types.remote";
 	import * as m from '$lib/paraglide/messages';
+  import AvatarUpload from "$lib/components/AvatarUpload.svelte";
   import InputText from "$lib/components/InputText.svelte";
   import InputTextArea from "$lib/components/InputTextArea.svelte";
   import TypeForm from "$lib/partials/TypeForm.svelte";
@@ -21,12 +22,19 @@
   bind:open
   titles={{ create: m.skill_type_create(), edit: m.skill_type_edit_title() }}
 >
-  <InputText 
-    id="skill-name" 
-    name="name" 
-    label={m.skill_type_field_name()} 
-    value={entity?.name} 
-    required 
+  <AvatarUpload
+    name="image"
+    type="skill"
+    value={entity?.image}
+    label={m.skill_type_field_image()}
+  />
+
+  <InputText
+    id="skill-name"
+    name="name"
+    label={m.skill_type_field_name()}
+    value={entity?.name}
+    required
   />
 
   <InputTextArea 

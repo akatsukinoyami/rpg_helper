@@ -8,7 +8,7 @@ import type { RequestHandler } from './$types';
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']);
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
-const VALID_UPLOAD_TYPES = new Set(['user', 'game', 'character']);
+const VALID_UPLOAD_TYPES = new Set(['user', 'game', 'character', 'race', 'skill', 'item']);
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) error(401, 'Unauthorized');

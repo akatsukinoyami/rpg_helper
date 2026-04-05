@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as remoteFunctions from '$lib/remote/races.remote';
 	import * as m from '$lib/paraglide/messages';
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
 	import TypeForm from '$lib/partials/TypeForm.svelte';
@@ -23,6 +24,13 @@
 	bind:open
 	titles={{ create: m.race_create(), edit: m.race_edit_title() }}
 >
+	<AvatarUpload
+		name="image"
+		type="race"
+		value={entity?.image}
+		label={m.race_field_image()}
+	/>
+
 	<InputText
 		id="race-name"
 		name="name"
