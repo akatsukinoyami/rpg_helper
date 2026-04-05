@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
-  import Button from '$lib/components/Button.svelte';
+	import { untrack } from 'svelte';
+	import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
-  import Message from '$lib/components/Message.svelte';
-  import Palette from '$lib/components/Palette.svelte';
-  import { langLabels, modeLabels, schemeLabels } from '$lib/constants/labels';
+	import Message from '$lib/components/Message.svelte';
+	import Palette from '$lib/components/Palette.svelte';
+	import { langLabels, modeLabels, schemeLabels } from '$lib/constants/labels';
 	import * as m from '$lib/paraglide/messages';
 	import { saveTheme } from '$lib/remote/settings.remote';
 	import type { PageData } from './$types';

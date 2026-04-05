@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import appDia from '$lib/assets/appDia.svg';
 	import appMax from '$lib/assets/appMax.svg';
-  import { authClient } from '$lib/auth-client';
-  import AvatarUpload from '$lib/components/AvatarUpload.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import HR from '$lib/components/HR.svelte';
-  import InputText from '$lib/components/InputText.svelte';
-  import { providerIcons, providerLabels } from '$lib/constants/labels';
+	import { authClient } from '$lib/auth-client';
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import HR from '$lib/components/HR.svelte';
+	import InputText from '$lib/components/InputText.svelte';
+	import { providerIcons, providerLabels } from '$lib/constants/labels';
 	import * as m from '$lib/paraglide/messages';
 	import { saveAccount } from '$lib/remote/settings.remote';
-  import { keys } from '$lib/utils';
+	import { keys } from '$lib/utils';
 
 	import type { PageData } from './$types';
-    import Label from '$lib/components/Label.svelte';
+	import Label from '$lib/components/Label.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -24,7 +24,7 @@
 			name_taken: m.settings_error_name_taken,
 			email_taken: m.settings_error_email_taken,
 			mismatch: m.settings_error_password_mismatch,
-			too_short: m.settings_error_password_too_short,
+			too_short: m.settings_error_password_too_short
 		};
 		return key ? (msgs[key]?.() ?? null) : null;
 	};
@@ -48,10 +48,10 @@
 	}
 
 	async function link(provider: keyof typeof providerIcons) {
-    const options = { provider, callbackURL: '' };
-    if (typeof window !== 'undefined') {
-      options.callbackURL = window?.location?.href;
-    }
+		const options = { provider, callbackURL: '' };
+		if (typeof window !== 'undefined') {
+			options.callbackURL = window?.location?.href;
+		}
 
 		await authClient.linkSocial(options);
 	}

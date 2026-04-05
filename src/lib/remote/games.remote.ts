@@ -68,16 +68,18 @@ export const edit = form(GameBaseSchema, async (data) => {
 		.update(games)
 		.set({ name: data.name, description: data.description || null, image: data.image || null })
 		.where(eq(games.id, gameId))
-		.returning({ name: games.name, description: games.description, image: games.image, hpLabel: games.hpLabel, mpLabel: games.mpLabel });
-	
+		.returning({
+			name: games.name,
+			description: games.description,
+			image: games.image,
+			hpLabel: games.hpLabel,
+			mpLabel: games.mpLabel
+		});
+
 	await db
 		.update(locations)
 		.set({ name: data.name })
-		.where(and(
-			eq(locations.gameId, gameId), 
-			eq(locations.parentId, null)
-		));
-
+		.where(and(eq(locations.gameId, gameId), eq(locations.parentId, null)));
 
 	broadcast(gameId!, { type: 'game:updated', payload: updated });
 
@@ -107,16 +109,10 @@ export const transfer = form(TransferSchema, async (data) => {
 	const [character] = await db
 		.select({ id: characters.id })
 		.from(characters)
-		.where(and(
-			eq(characters.userId, data.newGmUserId), 
-			eq(characters.gameId, gameId)
-		))
+		.where(and(eq(characters.userId, data.newGmUserId), eq(characters.gameId, gameId)))
 		.limit(1);
 
 	if (!character) return { transferError: 'user_not_in_game' as const };
 
-	await db
-		.update(games)
-		.set({ gmUserId: data.newGmUserId })
-		.where(eq(games.id, gameId));
+	await db.update(games).set({ gmUserId: data.newGmUserId }).where(eq(games.id, gameId));
 });

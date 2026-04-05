@@ -1,4 +1,4 @@
-import type { LocalizedString } from "@inlang/paraglide-js";
+import type { LocalizedString } from '@inlang/paraglide-js';
 
 export type OptionLabel = string | (() => string);
 export type OptionsObject = Record<string, OptionLabel>;

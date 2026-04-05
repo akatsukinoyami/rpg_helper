@@ -8,7 +8,9 @@ const inlineExt: MarkedExtension = {
 		{
 			name: 'spoiler',
 			level: 'inline',
-			start(src) { return src.indexOf('||'); },
+			start(src) {
+				return src.indexOf('||');
+			},
 			tokenizer(src) {
 				const match = /^\|\|([^|\n]+)\|\|/.exec(src);
 				if (match) return { type: 'spoiler', raw: match[0], text: match[1] };
@@ -20,7 +22,9 @@ const inlineExt: MarkedExtension = {
 		{
 			name: 'underline',
 			level: 'inline',
-			start(src) { return src.indexOf('++'); },
+			start(src) {
+				return src.indexOf('++');
+			},
 			tokenizer(src) {
 				const match = /^\+\+([^+\n]+)\+\+/.exec(src);
 				if (match) return { type: 'underline', raw: match[0], text: match[1] };

@@ -2,64 +2,67 @@
 
 /* ── hljs token colour tokens (light values = github theme defaults) ────── */
 :root {
-  --hljs-fg:           #24292e;
-  --hljs-keyword:      #d73a49;
-  --hljs-function:     #6f42c1;
-  --hljs-number:       #005cc5;
-  --hljs-string:       #032f62;
-  --hljs-builtin:      #e36209;
-  --hljs-comment:      #6a737d;
-  --hljs-tag:          #22863a;
-  --hljs-subst:        #24292e;
-  --hljs-section:      #005cc5;
-  --hljs-bullet:       #735c0f;
-  --hljs-addition-fg:  #22863a;
-  --hljs-addition-bg:  #f0fff4;
-  --hljs-deletion-fg:  #b31d28;
-  --hljs-deletion-bg:  #ffeef0;
+	--hljs-fg: #24292e;
+	--hljs-keyword: #d73a49;
+	--hljs-function: #6f42c1;
+	--hljs-number: #005cc5;
+	--hljs-string: #032f62;
+	--hljs-builtin: #e36209;
+	--hljs-comment: #6a737d;
+	--hljs-tag: #22863a;
+	--hljs-subst: #24292e;
+	--hljs-section: #005cc5;
+	--hljs-bullet: #735c0f;
+	--hljs-addition-fg: #22863a;
+	--hljs-addition-bg: #f0fff4;
+	--hljs-deletion-fg: #b31d28;
+	--hljs-deletion-bg: #ffeef0;
 }
 
 /* Dark values — applied to explicit dark themes and system-dark via media query */
 [data-theme*="-dark"] {
-  --hljs-fg:           #c9d1d9;
-  --hljs-keyword:      #ff7b72;
-  --hljs-function:     #d2a8ff;
-  --hljs-number:       #79c0ff;
-  --hljs-string:       #a5d6ff;
-  --hljs-builtin:      #ffa657;
-  --hljs-comment:      #8b949e;
-  --hljs-tag:          #7ee787;
-  --hljs-subst:        #c9d1d9;
-  --hljs-section:      #1f6feb;
-  --hljs-bullet:       #f2cc60;
-  --hljs-addition-fg:  #aff5b4;
-  --hljs-addition-bg:  #033a16;
-  --hljs-deletion-fg:  #ffdcd7;
-  --hljs-deletion-bg:  #67060c;
+	--hljs-fg: #c9d1d9;
+	--hljs-keyword: #ff7b72;
+	--hljs-function: #d2a8ff;
+	--hljs-number: #79c0ff;
+	--hljs-string: #a5d6ff;
+	--hljs-builtin: #ffa657;
+	--hljs-comment: #8b949e;
+	--hljs-tag: #7ee787;
+	--hljs-subst: #c9d1d9;
+	--hljs-section: #1f6feb;
+	--hljs-bullet: #f2cc60;
+	--hljs-addition-fg: #aff5b4;
+	--hljs-addition-bg: #033a16;
+	--hljs-deletion-fg: #ffdcd7;
+	--hljs-deletion-bg: #67060c;
 }
 
 @media (prefers-color-scheme: dark) {
-  [data-theme*="-system"] {
-    --hljs-fg:           #c9d1d9;
-    --hljs-keyword:      #ff7b72;
-    --hljs-function:     #d2a8ff;
-    --hljs-number:       #79c0ff;
-    --hljs-string:       #a5d6ff;
-    --hljs-builtin:      #ffa657;
-    --hljs-comment:      #8b949e;
-    --hljs-tag:          #7ee787;
-    --hljs-subst:        #c9d1d9;
-    --hljs-section:      #1f6feb;
-    --hljs-bullet:       #f2cc60;
-    --hljs-addition-fg:  #aff5b4;
-    --hljs-addition-bg:  #033a16;
-    --hljs-deletion-fg:  #ffdcd7;
-    --hljs-deletion-bg:  #67060c;
-  }
+	[data-theme*="-system"] {
+		--hljs-fg: #c9d1d9;
+		--hljs-keyword: #ff7b72;
+		--hljs-function: #d2a8ff;
+		--hljs-number: #79c0ff;
+		--hljs-string: #a5d6ff;
+		--hljs-builtin: #ffa657;
+		--hljs-comment: #8b949e;
+		--hljs-tag: #7ee787;
+		--hljs-subst: #c9d1d9;
+		--hljs-section: #1f6feb;
+		--hljs-bullet: #f2cc60;
+		--hljs-addition-fg: #aff5b4;
+		--hljs-addition-bg: #033a16;
+		--hljs-deletion-fg: #ffdcd7;
+		--hljs-deletion-bg: #67060c;
+	}
 }
 
 /* ── hljs rules — use the variables, written once ───────────────────────── */
-.msg-content pre code.hljs { background: var(--color-gray-100); color: var(--hljs-fg); }
+.msg-content pre code.hljs {
+	background: var(--color-gray-100);
+	color: var(--hljs-fg);
+}
 
 .msg-content pre .hljs-doctag,
 .msg-content pre .hljs-keyword,
@@ -67,12 +70,16 @@
 .msg-content pre .hljs-template-tag,
 .msg-content pre .hljs-template-variable,
 .msg-content pre .hljs-type,
-.msg-content pre .hljs-variable.language_ { color: var(--hljs-keyword); }
+.msg-content pre .hljs-variable.language_ {
+	color: var(--hljs-keyword);
+}
 
 .msg-content pre .hljs-title,
 .msg-content pre .hljs-title.class_,
 .msg-content pre .hljs-title.class_.inherited__,
-.msg-content pre .hljs-title.function_ { color: var(--hljs-function); }
+.msg-content pre .hljs-title.function_ {
+	color: var(--hljs-function);
+}
 
 .msg-content pre .hljs-attr,
 .msg-content pre .hljs-attribute,
@@ -83,28 +90,57 @@
 .msg-content pre .hljs-selector-attr,
 .msg-content pre .hljs-selector-class,
 .msg-content pre .hljs-selector-id,
-.msg-content pre .hljs-variable { color: var(--hljs-number); }
+.msg-content pre .hljs-variable {
+	color: var(--hljs-number);
+}
 
 .msg-content pre .hljs-meta .hljs-string,
 .msg-content pre .hljs-regexp,
-.msg-content pre .hljs-string { color: var(--hljs-string); }
+.msg-content pre .hljs-string {
+	color: var(--hljs-string);
+}
 
 .msg-content pre .hljs-built_in,
-.msg-content pre .hljs-symbol { color: var(--hljs-builtin); }
+.msg-content pre .hljs-symbol {
+	color: var(--hljs-builtin);
+}
 
 .msg-content pre .hljs-code,
 .msg-content pre .hljs-comment,
-.msg-content pre .hljs-formula { color: var(--hljs-comment); }
+.msg-content pre .hljs-formula {
+	color: var(--hljs-comment);
+}
 
 .msg-content pre .hljs-name,
 .msg-content pre .hljs-quote,
 .msg-content pre .hljs-selector-pseudo,
-.msg-content pre .hljs-selector-tag { color: var(--hljs-tag); }
+.msg-content pre .hljs-selector-tag {
+	color: var(--hljs-tag);
+}
 
-.msg-content pre .hljs-subst { color: var(--hljs-subst); }
-.msg-content pre .hljs-section { color: var(--hljs-section); font-weight: 700; }
-.msg-content pre .hljs-bullet { color: var(--hljs-bullet); }
-.msg-content pre .hljs-emphasis { color: var(--hljs-fg); font-style: italic; }
-.msg-content pre .hljs-strong { color: var(--hljs-fg); font-weight: 700; }
-.msg-content pre .hljs-addition { color: var(--hljs-addition-fg); background-color: var(--hljs-addition-bg); }
-.msg-content pre .hljs-deletion { color: var(--hljs-deletion-fg); background-color: var(--hljs-deletion-bg); }
+.msg-content pre .hljs-subst {
+	color: var(--hljs-subst);
+}
+.msg-content pre .hljs-section {
+	color: var(--hljs-section);
+	font-weight: 700;
+}
+.msg-content pre .hljs-bullet {
+	color: var(--hljs-bullet);
+}
+.msg-content pre .hljs-emphasis {
+	color: var(--hljs-fg);
+	font-style: italic;
+}
+.msg-content pre .hljs-strong {
+	color: var(--hljs-fg);
+	font-weight: 700;
+}
+.msg-content pre .hljs-addition {
+	color: var(--hljs-addition-fg);
+	background-color: var(--hljs-addition-bg);
+}
+.msg-content pre .hljs-deletion {
+	color: var(--hljs-deletion-fg);
+	background-color: var(--hljs-deletion-bg);
+}

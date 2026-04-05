@@ -29,46 +29,43 @@ export const indexAll = query(async () => {
 	}));
 });
 
-export const index = query(
-	v.pipe(v.string(), v.trim(), v.minLength(1)),
-	async (charId) => {
-		const { params } = getRequestEvent();
+export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (charId) => {
+	const { params } = getRequestEvent();
 
-		const [row] = await db
-			.select({
-				id: characters.id,
-				userId: characters.userId,
-				gameId: characters.gameId,
-				raceId: characters.raceId,
-				name: characters.name,
-				gender: characters.gender,
-				age: characters.age,
-				image: characters.image,
-				bodyDescription: characters.bodyDescription,
-				prehistory: characters.prehistory,
-				stats: characters.stats,
-				status: characters.status,
-				hp: characters.hp,
-				maxHp: characters.maxHp,
-				mp: characters.mp,
-				maxMp: characters.maxMp,
-				userName: user.name,
-				raceName: races.name
-			})
-			.from(characters)
-			.leftJoin(user, eq(characters.userId, user.id))
-			.leftJoin(races, eq(characters.raceId, races.id))
-			.where(and(eq(characters.id, charId), eq(characters.gameId, params.id!)));
+	const [row] = await db
+		.select({
+			id: characters.id,
+			userId: characters.userId,
+			gameId: characters.gameId,
+			raceId: characters.raceId,
+			name: characters.name,
+			gender: characters.gender,
+			age: characters.age,
+			image: characters.image,
+			bodyDescription: characters.bodyDescription,
+			prehistory: characters.prehistory,
+			stats: characters.stats,
+			status: characters.status,
+			hp: characters.hp,
+			maxHp: characters.maxHp,
+			mp: characters.mp,
+			maxMp: characters.maxMp,
+			userName: user.name,
+			raceName: races.name
+		})
+		.from(characters)
+		.leftJoin(user, eq(characters.userId, user.id))
+		.leftJoin(races, eq(characters.raceId, races.id))
+		.where(and(eq(characters.id, charId), eq(characters.gameId, params.id!)));
 
-		if (!row) return null;
-		const { userName, raceName, ...charData } = row;
-		return {
-			...charData,
-			user: { id: charData.userId, name: userName ?? '' },
-			race: charData.raceId ? { id: charData.raceId, name: raceName! } : null
-		};
-	}
-);
+	if (!row) return null;
+	const { userName, raceName, ...charData } = row;
+	return {
+		...charData,
+		user: { id: charData.userId, name: userName ?? '' },
+		race: charData.raceId ? { id: charData.raceId, name: raceName! } : null
+	};
+});
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 

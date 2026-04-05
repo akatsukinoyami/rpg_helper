@@ -54,10 +54,32 @@ const GAME1 = {
 		{ name: 'Охота', description: 'Отслеживание и добыча дичи' }
 	],
 	itemTypes: [
-		{ name: 'Меч викинга', description: 'Широкий железный меч', trackingMode: 'durability' as const, maxDurability: 100, weight: '3.5' },
-		{ name: 'Меховой плащ', description: 'Тёплый плащ из медвежьей шкуры', trackingMode: 'durability' as const, maxDurability: 60, weight: '2.0' },
-		{ name: 'Золотые монеты', description: 'Местная валюта', trackingMode: 'quantity' as const, weight: '0.01' },
-		{ name: 'Целебное зелье', description: 'Восстанавливает здоровье', trackingMode: 'quantity' as const, weight: '0.3' }
+		{
+			name: 'Меч викинга',
+			description: 'Широкий железный меч',
+			trackingMode: 'durability' as const,
+			maxDurability: 100,
+			weight: '3.5'
+		},
+		{
+			name: 'Меховой плащ',
+			description: 'Тёплый плащ из медвежьей шкуры',
+			trackingMode: 'durability' as const,
+			maxDurability: 60,
+			weight: '2.0'
+		},
+		{
+			name: 'Золотые монеты',
+			description: 'Местная валюта',
+			trackingMode: 'quantity' as const,
+			weight: '0.01'
+		},
+		{
+			name: 'Целебное зелье',
+			description: 'Восстанавливает здоровье',
+			trackingMode: 'quantity' as const,
+			weight: '0.3'
+		}
 	],
 	locations: [
 		{ name: 'Хроники Арктики', description: 'Корень мира', parentId: null },
@@ -72,7 +94,10 @@ const GAME1 = {
 			age: 28,
 			prehistory: 'Северный воин, потерявший свой клан в битве с морозными великанами.',
 			stats: { str: 14, dex: 10, con: 13, int: 9, wis: 10, cha: 8 },
-			hp: 42, maxHp: 42, mp: 10, maxMp: 10
+			hp: 42,
+			maxHp: 42,
+			mp: 10,
+			maxMp: 10
 		},
 		{
 			userId: 'user-mariya',
@@ -81,7 +106,10 @@ const GAME1 = {
 			age: 24,
 			prehistory: 'Молодая жрица богини зимы, ищущая артефакт своего ордена.',
 			stats: { str: 7, dex: 12, con: 9, int: 14, wis: 13, cha: 11 },
-			hp: 28, maxHp: 28, mp: 35, maxMp: 35
+			hp: 28,
+			maxHp: 28,
+			mp: 35,
+			maxMp: 35
 		}
 	]
 };
@@ -99,10 +127,32 @@ const GAME2 = {
 		{ name: 'Запугивание', description: 'Принудить к подчинению угрозами' }
 	],
 	itemTypes: [
-		{ name: 'Абордажная сабля', description: 'Кривой клинок морского разбойника', trackingMode: 'durability' as const, maxDurability: 80, weight: '1.8' },
-		{ name: 'Ром', description: 'Крепкий напиток из тростника', trackingMode: 'quantity' as const, weight: '0.5' },
-		{ name: 'Золото', description: 'Универсальная валюта портов', trackingMode: 'quantity' as const, weight: '0.01' },
-		{ name: 'Морской компас', description: 'Точный инструмент навигатора', trackingMode: 'durability' as const, maxDurability: 200, weight: '0.2' }
+		{
+			name: 'Абордажная сабля',
+			description: 'Кривой клинок морского разбойника',
+			trackingMode: 'durability' as const,
+			maxDurability: 80,
+			weight: '1.8'
+		},
+		{
+			name: 'Ром',
+			description: 'Крепкий напиток из тростника',
+			trackingMode: 'quantity' as const,
+			weight: '0.5'
+		},
+		{
+			name: 'Золото',
+			description: 'Универсальная валюта портов',
+			trackingMode: 'quantity' as const,
+			weight: '0.01'
+		},
+		{
+			name: 'Морской компас',
+			description: 'Точный инструмент навигатора',
+			trackingMode: 'durability' as const,
+			maxDurability: 200,
+			weight: '0.2'
+		}
 	],
 	locations: [
 		{ name: 'Тёмные воды', description: 'Корень мира', parentId: null },
@@ -116,7 +166,10 @@ const GAME2 = {
 			age: 35,
 			prehistory: 'Легендарный пират, захвативший семь торговых флотилий.',
 			stats: { str: 12, dex: 13, con: 11, int: 12, wis: 9, cha: 14 },
-			hp: 38, maxHp: 38, mp: 15, maxMp: 15
+			hp: 38,
+			maxHp: 38,
+			mp: 15,
+			maxMp: 15
 		},
 		{
 			userId: 'user-dmitriy',
@@ -125,7 +178,10 @@ const GAME2 = {
 			age: 22,
 			prehistory: 'Беглянка из знатного дома, нашедшая свободу на море.',
 			stats: { str: 9, dex: 16, con: 9, int: 11, wis: 11, cha: 13 },
-			hp: 30, maxHp: 30, mp: 20, maxMp: 20
+			hp: 30,
+			maxHp: 30,
+			mp: 20,
+			maxMp: 20
 		}
 	]
 };
@@ -143,10 +199,31 @@ const GAME3 = {
 		{ name: 'Торговля хламом', description: 'Обмен мусором по выгодному курсу' }
 	],
 	itemTypes: [
-		{ name: 'Самодельный пистолет', description: 'Ненадёжный, но смертоносный', trackingMode: 'durability' as const, maxDurability: 50, weight: '0.9' },
-		{ name: 'Консервы', description: 'Единственная еда в пустоши', trackingMode: 'quantity' as const, weight: '0.4' },
-		{ name: 'Аптечка', description: 'Остатки довоенной медицины', trackingMode: 'quantity' as const, weight: '0.6' },
-		{ name: 'Металлолом', description: 'Валюта пустоши', trackingMode: 'quantity' as const, weight: '0.1' }
+		{
+			name: 'Самодельный пистолет',
+			description: 'Ненадёжный, но смертоносный',
+			trackingMode: 'durability' as const,
+			maxDurability: 50,
+			weight: '0.9'
+		},
+		{
+			name: 'Консервы',
+			description: 'Единственная еда в пустоши',
+			trackingMode: 'quantity' as const,
+			weight: '0.4'
+		},
+		{
+			name: 'Аптечка',
+			description: 'Остатки довоенной медицины',
+			trackingMode: 'quantity' as const,
+			weight: '0.6'
+		},
+		{
+			name: 'Металлолом',
+			description: 'Валюта пустоши',
+			trackingMode: 'quantity' as const,
+			weight: '0.1'
+		}
 	],
 	locations: [
 		{ name: 'Пустошь', description: 'Корень мира', parentId: null },
@@ -160,7 +237,10 @@ const GAME3 = {
 			age: 45,
 			prehistory: 'Бывший военный инженер, выживший в бункере двадцать лет.',
 			stats: { str: 11, dex: 10, con: 14, int: 15, wis: 13, cha: 7 },
-			hp: 45, maxHp: 45, mp: 25, maxMp: 25
+			hp: 45,
+			maxHp: 45,
+			mp: 25,
+			maxMp: 25
 		},
 		{
 			userId: 'user-aleksey',
@@ -169,7 +249,10 @@ const GAME3 = {
 			age: 19,
 			prehistory: 'Выросла среди руин, научилась выживать раньше, чем ходить.',
 			stats: { str: 9, dex: 15, con: 10, int: 10, wis: 12, cha: 10 },
-			hp: 32, maxHp: 32, mp: 18, maxMp: 18
+			hp: 32,
+			maxHp: 32,
+			mp: 18,
+			maxMp: 18
 		}
 	]
 };
@@ -234,7 +317,11 @@ async function seed() {
 	const skillMap = new Map(insertedSkills.map((s) => [s.name.en, s.id]));
 
 	for (const { startingSkills, ...raceData } of racesSeed) {
-		const [race] = await db.insert(races).values(raceData).onConflictDoNothing().returning({ id: races.id });
+		const [race] = await db
+			.insert(races)
+			.values(raceData)
+			.onConflictDoNothing()
+			.returning({ id: races.id });
 		if (!race) continue;
 		const links = startingSkills
 			.map((n) => skillMap.get(n))
@@ -269,7 +356,11 @@ async function seed() {
 
 		// Skill types
 		await db.insert(skillTypes).values(
-			def.skillTypes.map((st) => ({ gameId: game.id, name: st.name, description: st.description }))
+			def.skillTypes.map((st) => ({
+				gameId: game.id,
+				name: st.name,
+				description: st.description
+			}))
 		);
 
 		// Item types

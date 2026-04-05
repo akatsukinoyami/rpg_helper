@@ -20,7 +20,11 @@
 	});
 	const unsubEdited = ws.on('message:edited', () => messagesQuery.refresh());
 	const unsubDeleted = ws.on('message:deleted', () => messagesQuery.refresh());
-	onDestroy(() => { unsub(); unsubEdited(); unsubDeleted(); });
+	onDestroy(() => {
+		unsub();
+		unsubEdited();
+		unsubDeleted();
+	});
 
 	let replyTo = $state<ReplyTarget | null>(null);
 

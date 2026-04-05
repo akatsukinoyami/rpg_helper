@@ -7,11 +7,8 @@ import { assertGm, DeleteSchema } from './utils';
 
 export const index = query(async () => {
 	const { params } = getRequestEvent();
-	
-	return await db
-		.select()
-		.from(skillTypes)
-		.where(eq(skillTypes.gameId, params.id));
+
+	return await db.select().from(skillTypes).where(eq(skillTypes.gameId, params.id));
 });
 
 const imageField = v.optional(v.pipe(v.string(), v.trim()));
@@ -64,8 +61,6 @@ export const remove = command(DeleteSchema, async ({ id }: { id: string }) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	await db
-		.delete(skillTypes)
-		.where(and(eq(skillTypes.id, id), eq(skillTypes.gameId, gameId)));
+	await db.delete(skillTypes).where(and(eq(skillTypes.id, id), eq(skillTypes.gameId, gameId)));
 	await index().refresh();
 });

@@ -16,7 +16,7 @@ export class WsStore {
 
 	#connect() {
 		if (typeof window === 'undefined') return;
-		
+
 		const origin = window.location.origin.replace(/^https/, 'wss').replace(/^http/, 'ws');
 		const ws = new WebSocket(`${origin}/ws/game/${this.gameId}`);
 
@@ -28,7 +28,9 @@ export class WsStore {
 		};
 
 		ws.onmessage = ({ data }) => {
-			try { this.#dispatch(JSON.parse(data as string)); } catch {}
+			try {
+				this.#dispatch(JSON.parse(data as string));
+			} catch {}
 		};
 
 		ws.onclose = () => {

@@ -1,18 +1,18 @@
 <script lang="ts">
-  import * as remoteFunctions from "$lib/remote/skill-types.remote";
+	import * as remoteFunctions from '$lib/remote/skill-types.remote';
 	import * as m from '$lib/paraglide/messages';
-  import AvatarUpload from "$lib/components/AvatarUpload.svelte";
-  import InputText from "$lib/components/InputText.svelte";
-  import InputTextArea from "$lib/components/InputTextArea.svelte";
-  import TypeForm from "$lib/partials/TypeForm.svelte";
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
+	import InputText from '$lib/components/InputText.svelte';
+	import InputTextArea from '$lib/components/InputTextArea.svelte';
+	import TypeForm from '$lib/partials/TypeForm.svelte';
 
-  interface Props {
-    action: 'create' | 'edit';
-    open: boolean;
-    entity?: Record<string, any>;
-  }
+	interface Props {
+		action: 'create' | 'edit';
+		open: boolean;
+		entity?: Record<string, any>;
+	}
 
-  let { action, entity, open = $bindable() }: Props = $props();
+	let { action, entity, open = $bindable() }: Props = $props();
 </script>
 
 <TypeForm

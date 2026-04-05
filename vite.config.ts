@@ -18,8 +18,8 @@ export default defineConfig({
 			outdir: './src/lib/paraglide'
 		})
 	],
-  server: {
-    host: '127.0.0.1',
-    // port: 5173 (optional: specify a port)
-  }
+	server: {
+		host: '127.0.0.1'
+		// port: 5173 (optional: specify a port)
+	}
 });

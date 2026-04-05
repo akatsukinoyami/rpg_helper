@@ -6,35 +6,29 @@ import { db } from '$lib/server/db';
 import { locations } from '$lib/server/db/schema';
 import { assertGm, DeleteSchema } from './utils';
 
-export const index = query(
-	v.pipe(v.string(), v.trim(), v.minLength(1)),
-	async (id) => {
-		const { params } = getRequestEvent();
-		const gameId = params.id!;
+export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (id) => {
+	const { params } = getRequestEvent();
+	const gameId = params.id!;
 
-		const [location] = await db
-			.select()
-			.from(locations)
-			.where(and(eq(locations.id, id), eq(locations.gameId, gameId)));
+	const [location] = await db
+		.select()
+		.from(locations)
+		.where(and(eq(locations.id, id), eq(locations.gameId, gameId)));
 
-		if (!location) return null;
+	if (!location) return null;
 
-		const children = await db
-			.select()
-			.from(locations)
-			.where(and(eq(locations.parentId, id), eq(locations.gameId, gameId)));
+	const children = await db
+		.select()
+		.from(locations)
+		.where(and(eq(locations.parentId, id), eq(locations.gameId, gameId)));
 
-		return { ...location, children };
-	}
-);
+	return { ...location, children };
+});
 
 export const all = query(async () => {
 	const { params } = getRequestEvent();
 
-	return await db
-		.select()
-		.from(locations)
-		.where(eq(locations.gameId, params.id!));
+	return await db.select().from(locations).where(eq(locations.gameId, params.id!));
 });
 
 const LocationCreateSchema = v.object({
@@ -48,12 +42,15 @@ export const create = form(LocationCreateSchema, async (data) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	const [loc] = await db.insert(locations).values({
-		gameId,
-		name: data.name,
-		description: data.description || null,
-		parentId: data.parentId
-	}).returning({ id: locations.id });
+	const [loc] = await db
+		.insert(locations)
+		.values({
+			gameId,
+			name: data.name,
+			description: data.description || null,
+			parentId: data.parentId
+		})
+		.returning({ id: locations.id });
 	await index(data.parentId).refresh();
 	await all().refresh();
 	redirect(303, `/games/${gameId}/locations/${loc.id}`);

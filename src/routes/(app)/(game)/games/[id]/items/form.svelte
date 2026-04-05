@@ -1,27 +1,29 @@
 <script lang="ts">
-  import AvatarUpload from "$lib/components/AvatarUpload.svelte";
-  import InputSelect from "$lib/components/InputSelect.svelte";
-  import InputText from "$lib/components/InputText.svelte";
-  import InputTextArea from "$lib/components/InputTextArea.svelte";
-  import * as m from '$lib/paraglide/messages';
-  import TypeForm from "$lib/partials/TypeForm.svelte";
-  import * as remoteFunctions from "$lib/remote/item-types.remote";
+	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
+	import InputSelect from '$lib/components/InputSelect.svelte';
+	import InputText from '$lib/components/InputText.svelte';
+	import InputTextArea from '$lib/components/InputTextArea.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import TypeForm from '$lib/partials/TypeForm.svelte';
+	import * as remoteFunctions from '$lib/remote/item-types.remote';
 
-  const trackingOptions = {
-    quantity: m.item_type_tracking_qty(),
-    durability: m.item_type_tracking_dur()
-  } as const;
+	const trackingOptions = {
+		quantity: m.item_type_tracking_qty(),
+		durability: m.item_type_tracking_dur()
+	} as const;
 
-  interface Props {
-    action: 'create' | 'edit';
-    open: boolean;
-    entity?: Record<string, any>;
-  }
+	interface Props {
+		action: 'create' | 'edit';
+		open: boolean;
+		entity?: Record<string, any>;
+	}
 
-  let { action, entity, open = $bindable() }: Props = $props();
+	let { action, entity, open = $bindable() }: Props = $props();
 
-  let trackingMode = $state<'quantity' | 'durability'>('quantity');
-  $effect(() => { trackingMode = entity?.trackingMode ?? 'quantity'; });
+	let trackingMode = $state<'quantity' | 'durability'>('quantity');
+	$effect(() => {
+		trackingMode = entity?.trackingMode ?? 'quantity';
+	});
 </script>
 
 

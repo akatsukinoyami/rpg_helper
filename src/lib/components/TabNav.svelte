@@ -1,13 +1,13 @@
 <script lang="ts">
-  import Button, { type Props as ButtonProps } from "./Button.svelte";
+	import Button, { type Props as ButtonProps } from './Button.svelte';
 
-  interface Props {
-    options: ButtonProps[];
-    isActive: (e: ButtonProps) => boolean;
-    onclick?: (e: MouseEvent) => void;
-  }
+	interface Props {
+		options: ButtonProps[];
+		isActive: (e: ButtonProps) => boolean;
+		onclick?: (e: MouseEvent) => void;
+	}
 
-  let { options, isActive, onclick }: Props = $props();
+	let { options, isActive, onclick }: Props = $props();
 </script>
 
 <nav class="flex gap-0.5 border-b border-gray-200" {onclick}>

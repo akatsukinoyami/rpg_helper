@@ -31,7 +31,9 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 
 const themeTypes = ['light', 'dark', 'system'];
 const themeStyles = ['github', 'catppuccin', 'gruvbox'];
-const VALID_THEMES = new Set(themeTypes.flatMap(type => themeStyles.map(style => `${style}-${type}`)));
+const VALID_THEMES = new Set(
+	themeTypes.flatMap((type) => themeStyles.map((style) => `${style}-${type}`))
+);
 
 const handleTheme: Handle = ({ event, resolve }) => {
 	const raw = event.cookies.get('rph_theme') ?? '';
@@ -53,7 +55,9 @@ const handleWs: Handle = ({ event, resolve }) => {
 		url.pathname.startsWith('/ws/game/') &&
 		event.request.headers.get('upgrade') === 'websocket'
 	) {
-		if (!event.locals.session?.user) return new Response(m.auth_error_unauthorized(), { status: 401 });
+		if (!event.locals.session?.user) {
+			return new Response(m.auth_error_unauthorized(), { status: 401 });
+		}
 
 		const gameId = url.pathname.split('/')[3];
 		if (!gameId) return new Response(m.auth_error_bad_request(), { status: 400 });
@@ -83,7 +87,11 @@ interface BunWsSocket {
 }
 
 export const websocket = {
-	open(ws: BunWsSocket) { ws.subscribe(ws.data.gameId); },
-	close(ws: BunWsSocket) { ws.unsubscribe(ws.data.gameId); },
+	open(ws: BunWsSocket) {
+		ws.subscribe(ws.data.gameId);
+	},
+	close(ws: BunWsSocket) {
+		ws.unsubscribe(ws.data.gameId);
+	},
 	message(_ws: BunWsSocket, _msg: string | Buffer) {}
 };

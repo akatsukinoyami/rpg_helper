@@ -10,7 +10,7 @@
 		kind?: BadgeKind;
 		image?: string | null;
 		children?: Snippet;
-    content?: Snippet;
+		content?: Snippet;
 	}
 
 	type asAnchor = HTMLAnchorAttributes & { href: string; onclick?: never };

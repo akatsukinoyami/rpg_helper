@@ -22,7 +22,7 @@
 			byParent.get(key)!.push(loc);
 		}
 		const result: LocNode[] = [];
-		const root = all.find(l => l.parentId === null);
+		const root = all.find((l) => l.parentId === null);
 		if (!root) return result;
 		function walk(parentId: string, depth: number) {
 			for (const loc of byParent.get(parentId) ?? []) {

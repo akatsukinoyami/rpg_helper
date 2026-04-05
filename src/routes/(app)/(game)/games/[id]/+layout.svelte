@@ -15,26 +15,55 @@
 	const ws = new WsStore(untrack(() => data.gameId));
 	setContext(WS_CONTEXT_KEY, ws);
 	const unsub = ws.on('game:updated', () => invalidateAll());
-	onDestroy(() => { unsub(); ws.destroy(); });
+	onDestroy(() => {
+		unsub();
+		ws.destroy();
+	});
 
 	let addFormState = $state({ open: false });
 	setContext('addFormState', addFormState);
-	afterNavigate(() => { addFormState.open = false; });
+	afterNavigate(() => {
+		addFormState.open = false;
+	});
 
 	const base = $derived(localizeHref(`/games/${data.gameId}`));
 
 	const tabs: NavTab[] = $derived([
-		{ href: `${base}/locations`,  label: m.game_nav_locations,  active: page.url.pathname.startsWith(`${base}/locations`) },
-		{ href: `${base}/feed`,       label: m.game_nav_feed,       active: page.url.pathname.startsWith(`${base}/feed`) },
-		{ href: `${base}/characters`, label: m.game_nav_characters, active: page.url.pathname.startsWith(`${base}/characters`) },
-		{ href: `${base}/races`,      label: m.game_nav_races,      active: page.url.pathname.startsWith(`${base}/races`) },
-		{ href: `${base}/items`,      label: m.game_nav_items,      active: page.url.pathname.startsWith(`${base}/items`) },
-		{ href: `${base}/skills`,     label: m.game_nav_skills,     active: page.url.pathname.startsWith(`${base}/skills`) }
+		{
+			href: `${base}/locations`,
+			label: m.game_nav_locations,
+			active: page.url.pathname.startsWith(`${base}/locations`)
+		},
+		{
+			href: `${base}/feed`,
+			label: m.game_nav_feed,
+			active: page.url.pathname.startsWith(`${base}/feed`)
+		},
+		{
+			href: `${base}/characters`,
+			label: m.game_nav_characters,
+			active: page.url.pathname.startsWith(`${base}/characters`)
+		},
+		{
+			href: `${base}/races`,
+			label: m.game_nav_races,
+			active: page.url.pathname.startsWith(`${base}/races`)
+		},
+		{
+			href: `${base}/items`,
+			label: m.game_nav_items,
+			active: page.url.pathname.startsWith(`${base}/items`)
+		},
+		{
+			href: `${base}/skills`,
+			label: m.game_nav_skills,
+			active: page.url.pathname.startsWith(`${base}/skills`)
+		}
 	]);
 
 	const actions: NavAction[] = $derived([
 		{ icon: mdiPencil, href: localizeHref(`/games/${data.game.id}/edit`), hidden: !data.isGm },
-		{ icon: mdiCog,    href: localizeHref('/settings') },
+		{ icon: mdiCog, href: localizeHref('/settings') },
 		{ icon: mdiArrowLeft, href: localizeHref('/games') }
 	]);
 </script>

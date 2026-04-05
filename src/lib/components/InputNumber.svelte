@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import type { HTMLInputAttributes } from 'svelte/elements';
-    import Label from './Label.svelte';
+	import Label from './Label.svelte';
 
 	interface Props extends HTMLInputAttributes {
 		label?: string;

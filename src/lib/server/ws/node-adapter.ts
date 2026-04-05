@@ -19,7 +19,10 @@ export function attachNodeWs(httpServer: Server): void {
 		if (!url.pathname.startsWith('/ws/game/')) return; // leave Vite HMR alone
 
 		const gameId = url.pathname.split('/')[3];
-		if (!gameId) { socket.destroy(); return; }
+		if (!gameId) {
+			socket.destroy();
+			return;
+		}
 
 		const headers = new Headers(req.headers as Record<string, string>);
 		const session = await auth.api.getSession({ headers });

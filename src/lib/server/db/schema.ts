@@ -178,7 +178,9 @@ export const characters = pgTable('characters', {
 	maxHp: integer('max_hp').default(0).notNull(),
 	mp: integer('mp').default(0).notNull(),
 	maxMp: integer('max_mp').default(0).notNull(),
-	currentLocationId: uuid('current_location_id').references(() => locations.id, { onDelete: 'set null' }),
+	currentLocationId: uuid('current_location_id').references(() => locations.id, {
+		onDelete: 'set null'
+	}),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -434,7 +436,10 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
 	user: one(user, { fields: [characters.userId], references: [user.id] }),
 	game: one(games, { fields: [characters.gameId], references: [games.id] }),
 	race: one(races, { fields: [characters.raceId], references: [races.id] }),
-	currentLocation: one(locations, { fields: [characters.currentLocationId], references: [locations.id] }),
+	currentLocation: one(locations, {
+		fields: [characters.currentLocationId],
+		references: [locations.id]
+	}),
 	characterSkills: many(characterSkills),
 	characterItems: many(characterItems),
 	charItems: many(charItems),
@@ -492,7 +497,11 @@ export const diceRollsRelations = relations(diceRolls, ({ one }) => ({
 
 export const locationsRelations = relations(locations, ({ one, many }) => ({
 	game: one(games, { fields: [locations.gameId], references: [games.id] }),
-	parent: one(locations, { fields: [locations.parentId], references: [locations.id], relationName: 'locationTree' }),
+	parent: one(locations, {
+		fields: [locations.parentId],
+		references: [locations.id],
+		relationName: 'locationTree'
+	}),
 	children: many(locations, { relationName: 'locationTree' }),
 	messages: many(messages),
 	characters: many(characters)
@@ -501,7 +510,11 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
 export const messagesRelations = relations(messages, ({ one, many }) => ({
 	location: one(locations, { fields: [messages.locationId], references: [locations.id] }),
 	character: one(characters, { fields: [messages.characterId], references: [characters.id] }),
-	replyTo: one(messages, { fields: [messages.replyToId], references: [messages.id], relationName: 'messageReplies' }),
+	replyTo: one(messages, {
+		fields: [messages.replyToId],
+		references: [messages.id],
+		relationName: 'messageReplies'
+	}),
 	replies: many(messages, { relationName: 'messageReplies' })
 }));
 

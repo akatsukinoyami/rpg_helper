@@ -7,21 +7,25 @@
 	import * as chars from '$lib/remote/characters.remote';
 	import * as m from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
-    import Tile from '$lib/components/Tile.svelte';
+	import Tile from '$lib/components/Tile.svelte';
 
 	let { data }: { data: { gameId: string; isGm: boolean; userId: string } } = $props();
 
 	const query = $derived(chars.index(page.params.charId!));
 
-	const statusLabel = { pending: m.game_dashboard_pending, approved: m.game_dashboard_approved, rejected: m.game_dashboard_rejected } as const;
+	const statusLabel = {
+		pending: m.game_dashboard_pending,
+		approved: m.game_dashboard_approved,
+		rejected: m.game_dashboard_rejected
+	} as const;
 	const statusKind = { pending: 'warn', approved: 'success', rejected: 'danger' } as const;
 
 	const statKeys = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
-	const genderLabel = { 
-		male: m.char_gender_male, 
-		female: m.char_gender_female, 
-		both: m.char_gender_both, 
-		none: m.char_gender_none 
+	const genderLabel = {
+		male: m.char_gender_male,
+		female: m.char_gender_female,
+		both: m.char_gender_both,
+		none: m.char_gender_none
 	} as const;
 </script>
 

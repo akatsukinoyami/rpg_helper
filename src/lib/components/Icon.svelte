@@ -2,8 +2,8 @@
 	import type { SVGAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 
-  export type Path = string | SVGAttributes<SVGPathElement>; 
-  export type Paths = Path | Path[];
+	export type Path = string | SVGAttributes<SVGPathElement>;
+	export type Paths = Path | Path[];
 
 	export interface Props {
 		path?: Paths;

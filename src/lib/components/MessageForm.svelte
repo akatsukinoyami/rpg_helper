@@ -143,16 +143,16 @@
 	}
 
 	const tools: { icon: string; title: string; action: () => void }[] = [
-		{ icon: mdiFormatBold,          title: 'Bold',          action: () => insertMarkdown('**') },
-		{ icon: mdiFormatItalic,        title: 'Italic',        action: () => insertMarkdown('*') },
-		{ icon: mdiFormatUnderline,     title: 'Underline',     action: () => insertMarkdown('++') },
+		{ icon: mdiFormatBold, title: 'Bold', action: () => insertMarkdown('**') },
+		{ icon: mdiFormatItalic, title: 'Italic', action: () => insertMarkdown('*') },
+		{ icon: mdiFormatUnderline, title: 'Underline', action: () => insertMarkdown('++') },
 		{ icon: mdiFormatStrikethrough, title: 'Strikethrough', action: () => insertMarkdown('~~') },
-		{ icon: mdiEyeOff,              title: 'Hidden text',   action: () => insertMarkdown('||') },
-		{ icon: mdiFormatQuoteClose,    title: 'Quote',         action: () => insertLinePrefix('> ') },
-		{ icon: mdiCodeBraces,          title: 'Inline code',   action: () => insertMarkdown('`') },
-		{ icon: mdiConsole,             title: 'Code block',    action: insertCodeBlock },
-		{ icon: mdiLink,                title: 'Link',          action: () => insertMarkdown('[', '](url)') },
-		{ icon: mdiImage,               title: 'Image',         action: () => insertMarkdown('![', '](url)') },
+		{ icon: mdiEyeOff, title: 'Hidden text', action: () => insertMarkdown('||') },
+		{ icon: mdiFormatQuoteClose, title: 'Quote', action: () => insertLinePrefix('> ') },
+		{ icon: mdiCodeBraces, title: 'Inline code', action: () => insertMarkdown('`') },
+		{ icon: mdiConsole, title: 'Code block', action: insertCodeBlock },
+		{ icon: mdiLink, title: 'Link', action: () => insertMarkdown('[', '](url)') },
+		{ icon: mdiImage, title: 'Image', action: () => insertMarkdown('![', '](url)') }
 	];
 </script>
 

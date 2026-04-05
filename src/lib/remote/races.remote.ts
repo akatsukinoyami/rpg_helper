@@ -8,10 +8,7 @@ import { assertGm, DeleteSchema } from './utils';
 
 export const index = query(async () => {
 	const { params } = getRequestEvent();
-	return await db
-		.select()
-		.from(races)
-		.where(eq(races.gameId, params.id));
+	return await db.select().from(races).where(eq(races.gameId, params.id));
 });
 
 const numStat = v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(0));
@@ -34,7 +31,14 @@ const RaceEditSchema = v.object({
 });
 
 function buildStats(data: v.InferOutput<typeof RaceSchema>): Stats {
-	return { str: data.str, dex: data.dex, con: data.con, int: data.int, wis: data.wis, cha: data.cha };
+	return {
+		str: data.str,
+		dex: data.dex,
+		con: data.con,
+		int: data.int,
+		wis: data.wis,
+		cha: data.cha
+	};
 }
 
 export const create = form(RaceSchema, async (data) => {
@@ -57,7 +61,12 @@ export const edit = form(RaceEditSchema, async (data) => {
 	await assertGm(gameId);
 	await db
 		.update(races)
-		.set({ name: data.name, description: data.description || null, image: data.image || null, baseStats: buildStats(data) })
+		.set({
+			name: data.name,
+			description: data.description || null,
+			image: data.image || null,
+			baseStats: buildStats(data)
+		})
 		.where(and(eq(races.id, data.id), eq(races.gameId, gameId)));
 	await index().refresh();
 });

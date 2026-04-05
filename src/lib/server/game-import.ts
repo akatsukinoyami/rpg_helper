@@ -51,10 +51,12 @@ const LocationNodeSchema: v.BaseSchema<unknown, LocationInput, v.BaseIssue<unkno
 });
 
 export const GameDataSchema = v.object({
-	game: v.optional(v.object({
-		name: v.optional(v.string()),
-		description: v.optional(v.string())
-	})),
+	game: v.optional(
+		v.object({
+			name: v.optional(v.string()),
+			description: v.optional(v.string())
+		})
+	),
 	races: v.optional(v.array(RaceNodeSchema)),
 	skillTypes: v.optional(v.array(SkillTypeNodeSchema)),
 	itemTypes: v.optional(v.array(ItemTypeNodeSchema)),
@@ -90,7 +92,12 @@ async function insertLocations(
 
 // ── Public API ─────────────────────────────────────────────────────────────────
 
-export type ImportCounts = { races: number; skillTypes: number; itemTypes: number; locations: number };
+export type ImportCounts = {
+	races: number;
+	skillTypes: number;
+	itemTypes: number;
+	locations: number;
+};
 
 export async function importGameYaml(gameId: string, yamlText: string): Promise<ImportCounts> {
 	let parsed: unknown;

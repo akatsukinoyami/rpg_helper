@@ -14,7 +14,11 @@
 	const unsub = ws.on('message:created', () => feedQuery.refresh());
 	const unsubEdited = ws.on('message:edited', () => feedQuery.refresh());
 	const unsubDeleted = ws.on('message:deleted', () => feedQuery.refresh());
-	onDestroy(() => { unsub(); unsubEdited(); unsubDeleted(); });
+	onDestroy(() => {
+		unsub();
+		unsubEdited();
+		unsubDeleted();
+	});
 </script>
 
 {#if feedQuery.loading}

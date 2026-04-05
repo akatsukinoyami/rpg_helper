@@ -1,44 +1,48 @@
 <script lang="ts">
-  import { mdiClose } from "@mdi/js";
-  import { type Snippet } from "svelte";
-  import { invalidateAll } from "$app/navigation";
-  import * as m from '$lib/paraglide/messages';
-  import Button from "$lib/components/Button.svelte";
-  import * as ItemTypeRemoteFuncs from "$lib/remote/item-types.remote";
-  import * as SkillTypeRemoteFuncs from "$lib/remote/skill-types.remote";
-  import * as LocationTypeRemoteFuncs from "$lib/remote/locations.remote";
-  import * as RaceRemoteFuncs from "$lib/remote/races.remote";
+	import { mdiClose } from '@mdi/js';
+	import { type Snippet } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+	import * as m from '$lib/paraglide/messages';
+	import Button from '$lib/components/Button.svelte';
+	import * as ItemTypeRemoteFuncs from '$lib/remote/item-types.remote';
+	import * as SkillTypeRemoteFuncs from '$lib/remote/skill-types.remote';
+	import * as LocationTypeRemoteFuncs from '$lib/remote/locations.remote';
+	import * as RaceRemoteFuncs from '$lib/remote/races.remote';
 
-  async function remove(id: string) {
-    if (!id) return;
-    await remoteFunctions.remove({ id });
-    await invalidateAll();
-    open = false;
-  }
+	async function remove(id: string) {
+		if (!id) return;
+		await remoteFunctions.remove({ id });
+		await invalidateAll();
+		open = false;
+	}
 
-  interface Props {
-    action: 'create' | 'edit';
-    open: boolean;
-    class?: string;
-    entity?: Record<string, any>;
-    children?: Snippet;
-    canDelete?: boolean;
-    remoteFunctions: typeof ItemTypeRemoteFuncs | typeof SkillTypeRemoteFuncs | typeof LocationTypeRemoteFuncs | typeof RaceRemoteFuncs;
-    titles?: Partial<Record<keyof typeof ItemTypeRemoteFuncs, string>>;
-  }
+	interface Props {
+		action: 'create' | 'edit';
+		open: boolean;
+		class?: string;
+		entity?: Record<string, any>;
+		children?: Snippet;
+		canDelete?: boolean;
+		remoteFunctions:
+			| typeof ItemTypeRemoteFuncs
+			| typeof SkillTypeRemoteFuncs
+			| typeof LocationTypeRemoteFuncs
+			| typeof RaceRemoteFuncs;
+		titles?: Partial<Record<keyof typeof ItemTypeRemoteFuncs, string>>;
+	}
 
-  let {
-    action,
-    entity,
-    class: className,
-    open = $bindable(),
-    titles,
-    children,
-    canDelete = true,
-    remoteFunctions,
-  }: Props = $props();
+	let {
+		action,
+		entity,
+		class: className,
+		open = $bindable(),
+		titles,
+		children,
+		canDelete = true,
+		remoteFunctions
+	}: Props = $props();
 
-  const func = $derived(remoteFunctions[action]);
+	const func = $derived(remoteFunctions[action]);
 </script>
 
 {#if open}

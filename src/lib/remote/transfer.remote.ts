@@ -6,66 +6,64 @@ import { db } from '$lib/server/db';
 import { games, races, skillTypes, itemTypes, locations } from '$lib/server/db/schema';
 import { assertGm } from './utils';
 
-
-
 // ── Serialisation ──────────────────────────────────────────────────────────────
 
 function serializeRaces(rows: (typeof races.$inferSelect)[]) {
-  return rows.map((r) => ({
-    name: r.name,
-    ...(r.description ? { description: r.description } : {}),
-    baseStats: r.baseStats
-  }));
+	return rows.map((r) => ({
+		name: r.name,
+		...(r.description ? { description: r.description } : {}),
+		baseStats: r.baseStats
+	}));
 }
 
 function serializeSkillTypes(rows: (typeof skillTypes.$inferSelect)[]) {
-  return rows.map((r) => ({
-    name: r.name,
-    ...(r.description ? { description: r.description } : {})
-  }));
+	return rows.map((r) => ({
+		name: r.name,
+		...(r.description ? { description: r.description } : {})
+	}));
 }
 
 function serializeItemTypes(rows: (typeof itemTypes.$inferSelect)[]) {
-  return rows.map((r) => ({
-    name: r.name,
-    ...(r.description ? { description: r.description } : {}),
-    trackingMode: r.trackingMode,
-    weight: r.weight,
-    ...(r.maxDurability != null ? { maxDurability: r.maxDurability } : {})
-  }));
+	return rows.map((r) => ({
+		name: r.name,
+		...(r.description ? { description: r.description } : {}),
+		trackingMode: r.trackingMode,
+		weight: r.weight,
+		...(r.maxDurability != null ? { maxDurability: r.maxDurability } : {})
+	}));
 }
 
 type LocationNode = {
-  name: string;
-  description?: string;
-  hidden: boolean;
-  children: LocationNode[];
+	name: string;
+	description?: string;
+	hidden: boolean;
+	children: LocationNode[];
 };
 
 function buildLocationTree(rows: (typeof locations.$inferSelect)[]): LocationNode[] {
-  const nodes = new Map<string, LocationNode>();
-  const parentIds = new Map<string, string | null>();
+	const nodes = new Map<string, LocationNode>();
+	const parentIds = new Map<string, string | null>();
 
-  for (const l of rows) {
-    nodes.set(l.id, {
-      name: l.name,
-      ...(l.description ? { description: l.description } : {}),
-      hidden: l.hidden,
-      children: []
-    });
-    parentIds.set(l.id, l.parentId);
-  }
+	for (const l of rows) {
+		nodes.set(l.id, {
+			name: l.name,
+			...(l.description ? { description: l.description } : {}),
+			hidden: l.hidden,
+			children: []
+		});
+		parentIds.set(l.id, l.parentId);
+	}
 
-  const roots: LocationNode[] = [];
-  for (const [id, node] of nodes) {
-    const parentId = parentIds.get(id);
-    if (parentId && nodes.has(parentId)) {
-      nodes.get(parentId)!.children.push(node);
-    } else {
-      roots.push(node);
-    }
-  }
-  return roots;
+	const roots: LocationNode[] = [];
+	for (const [id, node] of nodes) {
+		const parentId = parentIds.get(id);
+		if (parentId && nodes.has(parentId)) {
+			nodes.get(parentId)!.children.push(node);
+		} else {
+			roots.push(node);
+		}
+	}
+	return roots;
 }
 // ── Commands ───────────────────────────────────────────────────────────────────
 
@@ -112,11 +110,13 @@ export const exportSection = command(
 			data.locations = buildLocationTree(rows);
 		}
 
-		const slug = gameRow.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+		const slug = gameRow.name
+			.toLowerCase()
+			.replace(/\s+/g, '-')
+			.replace(/[^a-z0-9-]/g, '');
 		const suffix = section === 'all' ? 'export' : section;
 		const filename = `${slug}-${suffix}.yaml`;
 
 		return { yaml: yaml.dump(data, { indent: 2, noRefs: true }), filename };
 	}
 );
-

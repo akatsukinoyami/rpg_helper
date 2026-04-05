@@ -12,32 +12,29 @@ import { processDice } from '$lib/server/dice';
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
 
-export const index = query(
-	v.pipe(v.string(), v.trim(), v.minLength(1)),
-	async (locationId) => {
-		return await db
-			.select({
-				id: messages.id,
-				content: messages.content,
-				createdAt: messages.createdAt,
-				editedAt: messages.editedAt,
-				gmAnnotation: messages.gmAnnotation,
-				locationId: messages.locationId,
-				characterId: messages.characterId,
-				characterName: characters.name,
-				characterImage: characters.image,
-				replyToId: messages.replyToId,
-				replyContent: replyMsg.content,
-				replyCharacterName: replyChar.name,
-			})
-			.from(messages)
-			.leftJoin(characters, eq(messages.characterId, characters.id))
-			.leftJoin(replyMsg, eq(messages.replyToId, replyMsg.id))
-			.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
-			.where(and(isNull(messages.deletedAt), eq(messages.locationId, locationId)))
-			.orderBy(asc(messages.createdAt));
-	}
-);
+export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (locationId) => {
+	return await db
+		.select({
+			id: messages.id,
+			content: messages.content,
+			createdAt: messages.createdAt,
+			editedAt: messages.editedAt,
+			gmAnnotation: messages.gmAnnotation,
+			locationId: messages.locationId,
+			characterId: messages.characterId,
+			characterName: characters.name,
+			characterImage: characters.image,
+			replyToId: messages.replyToId,
+			replyContent: replyMsg.content,
+			replyCharacterName: replyChar.name
+		})
+		.from(messages)
+		.leftJoin(characters, eq(messages.characterId, characters.id))
+		.leftJoin(replyMsg, eq(messages.replyToId, replyMsg.id))
+		.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
+		.where(and(isNull(messages.deletedAt), eq(messages.locationId, locationId)))
+		.orderBy(asc(messages.createdAt));
+});
 
 export const feed = query(async () => {
 	const { params } = getRequestEvent();
@@ -57,7 +54,7 @@ export const feed = query(async () => {
 			characterImage: characters.image,
 			replyToId: messages.replyToId,
 			replyContent: replyMsg.content,
-			replyCharacterName: replyChar.name,
+			replyCharacterName: replyChar.name
 		})
 		.from(messages)
 		.innerJoin(locations, eq(messages.locationId, locations.id))
@@ -89,12 +86,15 @@ export const send = command(
 
 		const processed = processDice(content);
 
-		const [inserted] = await db.insert(messages).values({
-			locationId,
-			characterId: character?.id ?? null,
-			content: processed,
-			replyToId: replyToId || null
-		}).returning({ id: messages.id, createdAt: messages.createdAt });
+		const [inserted] = await db
+			.insert(messages)
+			.values({
+				locationId,
+				characterId: character?.id ?? null,
+				content: processed,
+				replyToId: replyToId || null
+			})
+			.returning({ id: messages.id, createdAt: messages.createdAt });
 
 		broadcast(gameId, {
 			type: 'message:created',
@@ -154,28 +154,27 @@ export const edit = command(
 
 		broadcast(gameId, {
 			type: 'message:edited',
-			payload: { messageId, content: processed, gmAnnotation: null, editedAt: new Date().toISOString() }
+			payload: {
+				messageId,
+				content: processed,
+				gmAnnotation: null,
+				editedAt: new Date().toISOString()
+			}
 		});
 
 		await index(msg.locationId).refresh();
 	}
 );
 
-export const remove = command(
-	messageIdSchema,
-	async (messageId) => {
-		const { msg, gameId } = await getMessageAndCheckAccess(messageId);
+export const remove = command(messageIdSchema, async (messageId) => {
+	const { msg, gameId } = await getMessageAndCheckAccess(messageId);
 
-		await db
-			.update(messages)
-			.set({ deletedAt: new Date() })
-			.where(eq(messages.id, messageId));
+	await db.update(messages).set({ deletedAt: new Date() }).where(eq(messages.id, messageId));
 
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+	broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
 
-		await index(msg.locationId).refresh();
-	}
-);
+	await index(msg.locationId).refresh();
+});
 
 export const annotate = command(
 	v.object({ messageId: messageIdSchema, annotation: v.pipe(v.string(), v.trim()) }),
@@ -186,7 +185,11 @@ export const annotate = command(
 		await assertGm(gameId);
 
 		const [msg] = await db
-			.select({ locationId: messages.locationId, content: messages.content, editedAt: messages.editedAt })
+			.select({
+				locationId: messages.locationId,
+				content: messages.content,
+				editedAt: messages.editedAt
+			})
 			.from(messages)
 			.where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
 			.limit(1);

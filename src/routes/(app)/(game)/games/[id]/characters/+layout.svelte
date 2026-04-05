@@ -8,12 +8,12 @@
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import * as characters from '$lib/remote/characters.remote';
 
-	interface Props { 
-		data: { 
-			gameId: string; 
-			isGm: boolean; 
-			userId: string 
-		}; 
+	interface Props {
+		data: {
+			gameId: string;
+			isGm: boolean;
+			userId: string;
+		};
 		children: Snippet;
 	}
 
@@ -30,9 +30,7 @@
 	const currentId = $derived(page.params.charId);
 
 	const canEdit = (char: { userId: string }) => data.isGm || char.userId === data.userId;
-	const hasOwnChar = $derived(
-		(allQuery.current ?? []).some((c) => c.userId === data.userId)
-	);
+	const hasOwnChar = $derived((allQuery.current ?? []).some((c) => c.userId === data.userId));
 
 	let confirmDeleteId = $state<string | null>(null);
 	let dialogOpen = $state(false);

@@ -1,16 +1,16 @@
 <script lang="ts" module>
-  import type { RemoteQuery } from "@sveltejs/kit";
-  import type { Snippet } from "svelte";
+	import type { RemoteQuery } from '@sveltejs/kit';
+	import type { Snippet } from 'svelte';
 
-  interface Props {
-    remoreFunc: () => RemoteQuery<any>;
-    messages?: {
-      error?: string;
-      loading?: string;
-      empty?: string;
-    }
-    content?: Snippet<[store: RemoteQuery<any>]>;
-  }
+	interface Props {
+		remoreFunc: () => RemoteQuery<any>;
+		messages?: {
+			error?: string;
+			loading?: string;
+			empty?: string;
+		};
+		content?: Snippet<[store: RemoteQuery<any>]>;
+	}
 </script>
 
 <script lang="ts">
