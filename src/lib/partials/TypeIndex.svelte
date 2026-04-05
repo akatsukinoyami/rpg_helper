@@ -62,7 +62,7 @@
   {#if items.length === 0}
     <p class="text-sm text-gray-400">{empty}</p>
   {:else}
-    <div class="grid grid-cols-2 items-start gap-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 items-start gap-2">
       {#each items as entity (entity.id)}
         {#if !edits[entity.id] || hrefGetter}
           <Tile

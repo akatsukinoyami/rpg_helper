@@ -20,11 +20,12 @@
 
 <script lang="ts">
 	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
+	import Icon from '$lib/components/Icon.svelte';
+	import MessageForm from '$lib/components/MessageForm.svelte';
+	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
+	import { renderMarkdown } from '$lib/md';
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
-	import MessageForm from '$lib/components/MessageForm.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 
 	interface Props {
 		msg: MessageData;
@@ -38,8 +39,7 @@
 
 	const name = $derived(msg.characterName ?? m.message_gm());
 
-	const initials = $derived(
-		name
+	const initials = $derived(msg.characterImage ? '' : name
 			.split(' ')
 			.slice(0, 2)
 			.map((w) => w[0]?.toUpperCase() ?? '')
@@ -53,6 +53,8 @@
 	const time = $derived(
 		new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 	);
+
+	const rendered = $derived(renderMarkdown(msg.content));
 
 	const isOwner = $derived(!!myCharacterId && myCharacterId === msg.characterId);
 	const canEdit = $derived(isOwner || isGm);
@@ -79,11 +81,10 @@
 	}
 </script>
 
-{#snippet avatar()}
+{#snippet avatar(className: string)}
 	<span
-		class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-		style:background-color="hsl({hue} 50% 45%)"
-		style:background-image={msg.characterImage ? `url(${msg.characterImage})` : undefined}
+		class={[className, "mt-0.5 flex shrink-0 items-center justify-center text-[10px] font-semibold text-white bg-contain"]}
+		style={msg.characterImage ? `background-image: url(${msg.characterImage})` : `background-color: hsl(${hue} 50% 45%)`}
 	>{initials}</span>
 {/snippet}
 
@@ -143,10 +144,8 @@
 			onDone={() => editing = false}
 		/>
 	{:else}
-		<p class="text-xs text-gray-900 whitespace-pre-wrap">{msg.content}</p>
-		{#if msg.editedAt}
-			<span class="text-[11px] text-gray-400 italic">{m.message_edited()}</span>
-		{/if}
+		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+		<div class="msg-content">{@html rendered}</div>
 		{#if msg.gmAnnotation}
 			<p class="text-[11px] text-indigo-600 border-l-2 border-indigo-300 pl-1.5 mt-0.5 italic">
 				<span class="font-bold">ГМ:</span> 
@@ -181,19 +180,19 @@
 	{/if}
 {/snippet}
 
-{#if view === 'compact'}
-	<div class="group flex items-center-safe gap-1.5">
-		{@render avatar()}
-		<span class="text-xs font-semibold text-gray-700">{name}:&nbsp;</span>
-		<span class="text-xs text-gray-900">{msg.content}</span>
-		{#if msg.locationName}
-			<span class="ml-1 text-[12px] text-gray-400">· {msg.locationName}</span>
+
+{#snippet footer()}
+	<footer class={["bg-gray-50 p-1 flex", msg.editedAt ? '' : 'items-end']}>
+		{#if msg.editedAt}
+			<span class="text-[11px] text-gray-400 italic">{m.message_edited()}</span>
 		{/if}
 		{@render actions()}
-	</div>
-{:else}
-	<div class="group flex items-start gap-2">
-		{@render avatar()}
+	</footer>
+{/snippet}
+
+{#if view === 'compact'}
+	<message class="group flex items-start gap-2">
+		{@render avatar('h-5 w-5 rounded-full')}
 
 		<div class="flex flex-col gap-0.5 min-w-0 flex-1">
 			<div class="flex items-baseline gap-2">
@@ -202,10 +201,35 @@
 				{#if msg.locationName}
 					<span class="text-[12px] text-gray-400">{msg.locationName}</span>
 				{/if}
-				{@render actions()}
+				
 			</div>
 			{@render replyPreview()}
 			{@render content()}
+			{@render footer()}
 		</div>
-	</div>
+	</message>
+{:else}
+	<message class="grid grid-cols-[7rem_1fr] group relative gap-y-2 w-full border-y border-gray-200">
+		<name class="block text-xs font-semibold text-gray-800 bg-gray-100 p-1">
+			{name}
+		</name>
+
+		<header class="block text-[12px] text-gray-400 text-right bg-gray-100 p-1">
+			{msg.locationName ? `${msg.locationName} / `: ''}
+			{time}
+		</header>
+
+		<avatar class="block">
+			{@render avatar('h-24 w-24 rounded-md')}
+		</avatar>
+
+		<section class="flex-1 min-w-0">
+			{@render replyPreview()}
+			{@render content()}
+		</section>
+
+		<div class="bg-gray-50 p-1"></div>
+		
+		{@render footer()}
+	</message>
 {/if}

@@ -2,6 +2,8 @@
 @import "$lib/themes/github.css";
 @import "$lib/themes/catppuccin.css";
 @import "$lib/themes/gruvbox.css";
+@import "$lib/themes/highlight.js.css";
+@import "$lib/themes/markdown-message.css";
 
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";

@@ -2,12 +2,12 @@
   import { untrack } from 'svelte';
   import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
+  import Message from '$lib/components/Message.svelte';
   import Palette from '$lib/components/Palette.svelte';
   import { langLabels, modeLabels, schemeLabels } from '$lib/constants/labels';
 	import * as m from '$lib/paraglide/messages';
 	import { saveTheme } from '$lib/remote/settings.remote';
 	import type { PageData } from './$types';
-    import Message from '$lib/components/Message.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -39,10 +39,11 @@
       id: "id-id-id-id",
       content: `Тяжелая дубовая дверь со скрипом поддалась, впуская внутрь поток холодного ночного воздуха и запах мокрой хвои. Эдриан вошел в зал, стряхивая капли дождя с поношенного плаща. Его взгляд тут же зацепился за фигуру в дальнем углу: незнакомец в глубоком капюшоне сидел неподвижно, водя пальцем по краю кубка.
 
-        — Надеюсь, эль здесь крепче, чем манеры местных вышибал, — вполголоса проворчал мечник, направляясь прямиком к столу таинственного гостя.
+— *Надеюсь, эль здесь крепче, чем манеры местных вышибал,* — вполголоса проворчал мечник, направляясь прямиком к столу таинственного гостя.
 
-        Он отодвинул свободный стул и, не дожидаясь приглашения, сел напротив, положив ладонь на рукоять меча.
-        — Говорят, вы искали того, кто не боится заглянуть в шахты Черного Пика? Считайте, что вы его нашли.`,
+Он отодвинул свободный стул и, не дожидаясь приглашения, сел напротив, положив ладонь на рукоять меча.
+
+— *Говорят, вы искали того, кто не боится заглянуть в шахты Черного Пика? Считайте, что вы его нашли.*`,
       createdAt: new Date(),
       characterName: "Эдриан",
       locationName: "Интересная Локация"

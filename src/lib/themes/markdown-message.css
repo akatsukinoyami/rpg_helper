@@ -1,0 +1,32 @@
+/* ── Message markdown content — @apply keeps colours theme-aware ─────────── */
+@layer components {
+  .msg-content { @apply text-xs text-gray-900 wrap-break-word; }
+  .msg-content > *:first-child { @apply mt-0; }
+  .msg-content > *:last-child  { @apply mb-0; }
+  .msg-content p { @apply m-0; }
+  .msg-content p + p { @apply mt-0.5; }
+  .msg-content strong { @apply font-semibold; }
+  .msg-content em  { @apply italic; }
+  .msg-content del { @apply line-through; }
+  .msg-content u   { @apply underline; }
+  .msg-content a { @apply text-indigo-600 underline underline-offset-2 hover:text-indigo-700; }
+
+  .msg-content :not(pre) > code { @apply font-mono bg-gray-100 rounded px-0.5 text-[0.7rem]; }
+
+  .msg-content pre { @apply rounded-md overflow-x-auto my-1 p-0; }
+  .msg-content pre code.hljs { @apply rounded-md text-[0.7rem] leading-snug; padding: 0.5rem 0.75rem; }
+
+  .msg-content blockquote { @apply border-l-2 border-gray-300 pl-2 text-gray-500 my-1; }
+  .msg-content blockquote p { @apply m-0; }
+  .msg-content .md-img { @apply max-w-full max-h-64 rounded-md my-1 block; }
+
+  .msg-content .md-spoiler {
+    @apply rounded px-0.5 cursor-pointer select-none transition-colors duration-150;
+    background-color: var(--color-gray-900);
+    color: var(--color-gray-900);
+  }
+  .msg-content .md-spoiler:hover,
+  .msg-content .md-spoiler.revealed {
+    color: var(--color-gray-50);
+  }
+}

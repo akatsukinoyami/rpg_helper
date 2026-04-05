@@ -51,6 +51,6 @@
 	{actions}
 />
 
-<main class="mx-auto max-w-3xl p-3">
+<main class="mx-auto max-w-5xl p-3">
 	{@render children()}
 </main>
