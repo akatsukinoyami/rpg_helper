@@ -1,2 +1,0 @@
-ALTER TABLE "races" ADD COLUMN "game_id" uuid;--> statement-breakpoint
-ALTER TABLE "races" ADD CONSTRAINT "races_game_id_games_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."games"("id") ON DELETE cascade ON UPDATE no action;
