@@ -18,14 +18,13 @@
     value = $bindable(),
     id,
     required,
-    class: className,
     ...rest 
   }: Props = $props();
 
   let optionsLocal = $derived(Array.isArray(options) ? options : Object.entries(options));
 </script>
 
-<div class={["flex flex-col gap-1", className]}>
+<div class={["flex flex-col gap-1", rest.class]}>
   <Label for={id} {label} {required} />
   <select
     {...rest}

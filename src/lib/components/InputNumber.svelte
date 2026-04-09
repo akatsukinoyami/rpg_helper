@@ -11,7 +11,7 @@
 	let { label, id, value = $bindable(), required, ...rest }: Props = $props();
 </script>
 
-<div class="flex flex-col gap-1">  
+<div class={["flex flex-col gap-1", rest.class]}>
   <Label for={id} {label} {required} />
   <input
     {...rest}

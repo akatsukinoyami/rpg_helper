@@ -13,12 +13,23 @@
 		mdiCodeBraces,
 		mdiConsole,
 		mdiLink,
-		mdiImage
+		mdiImage,
+		mdiDiceMultiple,
+		mdiTune,
+		mdiBriefcase,
+		mdiFlash
 	} from '@mdi/js';
 	import * as messages from '$lib/remote/messages.remote';
+	import * as proposals from '$lib/remote/proposals.remote';
+	import * as diceRemote from '$lib/remote/diceRolls.remote';
+	import * as itemTypesRemote from '$lib/remote/item-types.remote';
+	import * as skillTypesRemote from '$lib/remote/skill-types.remote';
 	import * as m from '$lib/paraglide/messages';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import InputText from '$lib/components/InputText.svelte';
+	import InputNumber from '$lib/components/InputNumber.svelte';
+	import InputSelect from '$lib/components/InputSelect.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 
 	const MAX_LENGTH = 4096;
@@ -58,6 +69,112 @@
 	const disabled = $derived(!isEditing && !myCharacterId);
 	const remaining = $derived(MAX_LENGTH - content.length);
 	const overLimit = $derived(remaining < 0);
+
+	// ── Action panels ──────────────────────────────────────────────────────────
+
+	type ActionPanel = 'dice' | 'stat' | 'item' | 'skill';
+	let activeAction = $state<ActionPanel | null>(null);
+
+	function togglePanel(panel: ActionPanel) {
+		activeAction = activeAction === panel ? null : panel;
+	}
+
+	// Dice
+	let diceExpr = $state('1d20');
+	let diceSubmitting = $state(false);
+
+	async function submitDice() {
+		const expr = diceExpr.trim();
+		if (!expr || diceSubmitting) return;
+		diceSubmitting = true;
+		try {
+			await diceRemote.roll({ locationId, expression: expr });
+			activeAction = null;
+			diceExpr = '1d20';
+		} finally {
+			diceSubmitting = false;
+		}
+	}
+
+	// Stat proposal
+	const statFields = ['hp', 'mp', 'maxHp', 'maxMp', 'str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+	const statOptions: [string, string][] = [
+		['hp', m.stat_hp()],
+		['mp', m.stat_mp()],
+		['maxHp', m.stat_maxHp()],
+		['maxMp', m.stat_maxMp()],
+		['str', m.stat_str()],
+		['dex', m.stat_dex()],
+		['con', m.stat_con()],
+		['int', m.stat_int()],
+		['wis', m.stat_wis()],
+		['cha', m.stat_cha()],
+	];
+	let statField = $state<typeof statFields[number]>('hp');
+	let statDelta = $state(1);
+	let statReason = $state('');
+	let statSubmitting = $state(false);
+
+	async function submitStat() {
+		if (statSubmitting) return;
+		statSubmitting = true;
+		try {
+			await proposals.sendStat({ locationId, field: statField, delta: statDelta, reason: statReason || undefined });
+			activeAction = null;
+			statReason = '';
+		} finally {
+			statSubmitting = false;
+		}
+	}
+
+	// Item proposal
+	const itemsQuery = itemTypesRemote.index();
+	let itemTypeId = $state('');
+	let itemDelta = $state(1);
+	let itemReason = $state('');
+	let itemSubmitting = $state(false);
+
+	const selectedItem = $derived(itemsQuery.current?.find((i) => i.id === itemTypeId));
+
+	async function submitItem() {
+		if (!itemTypeId || itemSubmitting) return;
+		itemSubmitting = true;
+		try {
+			const isDur = selectedItem?.trackingMode === 'durability';
+			await proposals.sendItem({
+				locationId,
+				itemTypeId,
+				deltaQty: isDur ? undefined : itemDelta,
+				deltaDur: isDur ? itemDelta : undefined,
+				reason: itemReason || undefined
+			});
+			activeAction = null;
+			itemReason = '';
+		} finally {
+			itemSubmitting = false;
+		}
+	}
+
+	// Skill proposal
+	const skillsQuery = skillTypesRemote.index();
+	let skillTypeId = $state('');
+	let skillAction = $state<'add' | 'remove'>('add');
+	let skillReason = $state('');
+	let skillSubmitting = $state(false);
+
+	async function submitSkill() {
+		if (!skillTypeId || skillSubmitting) return;
+		skillSubmitting = true;
+		try {
+			await proposals.sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined });
+			activeAction = null;
+			skillReason = '';
+		} finally {
+			skillSubmitting = false;
+		}
+	}
+
+	// ── Formatting ─────────────────────────────────────────────────────────────
 
 	function stripHtml(s: string) {
 		const stripped = s.replace(/<[^>]*>/g, '');
@@ -154,6 +271,13 @@
 		{ icon: mdiLink, title: 'Link', action: () => insertMarkdown('[', '](url)') },
 		{ icon: mdiImage, title: 'Image', action: () => insertMarkdown('![', '](url)') }
 	];
+
+	const submitByType = {
+		dice: submitDice,
+		stat: submitStat,
+		item: submitItem,
+		skill: submitSkill,
+	};
 </script>
 
 <form onsubmit={handleSubmit} class="flex flex-col gap-1">
@@ -172,7 +296,7 @@
 		</div>
 	{/if}
 
-	<div class="flex gap-0.5 flex-wrap">
+	<div class="flex gap-0.5 flex-wrap items-center">
 		{#each tools as tool}
 			<button
 				type="button"
@@ -184,6 +308,19 @@
 				<Icon path={tool.icon} size={14} pathClass="fill-current" />
 			</button>
 		{/each}
+		{#if !isEditing && !disabled}
+			<span class="flex-1"></span>
+			{#each ([['dice', mdiDiceMultiple, 'Roll dice'], ['stat', mdiTune, 'Propose stat change'], ['item', mdiBriefcase, 'Propose item change'], ['skill', mdiFlash, 'Propose skill change']] as const) as [panel, icon, title]}
+				<button
+					type="button"
+					{title}
+					onclick={() => togglePanel(panel)}
+					class={['p-1 rounded text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer', activeAction === panel && 'bg-gray-200 text-gray-900']}
+				>
+					<Icon path={icon} size={14} pathClass="fill-current" />
+				</button>
+			{/each}
+		{/if}
 	</div>
 
 	<textarea
@@ -200,18 +337,98 @@
 		<p class="text-[11px] text-amber-600">{m.message_html_forbidden()}</p>
 	{/if}
 
-	<div class="flex items-center justify-end gap-2">
-		<span class={['text-[11px] tabular-nums', remaining < 100 ? (overLimit ? 'text-red-500 font-semibold' : 'text-amber-500') : 'text-gray-400']}>
-			{remaining}
-		</span>
-		{#if isEditing}
-			<Button type="button" kind="secondary" icon={mdiClose} onclick={handleCancel} />
+	{#if !isEditing && !disabled}
+		<!-- Action panels -->
+		{#if activeAction }
+			<div class="flex items-center gap-1.5 rounded bg-gray-50 border border-gray-200 px-2 py-1.5">
+				{#if activeAction === 'dice'}
+					<InputText
+						class="flex-1"
+						bind:value={diceExpr}
+						placeholder="2d6+3"
+						onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), submitDice())}
+					/>
+
+				{:else if activeAction === 'stat'}
+					<InputSelect
+						class="flex-1"
+						bind:value={statField}
+						options={statOptions}
+					/>
+					<InputNumber
+						class="flex-1"
+						bind:value={statDelta}
+						placeholder={m.proposal_stat_delta()}
+					/>
+					<InputText
+						class="flex-1"
+						bind:value={statReason}
+						placeholder={m.proposal_reason()}
+					/>
+
+				{:else if activeAction === 'item'}
+					<InputSelect
+						class="flex-1"
+						bind:value={itemTypeId}
+						options={[['', '— item —'], ...(itemsQuery.current ?? []).map((i) => [i.id, i.name] as [string, string])]}
+					/>
+					<InputNumber
+						class="flex-1"
+						bind:value={itemDelta}
+						placeholder={selectedItem?.trackingMode === 'durability' ? m.proposal_item_dur() : m.proposal_item_qty()}
+					/>
+					<InputText
+						class="flex-1"
+						bind:value={itemReason}
+						placeholder={m.proposal_reason()}
+					/>
+
+				{:else if activeAction === 'skill'}
+					<InputSelect
+						class="flex-1"
+						bind:value={skillTypeId}
+						options={[['', '— skill —'], ...(skillsQuery.current ?? []).map((s) => [s.id, s.name] as [string, string])]}
+					/>
+					<InputSelect
+						class="flex-1"
+						bind:value={skillAction}
+						options={[['add', '+ add'], ['remove', '− remove']]}
+					/>
+					<InputText
+						class="flex-1"
+						bind:value={skillReason}
+						placeholder={m.proposal_reason()}
+					/>
+				{/if}
+				<Button
+					type="button"
+					kind="primary"
+					icon={mdiSend}
+					onclick={submitByType[activeAction]}
+					disabled={!skillTypeId || skillSubmitting}
+				/>
+				<Button
+					onclick={() => (activeAction = null)}
+					type="button"
+					kind="ghost"
+					icon={mdiClose}
+				/>
+			</div>
 		{/if}
-		<Button
-			type="submit"
-			icon={mdiSend}
-			kind="primary"
-			disabled={disabled || !content.trim() || overLimit || submitting}
-		/>
-	</div>
+
+		<div class="flex items-center justify-end gap-2">
+			<span class={['text-[11px] tabular-nums', remaining < 100 ? (overLimit ? 'text-red-500 font-semibold' : 'text-amber-500') : 'text-gray-400']}>
+				{remaining}
+			</span>
+			{#if isEditing}
+				<Button type="button" kind="secondary" icon={mdiClose} onclick={handleCancel} />
+			{/if}
+			<Button
+				type="submit"
+				icon={mdiSend}
+				kind="primary"
+				disabled={disabled || !content.trim() || overLimit || submitting}
+			/>
+		</div>
+	{/if}
 </form>
