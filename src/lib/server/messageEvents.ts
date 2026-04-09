@@ -1,23 +1,71 @@
-import { inArray, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { diceRolls, itemProposals, messages, moves, skillProposals, statProposals } from '$lib/server/db/schema';
 
-/** Fetches all system events for a batch of message IDs. */
-export async function getEventsForMessages(messageIds: string[]) {
-	if (messageIds.length === 0) {
+type MsgKey = { locationId: string; id: number };
+
+/** Fetches all system events for a batch of messages identified by (locationId, id) pairs. */
+export async function getEventsForMessages(msgKeys: MsgKey[]) {
+	if (msgKeys.length === 0) {
 		return { moves: [], statProposals: [], itemProposals: [], skillProposals: [], diceRolls: [] };
 	}
 
+	// Build OR clause for each (locationId, id) pair
+	const msgCondition = or(
+		...msgKeys.map((k) => and(eq(messages.locationId, k.locationId), eq(messages.id, k.id)))
+	)!;
+
+	const proposalCondition = or(
+		...msgKeys.map((k) =>
+			and(
+				eq(statProposals.messageLocationId, k.locationId),
+				eq(statProposals.messageId, k.id)
+			)
+		)
+	)!;
+
+	const itemCondition = or(
+		...msgKeys.map((k) =>
+			and(
+				eq(itemProposals.messageLocationId, k.locationId),
+				eq(itemProposals.messageId, k.id)
+			)
+		)
+	)!;
+
+	const skillCondition = or(
+		...msgKeys.map((k) =>
+			and(
+				eq(skillProposals.messageLocationId, k.locationId),
+				eq(skillProposals.messageId, k.id)
+			)
+		)
+	)!;
+
+	const diceCondition = or(
+		...msgKeys.map((k) =>
+			and(
+				eq(diceRolls.messageLocationId, k.locationId),
+				eq(diceRolls.messageId, k.id)
+			)
+		)
+	)!;
+
 	const [movesRows, statRows, itemRows, skillRows, diceRows] = await Promise.all([
 		db
-			.select({ messageId: messages.id, id: moves.id, fromLocationId: moves.fromLocationId, toLocationId: moves.toLocationId })
+			.select({
+				messageRef: messages.ref,
+				id: moves.id,
+				fromLocationId: moves.fromLocationId,
+				toLocationId: moves.toLocationId
+			})
 			.from(messages)
 			.innerJoin(moves, eq(messages.moveId, moves.id))
-			.where(inArray(messages.id, messageIds)),
-		db.select().from(statProposals).where(inArray(statProposals.messageId, messageIds)),
-		db.select().from(itemProposals).where(inArray(itemProposals.messageId, messageIds)),
-		db.select().from(skillProposals).where(inArray(skillProposals.messageId, messageIds)),
-		db.select().from(diceRolls).where(inArray(diceRolls.messageId, messageIds))
+			.where(msgCondition),
+		db.select().from(statProposals).where(proposalCondition),
+		db.select().from(itemProposals).where(itemCondition),
+		db.select().from(skillProposals).where(skillCondition),
+		db.select().from(diceRolls).where(diceCondition)
 	]);
 
 	return {

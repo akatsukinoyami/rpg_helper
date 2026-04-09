@@ -55,7 +55,7 @@
 				{#if char.race || char.age != null || char.gender}
 					<p class="text-xs text-gray-400 mt-0.5">
 						{[
-							char.race ? localize(char.race.name, getLocale()) : null,
+							char.race ? char.race.name : null,
 							char.age != null ? String(char.age) : null,
 							char.gender ? genderLabel[char.gender]() : null
 						].filter(Boolean).join(' · ')}

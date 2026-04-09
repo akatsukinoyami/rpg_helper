@@ -346,7 +346,7 @@ async function seed() {
 		// Locations
 		const locationIds: string[] = [];
 		for (const loc of def.locations) {
-			const parentId = 'parent' in loc ? (locationIds[loc.parent] ?? null) : null;
+			const parentId = 'parent' in loc ? (locationIds[loc.parent as number] ?? null) : null;
 			const [inserted] = await db
 				.insert(locations)
 				.values({ gameId: game.id, name: loc.name, description: loc.description, parentId })

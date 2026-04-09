@@ -1,6 +1,6 @@
 import { command, getRequestEvent } from '$app/server';
 import * as v from 'valibot';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { characters, diceRolls, messages } from '$lib/server/db/schema';
@@ -14,6 +14,8 @@ const diceExpressionSchema = v.pipe(
 	v.trim(),
 	v.regex(/^\d+[dD]\d+([+-]\d+)?$/, 'Invalid dice expression')
 );
+
+const refSchema = v.pipe(v.string(), v.trim(), v.regex(/^.+#\d+$/, 'Invalid message ref'));
 
 function evaluateDice(expression: string): { rolls: number[]; modifier: number; result: number } {
 	const match = expression.match(/^(\d+)[dD](\d+)([+-]\d+)?$/);
@@ -52,12 +54,23 @@ export const roll = command(
 
 		const { rolls, modifier, result } = evaluateDice(expression);
 
-		const [msg] = await db
-			.insert(messages)
-			.values({ locationId, characterId: character.id })
-			.returning({ id: messages.id, createdAt: messages.createdAt });
+		const msg = await db.transaction(async (tx) => {
+			await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
+			const [row] = await tx
+				.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
+				.from(messages)
+				.where(eq(messages.locationId, locationId));
+			const id = (row?.max ?? 0) + 1;
+
+			const [inserted] = await tx
+				.insert(messages)
+				.values({ locationId, id, characterId: character.id })
+				.returning({ locationId: messages.locationId, id: messages.id, ref: messages.ref, createdAt: messages.createdAt });
+			return inserted;
+		});
 
 		await db.insert(diceRolls).values({
+			messageLocationId: msg.locationId,
 			messageId: msg.id,
 			gameId,
 			userId,
@@ -73,7 +86,7 @@ export const roll = command(
 		broadcast(gameId, {
 			type: 'message:created',
 			payload: {
-				messageId: msg.id,
+				messageId: msg.ref!,
 				locationId,
 				characterId: character.id,
 				content: null,
@@ -86,24 +99,27 @@ export const roll = command(
 );
 
 export const deleteRoll = command(
-	v.pipe(v.string(), v.trim(), v.minLength(1)),
-	async (messageId) => {
+	refSchema,
+	async (messageRef) => {
 		const { params } = getRequestEvent();
 		const gameId = params.id!;
 		await assertGm(gameId);
 
+		const locationId = messageRef.split('#')[0];
+		const messageId = parseInt(messageRef.split('#')[1], 10);
+
 		const [msg] = await db
 			.select({ locationId: messages.locationId })
 			.from(messages)
-			.where(eq(messages.id, messageId))
+			.where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)))
 			.limit(1);
 
 		if (!msg) error(404, 'Message not found');
 
 		// Hard delete — cascades to diceRolls row
-		await db.delete(messages).where(eq(messages.id, messageId));
+		await db.delete(messages).where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)));
 
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
-		await index(msg.locationId).refresh();
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
+		await index(locationId).refresh();
 	}
 );

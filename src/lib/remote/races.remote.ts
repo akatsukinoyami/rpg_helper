@@ -8,7 +8,7 @@ import { assertGm, DeleteSchema } from './utils';
 
 export const index = query(async () => {
 	const { params } = getRequestEvent();
-	return await db.select().from(races).where(eq(races.gameId, params.id));
+	return await db.select().from(races).where(eq(races.gameId, params.id!));
 });
 
 const numStat = v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(0));

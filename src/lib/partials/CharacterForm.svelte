@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { getLocale } from '$lib/paraglide/runtime';
-	import { localize } from '$lib/localize';
 	import * as m from '$lib/paraglide/messages';
 	import type { LocalizedText, Stats } from '$lib/server/db/schema';
 	import AvatarUpload from '$lib/components/AvatarUpload.svelte';
@@ -14,8 +12,8 @@
 
 	interface RaceOption {
 		id: string;
-		name: LocalizedText;
-		description?: LocalizedText | null;
+		name: string;
+		description?: string | null;
 		baseStats: Stats;
 		raceSkills: { skill: { name: LocalizedText } }[];
 	}
@@ -78,11 +76,11 @@
 				name="raceId"
 				required
 				bind:value={selectedRaceId}
-				options={races.map((race) => [race.id, localize(race.name, getLocale())] as [string, string])}
+				options={races.map((race) => [race.id, race.name] as [string, string])}
 			/>
 			{#if selectedRace}
 				{#if selectedRace.description}
-					<p class="mt-1 text-xs text-gray-500">{localize(selectedRace.description, getLocale())}</p>
+					<p class="mt-1 text-xs text-gray-500">{selectedRace.description}</p>
 				{/if}
 				<StatPreview {selectedRace} />
 			{/if}

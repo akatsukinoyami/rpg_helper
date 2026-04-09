@@ -1,6 +1,7 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
+	foreignKey,
 	integer,
 	jsonb,
 	numeric,
@@ -9,9 +10,10 @@ import {
 	primaryKey,
 	text,
 	timestamp,
-	uuid,
 	varchar
 } from 'drizzle-orm/pg-core';
+import { generateId } from './id';
+
 // ---------------------------------------------------------------------------
 // Shared types
 // ---------------------------------------------------------------------------
@@ -99,7 +101,7 @@ export const verification = pgTable('verification', {
 // ---------------------------------------------------------------------------
 
 export const games = pgTable('games', {
-	id: uuid('id').primaryKey().defaultRandom(),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -112,8 +114,8 @@ export const games = pgTable('games', {
 });
 
 export const races = pgTable('races', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -122,7 +124,7 @@ export const races = pgTable('races', {
 });
 
 export const skills = pgTable('skills', {
-	id: uuid('id').primaryKey().defaultRandom(),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
 	name: jsonb('name').$type<LocalizedText>().notNull(),
 	description: jsonb('description').$type<LocalizedText>(),
 	statModifiers: jsonb('stat_modifiers').$type<Partial<Stats>>(),
@@ -132,10 +134,10 @@ export const skills = pgTable('skills', {
 export const raceSkills = pgTable(
 	'race_skills',
 	{
-		raceId: uuid('race_id')
+		raceId: text('race_id')
 			.notNull()
 			.references(() => races.id, { onDelete: 'cascade' }),
-		skillId: uuid('skill_id')
+		skillId: text('skill_id')
 			.notNull()
 			.references(() => skills.id, { onDelete: 'cascade' })
 	},
@@ -143,7 +145,7 @@ export const raceSkills = pgTable(
 );
 
 export const items = pgTable('items', {
-	id: uuid('id').primaryKey().defaultRandom(),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
 	name: jsonb('name').$type<LocalizedText>().notNull(),
 	description: jsonb('description').$type<LocalizedText>(),
 	type: varchar('type', { enum: ['usable', 'sellable', 'both'] }).notNull(),
@@ -153,14 +155,14 @@ export const items = pgTable('items', {
 });
 
 export const characters = pgTable('characters', {
-	id: uuid('id').primaryKey().defaultRandom(),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	gameId: uuid('game_id')
+	gameId: text('game_id')
 		.notNull()
 		.references(() => games.id, { onDelete: 'cascade' }),
-	raceId: uuid('race_id').references(() => races.id, { onDelete: 'set null' }),
+	raceId: text('race_id').references(() => races.id, { onDelete: 'set null' }),
 	name: varchar('name', { length: 100 }).notNull(),
 	gender: varchar('gender', { enum: ['male', 'female', 'none', 'both'] })
 		.default('none')
@@ -177,7 +179,7 @@ export const characters = pgTable('characters', {
 	maxHp: integer('max_hp').default(0).notNull(),
 	mp: integer('mp').default(0).notNull(),
 	maxMp: integer('max_mp').default(0).notNull(),
-	currentLocationId: uuid('current_location_id').references(() => locations.id, {
+	currentLocationId: text('current_location_id').references(() => locations.id, {
 		onDelete: 'set null'
 	}),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -187,10 +189,10 @@ export const characters = pgTable('characters', {
 export const characterSkills = pgTable(
 	'character_skills',
 	{
-		characterId: uuid('character_id')
+		characterId: text('character_id')
 			.notNull()
 			.references(() => characters.id, { onDelete: 'cascade' }),
-		skillId: uuid('skill_id')
+		skillId: text('skill_id')
 			.notNull()
 			.references(() => skills.id, { onDelete: 'cascade' }),
 		level: integer('level').default(1).notNull()
@@ -201,10 +203,10 @@ export const characterSkills = pgTable(
 export const characterItems = pgTable(
 	'character_items',
 	{
-		characterId: uuid('character_id')
+		characterId: text('character_id')
 			.notNull()
 			.references(() => characters.id, { onDelete: 'cascade' }),
-		itemId: uuid('item_id')
+		itemId: text('item_id')
 			.notNull()
 			.references(() => items.id, { onDelete: 'cascade' }),
 		quantity: integer('quantity').default(1).notNull()
@@ -213,8 +215,8 @@ export const characterItems = pgTable(
 );
 
 export const characterEditProposals = pgTable('character_edit_proposals', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	characterId: uuid('character_id')
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
 	patch: jsonb('patch').notNull(),
@@ -230,10 +232,10 @@ export const characterEditProposals = pgTable('character_edit_proposals', {
 export const characterVisibility = pgTable(
 	'character_visibility',
 	{
-		characterId: uuid('character_id')
+		characterId: text('character_id')
 			.notNull()
 			.references(() => characters.id, { onDelete: 'cascade' }),
-		visibleToCharacterId: uuid('visible_to_character_id')
+		visibleToCharacterId: text('visible_to_character_id')
 			.notNull()
 			.references(() => characters.id, { onDelete: 'cascade' }),
 		showName: boolean('show_name').default(false).notNull(),
@@ -247,32 +249,16 @@ export const characterVisibility = pgTable(
 	(t) => [primaryKey({ columns: [t.characterId, t.visibleToCharacterId] })]
 );
 
-export const diceRolls = pgTable('dice_rolls', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	messageId: uuid('message_id')
-		.notNull()
-		.references(() => messages.id, { onDelete: 'cascade' }),
-	gameId: uuid('game_id')
-		.notNull()
-		.references(() => games.id, { onDelete: 'cascade' }),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	expression: varchar('expression', { length: 50 }).notNull(),
-	results: jsonb('results').$type<DiceResult>().notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
-
 // ---------------------------------------------------------------------------
 // Locations
 // ---------------------------------------------------------------------------
 
 export const locations = pgTable('locations', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	gameId: uuid('game_id')
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	gameId: text('game_id')
 		.notNull()
 		.references(() => games.id, { onDelete: 'cascade' }),
-	parentId: uuid('parent_id'), // self-ref FK added in migration SQL
+	parentId: text('parent_id'), // self-ref FK added in migration SQL
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -285,34 +271,51 @@ export const locations = pgTable('locations', {
 // ---------------------------------------------------------------------------
 
 export const moves = pgTable('moves', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	characterId: uuid('character_id')
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
-	fromLocationId: uuid('from_location_id')
+	fromLocationId: text('from_location_id')
 		.notNull()
 		.references(() => locations.id, { onDelete: 'cascade' }),
-	toLocationId: uuid('to_location_id')
+	toLocationId: text('to_location_id')
 		.notNull()
 		.references(() => locations.id, { onDelete: 'cascade' }),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
-export const messages = pgTable('messages', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	locationId: uuid('location_id')
-		.notNull()
-		.references(() => locations.id, { onDelete: 'cascade' }),
-	moveId: uuid('move_id').references(() => moves.id, { onDelete: 'cascade' }),
-	characterId: uuid('character_id').references(() => characters.id, { onDelete: 'set null' }),
-	content: text('content'),
-	replyToId: uuid('reply_to_id'), // self-ref FK added in migration SQL
-	referencedCharIds: uuid('referenced_char_ids').array(),
-	gmAnnotation: text('gm_annotation'),
-	editedAt: timestamp('edited_at'),
-	deletedAt: timestamp('deleted_at'),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
+export const messages = pgTable(
+	'messages',
+	{
+		locationId: text('location_id')
+			.notNull()
+			.references(() => locations.id, { onDelete: 'cascade' }),
+		id: integer('id').notNull(), // per-location counter, see nextMessageId()
+		// Generated ref: "aB3xK9mQ#5" — used as message ID in the app layer
+		ref: text('ref').generatedAlwaysAs(sql`location_id || '#' || id::text`),
+		moveId: text('move_id').references(() => moves.id, { onDelete: 'cascade' }),
+		characterId: text('character_id').references(() => characters.id, { onDelete: 'set null' }),
+		content: text('content'),
+		replyToId: integer('reply_to_id'), // same-location integer; FK below
+		// Generated replyRef: "aB3xK9mQ#3" or null
+		replyRef: text('reply_ref').generatedAlwaysAs(
+			sql`CASE WHEN reply_to_id IS NOT NULL THEN location_id || '#' || reply_to_id::text ELSE NULL END`
+		),
+		referencedCharIds: text('referenced_char_ids').array(),
+		gmAnnotation: text('gm_annotation'),
+		editedAt: timestamp('edited_at'),
+		deletedAt: timestamp('deleted_at'),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		primaryKey({ columns: [t.locationId, t.id] }),
+		// self-ref FK for replies (same location)
+		foreignKey({
+			columns: [t.locationId, t.replyToId],
+			foreignColumns: [t.locationId, t.id]
+		})
+	]
+);
 
 // ---------------------------------------------------------------------------
 // Stat change proposals
@@ -321,23 +324,34 @@ export const messages = pgTable('messages', {
 export const statFieldEnum = pgEnum('stat_field', ['hp', 'mp', 'maxHp', 'maxMp', 'str', 'dex', 'con', 'int', 'wis', 'cha']);
 export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
 
-export const statProposals = pgTable('stat_proposals', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	messageId: uuid('message_id')
-		.notNull()
-		.references(() => messages.id, { onDelete: 'cascade' }),
-	characterId: uuid('character_id')
-		.notNull()
-		.references(() => characters.id, { onDelete: 'cascade' }),
-	proposedBy: text('proposed_by')
-		.notNull()
-		.references(() => user.id),
-	field: statFieldEnum('field').notNull(),
-	delta: integer('delta').notNull(),
-	reason: text('reason'),
-	status: proposalStatusEnum('status').default('pending').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
+export const statProposals = pgTable(
+	'stat_proposals',
+	{
+		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		messageLocationId: text('message_location_id').notNull(),
+		messageId: integer('message_id').notNull(),
+		messageRef: text('message_ref').generatedAlwaysAs(
+			sql`message_location_id || '#' || message_id::text`
+		),
+		characterId: text('character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		proposedBy: text('proposed_by')
+			.notNull()
+			.references(() => user.id),
+		field: statFieldEnum('field').notNull(),
+		delta: integer('delta').notNull(),
+		reason: text('reason'),
+		status: proposalStatusEnum('status').default('pending').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		foreignKey({
+			columns: [t.messageLocationId, t.messageId],
+			foreignColumns: [messages.locationId, messages.id]
+		}).onDelete('cascade')
+	]
+);
 
 // ---------------------------------------------------------------------------
 // Item types + character inventory (game library)
@@ -346,8 +360,8 @@ export const statProposals = pgTable('stat_proposals', {
 export const trackingModeEnum = pgEnum('tracking_mode', ['durability', 'quantity']);
 
 export const itemTypes = pgTable('item_types', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -358,11 +372,11 @@ export const itemTypes = pgTable('item_types', {
 });
 
 export const charItems = pgTable('char_items', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	characterId: uuid('character_id')
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
-	itemTypeId: uuid('item_type_id')
+	itemTypeId: text('item_type_id')
 		.notNull()
 		.references(() => itemTypes.id, { onDelete: 'cascade' }),
 	durability: integer('durability'),
@@ -374,35 +388,46 @@ export const charItems = pgTable('char_items', {
 // Item change proposals
 // ---------------------------------------------------------------------------
 
-export const itemProposals = pgTable('item_proposals', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	messageId: uuid('message_id')
-		.notNull()
-		.references(() => messages.id, { onDelete: 'cascade' }),
-	characterId: uuid('character_id')
-		.notNull()
-		.references(() => characters.id, { onDelete: 'cascade' }),
-	proposedBy: text('proposed_by')
-		.notNull()
-		.references(() => user.id),
-	charItemId: uuid('char_item_id').references(() => charItems.id, { onDelete: 'set null' }),
-	itemTypeId: uuid('item_type_id')
-		.notNull()
-		.references(() => itemTypes.id, { onDelete: 'cascade' }),
-	deltaQty: integer('delta_qty'),
-	deltaDur: integer('delta_dur'),
-	reason: text('reason'),
-	status: proposalStatusEnum('status').default('pending').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
+export const itemProposals = pgTable(
+	'item_proposals',
+	{
+		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		messageLocationId: text('message_location_id').notNull(),
+		messageId: integer('message_id').notNull(),
+		messageRef: text('message_ref').generatedAlwaysAs(
+			sql`message_location_id || '#' || message_id::text`
+		),
+		characterId: text('character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		proposedBy: text('proposed_by')
+			.notNull()
+			.references(() => user.id),
+		charItemId: text('char_item_id').references(() => charItems.id, { onDelete: 'set null' }),
+		itemTypeId: text('item_type_id')
+			.notNull()
+			.references(() => itemTypes.id, { onDelete: 'cascade' }),
+		deltaQty: integer('delta_qty'),
+		deltaDur: integer('delta_dur'),
+		reason: text('reason'),
+		status: proposalStatusEnum('status').default('pending').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		foreignKey({
+			columns: [t.messageLocationId, t.messageId],
+			foreignColumns: [messages.locationId, messages.id]
+		}).onDelete('cascade')
+	]
+);
 
 // ---------------------------------------------------------------------------
 // Skill types + character skills (game library)
 // ---------------------------------------------------------------------------
 
 export const skillTypes = pgTable('skill_types', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	gameId: uuid('game_id').references(() => games.id, { onDelete: 'cascade' }),
+	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -412,10 +437,10 @@ export const skillTypes = pgTable('skill_types', {
 export const charSkills = pgTable(
 	'char_skills',
 	{
-		characterId: uuid('character_id')
+		characterId: text('character_id')
 			.notNull()
 			.references(() => characters.id, { onDelete: 'cascade' }),
-		skillTypeId: uuid('skill_type_id')
+		skillTypeId: text('skill_type_id')
 			.notNull()
 			.references(() => skillTypes.id, { onDelete: 'cascade' })
 	},
@@ -428,25 +453,67 @@ export const charSkills = pgTable(
 
 export const skillActionEnum = pgEnum('skill_action', ['add', 'remove']);
 
-export const skillProposals = pgTable('skill_proposals', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	messageId: uuid('message_id')
-		.notNull()
-		.references(() => messages.id, { onDelete: 'cascade' }),
-	characterId: uuid('character_id')
-		.notNull()
-		.references(() => characters.id, { onDelete: 'cascade' }),
-	proposedBy: text('proposed_by')
-		.notNull()
-		.references(() => user.id),
-	skillTypeId: uuid('skill_type_id')
-		.notNull()
-		.references(() => skillTypes.id, { onDelete: 'cascade' }),
-	action: skillActionEnum('action').notNull(),
-	reason: text('reason'),
-	status: proposalStatusEnum('status').default('pending').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
+export const skillProposals = pgTable(
+	'skill_proposals',
+	{
+		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		messageLocationId: text('message_location_id').notNull(),
+		messageId: integer('message_id').notNull(),
+		messageRef: text('message_ref').generatedAlwaysAs(
+			sql`message_location_id || '#' || message_id::text`
+		),
+		characterId: text('character_id')
+			.notNull()
+			.references(() => characters.id, { onDelete: 'cascade' }),
+		proposedBy: text('proposed_by')
+			.notNull()
+			.references(() => user.id),
+		skillTypeId: text('skill_type_id')
+			.notNull()
+			.references(() => skillTypes.id, { onDelete: 'cascade' }),
+		action: skillActionEnum('action').notNull(),
+		reason: text('reason'),
+		status: proposalStatusEnum('status').default('pending').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		foreignKey({
+			columns: [t.messageLocationId, t.messageId],
+			foreignColumns: [messages.locationId, messages.id]
+		}).onDelete('cascade')
+	]
+);
+
+// ---------------------------------------------------------------------------
+// Dice rolls
+// ---------------------------------------------------------------------------
+
+export const diceRolls = pgTable(
+	'dice_rolls',
+	{
+		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		messageLocationId: text('message_location_id').notNull(),
+		messageId: integer('message_id').notNull(),
+		messageRef: text('message_ref').generatedAlwaysAs(
+			sql`message_location_id || '#' || message_id::text`
+		),
+		gameId: text('game_id')
+			.notNull()
+			.references(() => games.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id),
+		expression: varchar('expression', { length: 50 }).notNull(),
+		results: jsonb('results').$type<DiceResult>().notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		foreignKey({
+			columns: [t.messageLocationId, t.messageId],
+			foreignColumns: [messages.locationId, messages.id]
+		}).onDelete('cascade')
+	]
+);
 
 // ---------------------------------------------------------------------------
 // Relations
@@ -499,9 +566,7 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
 	skillProposals: many(skillProposals),
 	messages: many(messages),
 	editProposals: many(characterEditProposals),
-	// Fields this character exposes to others
 	visibilityGranted: many(characterVisibility, { relationName: 'visibilitySource' }),
-	// Fields other characters expose to this character
 	visibilityReceived: many(characterVisibility, { relationName: 'visibilityTarget' })
 }));
 
@@ -542,7 +607,6 @@ export const characterVisibilityRelations = relations(characterVisibility, ({ on
 }));
 
 export const diceRollsRelations = relations(diceRolls, ({ one }) => ({
-	message: one(messages, { fields: [diceRolls.messageId], references: [messages.id] }),
 	game: one(games, { fields: [diceRolls.gameId], references: [games.id] }),
 	user: one(user, { fields: [diceRolls.userId], references: [user.id] })
 }));
@@ -572,12 +636,6 @@ export const messagesRelations = relations(messages, ({ one, many }) => ({
 	location: one(locations, { fields: [messages.locationId], references: [locations.id] }),
 	character: one(characters, { fields: [messages.characterId], references: [characters.id] }),
 	move: one(moves, { fields: [messages.moveId], references: [moves.id] }),
-	replyTo: one(messages, {
-		fields: [messages.replyToId],
-		references: [messages.id],
-		relationName: 'messageReplies'
-	}),
-	replies: many(messages, { relationName: 'messageReplies' }),
 	statProposals: many(statProposals),
 	itemProposals: many(itemProposals),
 	skillProposals: many(skillProposals),
@@ -585,7 +643,6 @@ export const messagesRelations = relations(messages, ({ one, many }) => ({
 }));
 
 export const statProposalsRelations = relations(statProposals, ({ one }) => ({
-	message: one(messages, { fields: [statProposals.messageId], references: [messages.id] }),
 	character: one(characters, { fields: [statProposals.characterId], references: [characters.id] }),
 	proposedBy: one(user, { fields: [statProposals.proposedBy], references: [user.id] })
 }));
@@ -602,7 +659,6 @@ export const charItemsRelations = relations(charItems, ({ one }) => ({
 }));
 
 export const itemProposalsRelations = relations(itemProposals, ({ one }) => ({
-	message: one(messages, { fields: [itemProposals.messageId], references: [messages.id] }),
 	character: one(characters, { fields: [itemProposals.characterId], references: [characters.id] }),
 	proposedBy: one(user, { fields: [itemProposals.proposedBy], references: [user.id] }),
 	charItem: one(charItems, { fields: [itemProposals.charItemId], references: [charItems.id] }),
@@ -610,7 +666,6 @@ export const itemProposalsRelations = relations(itemProposals, ({ one }) => ({
 }));
 
 export const skillProposalsRelations = relations(skillProposals, ({ one }) => ({
-	message: one(messages, { fields: [skillProposals.messageId], references: [messages.id] }),
 	character: one(characters, { fields: [skillProposals.characterId], references: [characters.id] }),
 	proposedBy: one(user, { fields: [skillProposals.proposedBy], references: [user.id] }),
 	skillType: one(skillTypes, { fields: [skillProposals.skillTypeId], references: [skillTypes.id] })

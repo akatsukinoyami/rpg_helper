@@ -8,7 +8,7 @@ import { assertGm, DeleteSchema } from './utils';
 export const index = query(async () => {
 	const { params } = getRequestEvent();
 
-	return await db.select().from(skillTypes).where(eq(skillTypes.gameId, params.id));
+	return await db.select().from(skillTypes).where(eq(skillTypes.gameId, params.id!));
 });
 
 const imageField = v.optional(v.pipe(v.string(), v.trim()));

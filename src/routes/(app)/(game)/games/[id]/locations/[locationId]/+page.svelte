@@ -29,7 +29,7 @@
 	let replyTo = $state<ReplyTarget | null>(null);
 
 	function handleReply(msg: MessageData) {
-		replyTo = { id: msg.id, characterName: msg.characterName, content: msg.content };
+		replyTo = { id: msg.id, characterName: msg.characterName, content: msg.content ?? '' };
 	}
 </script>
 

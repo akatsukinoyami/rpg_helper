@@ -6,7 +6,7 @@ export class WsStore {
 	reconnecting = $state(false);
 
 	#ws: WebSocket | null = null;
-	#handlers = new Map<WsEventType, Set<(e: WsEvent) => void>>();
+	#handlers = new Map<WsEventType, Set<(payload: unknown) => void>>();
 	#attempt = 0;
 	#destroyed = false;
 
@@ -54,8 +54,8 @@ export class WsStore {
 
 	on<T extends WsEventType>(type: T, handler: (payload: WsEventPayload<T>) => void): () => void {
 		if (!this.#handlers.has(type)) this.#handlers.set(type, new Set());
-		this.#handlers.get(type)!.add(handler as (e: WsEvent) => void);
-		return () => this.#handlers.get(type)?.delete(handler as (e: WsEvent) => void);
+		this.#handlers.get(type)!.add(handler as (payload: unknown) => void);
+		return () => this.#handlers.get(type)?.delete(handler as (payload: unknown) => void);
 	}
 
 	destroy() {

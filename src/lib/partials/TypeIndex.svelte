@@ -50,7 +50,7 @@
   <Form action="create" bind:open={addFormState.open} />
 {/if}
 
-<FunctionLoad remoreFunc={() => index()} messages={dict}>
+<FunctionLoad remoreFunc={() => (index as () => ReturnType<typeof index>)()} messages={dict}>
   {#snippet content(store)}
     {@const items = itemsGetter(store.current)}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 items-start gap-2">

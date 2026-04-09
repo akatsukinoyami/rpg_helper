@@ -95,7 +95,7 @@ const CharacterSchema = v.object({
 export const createCharacter = form(CharacterSchema, async (data) => {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
-	const gameId = params.id;
+	const gameId = params.id!;
 
 	const game = await db
 		.select({ id: games.id })
@@ -157,8 +157,8 @@ export const createCharacter = form(CharacterSchema, async (data) => {
 export const editCharacter = form(CharacterSchema, async (data) => {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
-	const gameId = params.id;
-	const charId = params.charId;
+	const gameId = params.id!;
+	const charId = params.charId!;
 
 	const [game] = await db
 		.select({ gmUserId: games.gmUserId })

@@ -249,59 +249,11 @@
 	</footer>
 {/snippet}
 
-{#snippet systemEventLine(event: SystemEvent)}
-	{@const lineClass = eventLineClass(event)}
-	{@const isPendingProposal = (event.type === 'characterChange' || event.type === 'itemChange' || event.type === 'skillChange') && event.status === 'pending'}
-	<div class="flex items-center gap-2 py-0.5 select-none">
-		<span class="flex-1 border-t border-dashed border-gray-200"></span>
-		<span class={['text-[11px] flex items-center gap-1.5 font-mono', lineClass]}>
-			{#if event.type === 'move'}
-				{m.sys_moved({ charName: name, from: event.fromLocationName ?? event.fromLocationId, to: event.toLocationName ?? event.toLocationId })}
-			{:else if event.type === 'characterChange'}
-				{m.sys_stat_changed({ charName: name, stat: statLabels[event.stat] ?? event.stat, delta: signedDelta(event.delta) })}
-			{:else if event.type === 'itemChange'}
-				{@const delta = event.deltaQty != null
-					? `${signedDelta(event.deltaQty)} qty`
-					: `${signedDelta(event.deltaDur ?? 0)} dur`}
-				{m.sys_item_changed({ charName: name, itemName: event.itemTypeName ?? event.itemTypeId, delta })}
-			{:else if event.type === 'skillChange'}
-				{#if event.action === 'add'}
-					{m.sys_skill_acquired({ charName: name, skillName: event.skillTypeName ?? event.skillTypeId })}
-				{:else}
-					{m.sys_skill_lost({ charName: name, skillName: event.skillTypeName ?? event.skillTypeId })}
-				{/if}
-			{:else if event.type === 'diceRoll'}
-				{m.sys_dice_rolled({ charName: name, expression: event.expression })}
-				<span class="text-gray-300">·</span>
-				{m.sys_dice_result({ rolls: diceRollsText(event.rolls, event.modifier), result: String(event.result) })}
-			{/if}
-
-			{#if isGm}
-				{#if isPendingProposal}
-					<button
-						type="button"
-						class="cursor-pointer text-yellow-500 hover:text-yellow-700 transition-colors"
-						onclick={() => handleApprove(event)}
-					>{m.sys_approve()}</button>
-				{/if}
-				<button
-					type="button"
-					class="cursor-pointer text-red-400 hover:text-red-600 transition-colors"
-					disabled={deletePending}
-					onclick={() => handleEventDelete(event)}
-				>{m.message_delete()}</button>
-			{/if}
-		</span>
-		<span class="flex-1 border-t border-dashed border-gray-200"></span>
-	</div>
-{/snippet}
 
 {#if isSystem}
-	<div class="px-2 py-0.5">
-		{#each msg.events ?? [] as event}
-			{@render systemEventLine(event)}
-		{/each}
-	</div>
+	<message class="px-2 py-0.5">
+		
+	</message>
 {:else if view === 'compact'}
 	<message class="group flex items-start gap-2">
 		{@render avatar('h-5 w-5 text-[10px]')}
@@ -327,6 +279,7 @@
 
 		<header class="block text-[12px] text-gray-400 text-right bg-gray-100 p-1">
 			{msg.locationName ? `${msg.locationName} / `: ''}
+			{msg.id}
 			{time}
 		</header>
 

@@ -1,9 +1,13 @@
 import { command, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
-import { and, asc, desc, eq, isNull, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, ne, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
+import type { PgTransaction } from 'drizzle-orm/pg-core';
+import type { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
+import type { ExtractTablesWithRelations } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
+import type * as schema from '$lib/server/db/schema';
 import {
 	characters,
 	locations,
@@ -13,13 +17,37 @@ import {
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm, isGm } from '$lib/remote/utils';
 
+type AnyTx = PgTransaction<PostgresJsQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
+
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
+
+/** 
+ * @description Compute the next per-location message ID inside a transaction, using an advisory lock. 
+ **/
+async function nextMessageId(locationId: string, tx: AnyTx): Promise<number> {
+	await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
+	const [row] = await tx
+		.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
+		.from(messages)
+		.where(eq(messages.locationId, locationId));
+	return (row?.max ?? 0) + 1;
+}
+
+/** 
+ * @description WHERE clause that matches a message by its ref string ("locationId#integer"). 
+ **/
+function whereRef(ref: string) {
+	return and(
+		eq(messages.locationId, sql`split_part(${ref}, '#', 1)`),
+		eq(messages.id, sql`split_part(${ref}, '#', 2)::integer`)
+	);
+}
 
 export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (locationId) => {
 	return await db
 		.select({
-			id: messages.id,
+			id: sql<string>`${messages.locationId} || '#' || ${messages.id}::text`,
 			content: messages.content,
 			createdAt: messages.createdAt,
 			editedAt: messages.editedAt,
@@ -29,13 +57,16 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 			characterName: characters.name,
 			characterImage: characters.image,
 			moveId: messages.moveId,
-			replyToId: messages.replyToId,
+			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
 		})
 		.from(messages)
 		.leftJoin(characters, eq(messages.characterId, characters.id))
-		.leftJoin(replyMsg, eq(messages.replyToId, replyMsg.id))
+		.leftJoin(replyMsg, and(
+			eq(replyMsg.locationId, messages.locationId),
+			eq(replyMsg.id, messages.replyToId)
+		))
 		.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
 		.where(and(isNull(messages.deletedAt), eq(messages.locationId, locationId)))
 		.orderBy(asc(messages.createdAt));
@@ -47,7 +78,7 @@ export const feed = query(async () => {
 
 	return await db
 		.select({
-			id: messages.id,
+			id: sql<string>`${messages.locationId} || '#' || ${messages.id}::text`,
 			content: messages.content,
 			createdAt: messages.createdAt,
 			editedAt: messages.editedAt,
@@ -58,25 +89,29 @@ export const feed = query(async () => {
 			characterName: characters.name,
 			characterImage: characters.image,
 			moveId: messages.moveId,
-			replyToId: messages.replyToId,
+			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
 		})
 		.from(messages)
 		.innerJoin(locations, eq(messages.locationId, locations.id))
 		.leftJoin(characters, eq(messages.characterId, characters.id))
-		.leftJoin(replyMsg, eq(messages.replyToId, replyMsg.id))
+		.leftJoin(replyMsg, and(
+			eq(replyMsg.locationId, messages.locationId),
+			eq(replyMsg.id, messages.replyToId)
+		))
 		.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
 		.where(and(isNull(messages.deletedAt), eq(locations.gameId, gameId)))
 		.orderBy(asc(messages.createdAt));
 });
 
+const refSchema = v.pipe(v.string(), v.trim(), v.regex(/^.+#\d+$/, 'Invalid message ref'));
 
 export const send = command(
 	v.object({
 		locationId: v.pipe(v.string(), v.trim(), v.minLength(1)),
 		content: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(4096)),
-		replyToId: v.optional(v.pipe(v.string(), v.trim()))
+		replyToId: v.optional(refSchema)
 	}),
 	async ({ locationId, content, replyToId }) => {
 		const { locals, params } = getRequestEvent();
@@ -109,20 +144,30 @@ export const send = command(
 			await createMoveMessages(character.id, lastMsg.locationId, locationId, gameId);
 		}
 
-		const [inserted] = await db
-			.insert(messages)
-			.values({
-				locationId,
-				characterId: character.id,
-				content,
-				replyToId: replyToId || null
-			})
-			.returning({ id: messages.id, createdAt: messages.createdAt });
+		// Extract replyToId integer from ref (same location guaranteed)
+		const replyToInt = replyToId
+			? parseInt(replyToId.split('#')[1], 10)
+			: null;
+
+		const inserted = await db.transaction(async (tx) => {
+			const id = await nextMessageId(locationId, tx);
+			const [row] = await tx
+				.insert(messages)
+				.values({
+					locationId,
+					id,
+					characterId: character.id,
+					content,
+					replyToId: replyToInt
+				})
+				.returning({ id: messages.id, ref: messages.ref, createdAt: messages.createdAt });
+			return row;
+		});
 
 		broadcast(gameId, {
 			type: 'message:created',
 			payload: {
-				messageId: inserted.id,
+				messageId: inserted.ref!,
 				locationId,
 				characterId: character.id,
 				content,
@@ -146,10 +191,14 @@ async function createMoveMessages(
 		.returning({ id: moves.id });
 
 	// Departure message in old location, arrival message in new location
-	await db.insert(messages).values([
-		{ locationId: fromLocationId, characterId, moveId: move.id },
-		{ locationId: toLocationId, characterId, moveId: move.id }
-	]);
+	await db.transaction(async (tx) => {
+		const fromId = await nextMessageId(fromLocationId, tx);
+		const toId = await nextMessageId(toLocationId, tx);
+		await tx.insert(messages).values([
+			{ locationId: fromLocationId, id: fromId, characterId, moveId: move.id },
+			{ locationId: toLocationId, id: toId, characterId, moveId: move.id }
+		]);
+	});
 
 	broadcast(gameId, { type: 'location:revealed', payload: { locationId: fromLocationId } });
 	broadcast(gameId, { type: 'location:revealed', payload: { locationId: toLocationId } });
@@ -157,23 +206,21 @@ async function createMoveMessages(
 	await Promise.all([index(fromLocationId).refresh(), index(toLocationId).refresh()]);
 }
 
-const contentSchema = v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(4096));
-const messageIdSchema = v.pipe(v.string(), v.trim(), v.minLength(1));
-
-async function getMessageAndCheckAccess(messageId: string) {
+async function getMessageAndCheckAccess(messageRef: string) {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
 	const gameId = params.id!;
 
 	const [msg] = await db
 		.select({
-			characterId: messages.characterId,
 			locationId: messages.locationId,
+			id: messages.id,
+			characterId: messages.characterId,
 			moveId: messages.moveId,
 			content: messages.content
 		})
 		.from(messages)
-		.where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
+		.where(and(whereRef(messageRef), isNull(messages.deletedAt)))
 		.limit(1);
 
 	if (!msg) error(404, 'Message not found');
@@ -192,8 +239,10 @@ async function getMessageAndCheckAccess(messageId: string) {
 	return { msg, gameId };
 }
 
+const contentSchema = v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(4096));
+
 export const edit = command(
-	v.object({ messageId: messageIdSchema, content: contentSchema }),
+	v.object({ messageId: refSchema, content: contentSchema }),
 	async ({ messageId, content }) => {
 		const { msg, gameId } = await getMessageAndCheckAccess(messageId);
 
@@ -203,7 +252,7 @@ export const edit = command(
 		await db
 			.update(messages)
 			.set({ content, editedAt: new Date() })
-			.where(eq(messages.id, messageId));
+			.where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
 
 		broadcast(gameId, {
 			type: 'message:edited',
@@ -219,39 +268,39 @@ export const edit = command(
 	}
 );
 
-export const remove = command(messageIdSchema, async (messageId) => {
-	const { msg, gameId } = await getMessageAndCheckAccess(messageId);
+export const remove = command(refSchema, async (messageRef) => {
+	const { msg, gameId } = await getMessageAndCheckAccess(messageRef);
 
 	if (msg.moveId) {
 		// System move message: delete the moves row — cascades to both departure + arrival messages
 		await db.delete(moves).where(eq(moves.id, msg.moveId));
 
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
-		// Also broadcast deletion of the sibling move message (fetched via the move)
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
+		// Also broadcast deletion of the sibling move message
 		const sibling = await db
-			.select({ id: messages.id, locationId: messages.locationId })
+			.select({ locationId: messages.locationId, id: messages.id, ref: messages.ref })
 			.from(messages)
-			.where(and(eq(messages.moveId, msg.moveId), ne(messages.id, messageId)))
+			.where(and(eq(messages.moveId, msg.moveId), ne(messages.id, msg.id)))
 			.limit(1);
 		if (sibling[0]) {
-			broadcast(gameId, { type: 'message:deleted', payload: { messageId: sibling[0].id } });
+			broadcast(gameId, { type: 'message:deleted', payload: { messageId: sibling[0].ref! } });
 			await index(sibling[0].locationId).refresh();
 		}
 	} else if (msg.content === null) {
 		// Other system message (proposal/dice): hard delete, cascade handles linked rows
-		await db.delete(messages).where(eq(messages.id, messageId));
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+		await db.delete(messages).where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
 	} else {
 		// Text message: soft delete
-		await db.update(messages).set({ deletedAt: new Date() }).where(eq(messages.id, messageId));
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+		await db.update(messages).set({ deletedAt: new Date() }).where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
 	}
 
 	await index(msg.locationId).refresh();
 });
 
 export const annotate = command(
-	v.object({ messageId: messageIdSchema, annotation: v.pipe(v.string(), v.trim()) }),
+	v.object({ messageId: refSchema, annotation: v.pipe(v.string(), v.trim()) }),
 	async ({ messageId, annotation }) => {
 		const { params } = getRequestEvent();
 		const gameId = params.id!;
@@ -261,11 +310,12 @@ export const annotate = command(
 		const [msg] = await db
 			.select({
 				locationId: messages.locationId,
+				id: messages.id,
 				content: messages.content,
 				editedAt: messages.editedAt
 			})
 			.from(messages)
-			.where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
+			.where(and(whereRef(messageId), isNull(messages.deletedAt)))
 			.limit(1);
 
 		if (!msg) error(404, 'Message not found');
@@ -275,7 +325,7 @@ export const annotate = command(
 		await db
 			.update(messages)
 			.set({ gmAnnotation: processedAnnotation })
-			.where(eq(messages.id, messageId));
+			.where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
 
 		broadcast(gameId, {
 			type: 'message:edited',

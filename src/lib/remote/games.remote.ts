@@ -1,7 +1,7 @@
 import { form, getRequestEvent } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { characters, games, locations } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
@@ -79,7 +79,7 @@ export const edit = form(GameBaseSchema, async (data) => {
 	await db
 		.update(locations)
 		.set({ name: data.name })
-		.where(and(eq(locations.gameId, gameId), eq(locations.parentId, null)));
+		.where(and(eq(locations.gameId, gameId), isNull(locations.parentId)));
 
 	broadcast(gameId!, { type: 'game:updated', payload: updated });
 
@@ -96,7 +96,7 @@ const TransferSchema = v.object({ newGmUserId: v.pipe(v.string(), v.minLength(1)
 export const transfer = form(TransferSchema, async (data) => {
 	const { locals, params } = getRequestEvent();
 	const userId = locals.user!.id;
-	const gameId = params.id;
+	const gameId = params.id!;
 
 	const [game] = await db
 		.select({ gmUserId: games.gmUserId })

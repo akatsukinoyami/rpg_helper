@@ -32,12 +32,22 @@ async function getCharacterInGame(userId: string, gameId: string) {
 	return character;
 }
 
+/** Insert a system message using per-location counter. Returns { locationId, id, ref }. */
 async function insertSystemMessage(locationId: string, characterId: string) {
-	const [msg] = await db
-		.insert(messages)
-		.values({ locationId, characterId })
-		.returning({ id: messages.id });
-	return msg;
+	return await db.transaction(async (tx) => {
+		await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
+		const [row] = await tx
+			.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
+			.from(messages)
+			.where(eq(messages.locationId, locationId));
+		const id = (row?.max ?? 0) + 1;
+
+		const [msg] = await tx
+			.insert(messages)
+			.values({ locationId, id, characterId })
+			.returning({ locationId: messages.locationId, id: messages.id, ref: messages.ref });
+		return msg;
+	});
 }
 
 async function applyStatDelta(characterId: string, field: string, delta: number) {
@@ -56,31 +66,26 @@ async function applyStatDelta(characterId: string, field: string, delta: number)
 	}
 }
 
-async function refreshMessage(gameId: string, messageId: string, type: 'edited' | 'deleted') {
-	const [msg] = await db
-		.select({ locationId: messages.locationId })
-		.from(messages)
-		.where(eq(messages.id, messageId))
-		.limit(1);
-
+async function refreshMessage(gameId: string, messageRef: string, type: 'edited' | 'deleted') {
+	const locationId = messageRef.split('#')[0];
 	if (type === 'edited') {
-		broadcast(gameId, { 
-			type: 'message:edited', 
-			payload: { messageId, content: null, gmAnnotation: null, editedAt: new Date().toISOString() } 
+		broadcast(gameId, {
+			type: 'message:edited',
+			payload: { messageId: messageRef, content: null, gmAnnotation: null, editedAt: new Date().toISOString() }
 		});
 	} else {
-		broadcast(gameId, { 
-			type: 'message:deleted', 
-			payload: { messageId } 
+		broadcast(gameId, {
+			type: 'message:deleted',
+			payload: { messageId: messageRef }
 		});
 	}
-	if (msg) await index(msg.locationId).refresh();
+	await index(locationId).refresh();
 }
 
-function broadcastSystemMessage(gameId: string, msgId: string, locationId: string, characterId: string) {
-	broadcast(gameId, { 
-		type: 'message:created', 
-		payload: { messageId: msgId, locationId, characterId, content: null, createdAt: new Date().toISOString() } 
+function broadcastSystemMessage(gameId: string, messageRef: string, locationId: string, characterId: string) {
+	broadcast(gameId, {
+		type: 'message:created',
+		payload: { messageId: messageRef, locationId, characterId, content: null, createdAt: new Date().toISOString() }
 	});
 }
 
@@ -88,8 +93,9 @@ async function _getProposal<T extends keyof typeof proposalTables>(type: T, prop
 	const table = proposalTables[type];
 	const [proposal] = await db
 		.select()
-		.from(table)
-		.where(eq(table.id, proposalId))
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		.from(table as any)
+		.where(eq((table as any).id, proposalId))
 		.limit(1);
 
 	if (!proposal) error(404, 'Proposal not found');
@@ -114,7 +120,7 @@ const proposalTables = {
 	characterChange: statProposals,
 	itemChange: itemProposals,
 	skillChange: skillProposals,
-}
+};
 
 const applyApprove = {
 	async characterChange(proposal: ProposalOf<'characterChange'>) {
@@ -137,11 +143,11 @@ const applyApprove = {
 		} else {
 			await db
 				.insert(charItems)
-				.values({ 
-					characterId: proposal.characterId, 
-					itemTypeId: proposal.itemTypeId, 
-					quantity: proposal.deltaQty ?? null, 
-					durability: proposal.deltaDur ?? null 
+				.values({
+					characterId: proposal.characterId,
+					itemTypeId: proposal.itemTypeId,
+					quantity: proposal.deltaQty ?? null,
+					durability: proposal.deltaDur ?? null
 				});
 		}
 	},
@@ -149,16 +155,16 @@ const applyApprove = {
 		if (proposal.action === 'add') {
 			await db
 				.insert(charSkills)
-				.values({ 
+				.values({
 					characterId: proposal.characterId,
-					skillTypeId: proposal.skillTypeId 
+					skillTypeId: proposal.skillTypeId
 				})
 				.onConflictDoNothing();
 		} else {
 			await db
 				.delete(charSkills)
 				.where(and(
-					eq(charSkills.characterId, proposal.characterId), 
+					eq(charSkills.characterId, proposal.characterId),
 					eq(charSkills.skillTypeId, proposal.skillTypeId)
 				));
 		}
@@ -174,14 +180,15 @@ export const approve = command(
 
 		const proposal = await _getProposal(type, id);
 
-		await applyApprove[type](proposal);
+		await (applyApprove[type] as (p: typeof proposal) => Promise<void>)(proposal);
 
 		await db
 			.update(proposalTables[type])
 			.set({ status: 'approved' })
 			.where(eq(proposalTables[type].id, proposal.id));
 
-		await refreshMessage(gameId, proposal.messageId, 'edited');
+		const ref = `${proposal.messageLocationId}#${proposal.messageId}`;
+		await refreshMessage(gameId, ref, 'edited');
 	}
 );
 
@@ -199,7 +206,8 @@ export const reject = command(
 			.set({ status: 'rejected' })
 			.where(eq(proposalTables[type].id, id));
 
-		await refreshMessage(gameId, proposal.messageId, 'edited');
+		const ref = `${proposal.messageLocationId}#${proposal.messageId}`;
+		await refreshMessage(gameId, ref, 'edited');
 	}
 );
 
@@ -233,15 +241,15 @@ const removePropose = {
 				await db
 					.delete(charSkills)
 					.where(and(
-						eq(charSkills.characterId, proposal.characterId), 
+						eq(charSkills.characterId, proposal.characterId),
 						eq(charSkills.skillTypeId, proposal.skillTypeId)
 					));
 			} else {
 				await db
 					.insert(charSkills)
-					.values({ 
-						characterId: proposal.characterId, 
-						skillTypeId: proposal.skillTypeId 
+					.values({
+						characterId: proposal.characterId,
+						skillTypeId: proposal.skillTypeId
 					})
 					.onConflictDoNothing();
 			}
@@ -258,10 +266,18 @@ export const remove = command(
 
 		const proposal = await _getProposal(type, id, true);
 
-		await removePropose[type](proposal);
+		await (removePropose[type] as (p: typeof proposal) => Promise<void>)(proposal);
 
-		await db.delete(messages).where(eq(messages.id, proposal.messageId));
-		await refreshMessage(gameId, proposal.messageId, 'deleted');
+		// Hard delete the system message — cascade removes the proposal row
+		await db.delete(messages).where(
+			and(
+				eq(messages.locationId, proposal.messageLocationId),
+				eq(messages.id, proposal.messageId)
+			)
+		);
+
+		const ref = `${proposal.messageLocationId}#${proposal.messageId}`;
+		await refreshMessage(gameId, ref, 'deleted');
 	}
 );
 
@@ -284,9 +300,18 @@ export const sendStat = command(
 		const character = await getCharacterInGame(locals.user!.id, gameId);
 
 		const msg = await insertSystemMessage(locationId, character.id);
-		await db.insert(statProposals).values({ messageId: msg.id, characterId: character.id, proposedBy: locals.user!.id, field, delta, reason: reason ?? null, status: 'pending' });
+		await db.insert(statProposals).values({
+			messageLocationId: msg.locationId,
+			messageId: msg.id,
+			characterId: character.id,
+			proposedBy: locals.user!.id,
+			field,
+			delta,
+			reason: reason ?? null,
+			status: 'pending'
+		});
 
-		broadcastSystemMessage(gameId, msg.id, locationId, character.id);
+		broadcastSystemMessage(gameId, msg.ref!, locationId, character.id);
 		await index(locationId).refresh();
 	}
 );
@@ -307,9 +332,20 @@ export const sendItem = command(
 		if (deltaQty == null && deltaDur == null) error(400, 'Must provide deltaQty or deltaDur');
 
 		const msg = await insertSystemMessage(locationId, character.id);
-		await db.insert(itemProposals).values({ messageId: msg.id, characterId: character.id, proposedBy: locals.user!.id, itemTypeId, charItemId: charItemId ?? null, deltaQty: deltaQty ?? null, deltaDur: deltaDur ?? null, reason: reason ?? null, status: 'pending' });
+		await db.insert(itemProposals).values({
+			messageLocationId: msg.locationId,
+			messageId: msg.id,
+			characterId: character.id,
+			proposedBy: locals.user!.id,
+			itemTypeId,
+			charItemId: charItemId ?? null,
+			deltaQty: deltaQty ?? null,
+			deltaDur: deltaDur ?? null,
+			reason: reason ?? null,
+			status: 'pending'
+		});
 
-		broadcastSystemMessage(gameId, msg.id, locationId, character.id);
+		broadcastSystemMessage(gameId, msg.ref!, locationId, character.id);
 		await index(locationId).refresh();
 	}
 );
@@ -327,9 +363,18 @@ export const sendSkill = command(
 		const character = await getCharacterInGame(locals.user!.id, gameId);
 
 		const msg = await insertSystemMessage(locationId, character.id);
-		await db.insert(skillProposals).values({ messageId: msg.id, characterId: character.id, proposedBy: locals.user!.id, skillTypeId, action, reason: reason ?? null, status: 'pending' });
+		await db.insert(skillProposals).values({
+			messageLocationId: msg.locationId,
+			messageId: msg.id,
+			characterId: character.id,
+			proposedBy: locals.user!.id,
+			skillTypeId,
+			action,
+			reason: reason ?? null,
+			status: 'pending'
+		});
 
-		broadcastSystemMessage(gameId, msg.id, locationId, character.id);
+		broadcastSystemMessage(gameId, msg.ref!, locationId, character.id);
 		await index(locationId).refresh();
 	}
 );
@@ -351,10 +396,18 @@ export const gmSetStat = command(
 		await assertGm(gameId);
 
 		const msg = await insertSystemMessage(locationId, characterId);
-		await db.insert(statProposals).values({ messageId: msg.id, characterId, proposedBy: locals.user!.id, field, delta, status: 'approved' });
+		await db.insert(statProposals).values({
+			messageLocationId: msg.locationId,
+			messageId: msg.id,
+			characterId,
+			proposedBy: locals.user!.id,
+			field,
+			delta,
+			status: 'approved'
+		});
 		await applyStatDelta(characterId, field, delta);
 
-		broadcastSystemMessage(gameId, msg.id, locationId, characterId);
+		broadcastSystemMessage(gameId, msg.ref!, locationId, characterId);
 		await index(locationId).refresh();
 	}
 );

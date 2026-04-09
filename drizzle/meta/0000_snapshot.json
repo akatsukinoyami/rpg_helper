@@ -1,5 +1,5 @@
 {
-  "id": "3d66075e-fa2f-47e0-a51b-0f8cc8b93d6f",
+  "id": "5e63ce1d-cc68-4f72-837c-6142cb6509a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -115,20 +115,19 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "item_type_id": {
           "name": "item_type_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -193,13 +192,13 @@
       "columns": {
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "skill_type_id": {
           "name": "skill_type_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
@@ -253,14 +252,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -313,13 +311,13 @@
       "columns": {
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "item_id": {
           "name": "item_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -380,13 +378,13 @@
       "columns": {
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "skill_id": {
           "name": "skill_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -447,13 +445,13 @@
       "columns": {
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "visible_to_character_id": {
           "name": "visible_to_character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -556,10 +554,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -569,13 +566,13 @@
         },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "race_id": {
           "name": "race_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -659,7 +656,7 @@
         },
         "current_location_id": {
           "name": "current_location_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -745,20 +742,35 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "message_id": {
-          "name": "message_id",
-          "type": "uuid",
+        "message_location_id": {
+          "name": "message_location_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "message_id": {
+          "name": "message_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message_ref": {
+          "name": "message_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "message_location_id || '#' || message_id::text",
+            "type": "stored"
+          }
+        },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -790,19 +802,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "dice_rolls_message_id_messages_id_fk": {
-          "name": "dice_rolls_message_id_messages_id_fk",
-          "tableFrom": "dice_rolls",
-          "tableTo": "messages",
-          "columnsFrom": [
-            "message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "dice_rolls_game_id_games_id_fk": {
           "name": "dice_rolls_game_id_games_id_fk",
           "tableFrom": "dice_rolls",
@@ -828,6 +827,21 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "dice_rolls_message_location_id_message_id_messages_location_id_id_fk": {
+          "name": "dice_rolls_message_location_id_message_id_messages_location_id_id_fk",
+          "tableFrom": "dice_rolls",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "message_location_id",
+            "message_id"
+          ],
+          "columnsTo": [
+            "location_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -842,10 +856,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -921,20 +934,35 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "message_id": {
-          "name": "message_id",
-          "type": "uuid",
+        "message_location_id": {
+          "name": "message_location_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "message_id": {
+          "name": "message_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message_ref": {
+          "name": "message_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "message_location_id || '#' || message_id::text",
+            "type": "stored"
+          }
+        },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -946,13 +974,13 @@
         },
         "char_item_id": {
           "name": "char_item_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "item_type_id": {
           "name": "item_type_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -992,19 +1020,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "item_proposals_message_id_messages_id_fk": {
-          "name": "item_proposals_message_id_messages_id_fk",
-          "tableFrom": "item_proposals",
-          "tableTo": "messages",
-          "columnsFrom": [
-            "message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "item_proposals_character_id_characters_id_fk": {
           "name": "item_proposals_character_id_characters_id_fk",
           "tableFrom": "item_proposals",
@@ -1056,6 +1071,21 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "item_proposals_message_location_id_message_id_messages_location_id_id_fk": {
+          "name": "item_proposals_message_location_id_message_id_messages_location_id_id_fk",
+          "tableFrom": "item_proposals",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "message_location_id",
+            "message_id"
+          ],
+          "columnsTo": [
+            "location_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1070,14 +1100,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1155,10 +1184,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -1213,20 +1241,19 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "parent_id": {
           "name": "parent_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1289,28 +1316,37 @@
       "name": "messages",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
         "location_id": {
           "name": "location_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ref": {
+          "name": "ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "location_id || '#' || id::text",
+            "type": "stored"
+          }
+        },
         "move_id": {
           "name": "move_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1322,13 +1358,23 @@
         },
         "reply_to_id": {
           "name": "reply_to_id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
+        "reply_ref": {
+          "name": "reply_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "CASE WHEN reply_to_id IS NOT NULL THEN location_id || '#' || reply_to_id::text ELSE NULL END",
+            "type": "stored"
+          }
+        },
         "referenced_char_ids": {
           "name": "referenced_char_ids",
-          "type": "uuid[]",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -1398,9 +1444,32 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "messages_location_id_reply_to_id_messages_location_id_id_fk": {
+          "name": "messages_location_id_reply_to_id_messages_location_id_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "location_id",
+            "reply_to_id"
+          ],
+          "columnsTo": [
+            "location_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "messages_location_id_id_pk": {
+          "name": "messages_location_id_id_pk",
+          "columns": [
+            "location_id",
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -1412,26 +1481,25 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "from_location_id": {
           "name": "from_location_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "to_location_id": {
           "name": "to_location_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1497,13 +1565,13 @@
       "columns": {
         "race_id": {
           "name": "race_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "skill_id": {
           "name": "skill_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
@@ -1557,14 +1625,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1711,20 +1778,35 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "message_id": {
-          "name": "message_id",
-          "type": "uuid",
+        "message_location_id": {
+          "name": "message_location_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "message_id": {
+          "name": "message_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message_ref": {
+          "name": "message_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "message_location_id || '#' || message_id::text",
+            "type": "stored"
+          }
+        },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1736,7 +1818,7 @@
         },
         "skill_type_id": {
           "name": "skill_type_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1771,19 +1853,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "skill_proposals_message_id_messages_id_fk": {
-          "name": "skill_proposals_message_id_messages_id_fk",
-          "tableFrom": "skill_proposals",
-          "tableTo": "messages",
-          "columnsFrom": [
-            "message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "skill_proposals_character_id_characters_id_fk": {
           "name": "skill_proposals_character_id_characters_id_fk",
           "tableFrom": "skill_proposals",
@@ -1822,6 +1891,21 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "skill_proposals_message_location_id_message_id_messages_location_id_id_fk": {
+          "name": "skill_proposals_message_location_id_message_id_messages_location_id_id_fk",
+          "tableFrom": "skill_proposals",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "message_location_id",
+            "message_id"
+          ],
+          "columnsTo": [
+            "location_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1836,14 +1920,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "game_id": {
           "name": "game_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1901,10 +1984,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -1946,20 +2028,35 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "message_id": {
-          "name": "message_id",
-          "type": "uuid",
+        "message_location_id": {
+          "name": "message_location_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "message_id": {
+          "name": "message_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message_ref": {
+          "name": "message_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "message_location_id || '#' || message_id::text",
+            "type": "stored"
+          }
+        },
         "character_id": {
           "name": "character_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -2006,19 +2103,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "stat_proposals_message_id_messages_id_fk": {
-          "name": "stat_proposals_message_id_messages_id_fk",
-          "tableFrom": "stat_proposals",
-          "tableTo": "messages",
-          "columnsFrom": [
-            "message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "stat_proposals_character_id_characters_id_fk": {
           "name": "stat_proposals_character_id_characters_id_fk",
           "tableFrom": "stat_proposals",
@@ -2043,6 +2127,21 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "stat_proposals_message_location_id_message_id_messages_location_id_id_fk": {
+          "name": "stat_proposals_message_location_id_message_id_messages_location_id_id_fk",
+          "tableFrom": "stat_proposals",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "message_location_id",
+            "message_id"
+          ],
+          "columnsTo": [
+            "location_id",
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

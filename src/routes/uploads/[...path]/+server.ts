@@ -30,7 +30,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		error(404, 'Not found');
 	}
 
-	return new Response(data, {
+	return new Response(data.buffer as ArrayBuffer, {
 		headers: {
 			'Content-Type': contentType,
 			'Cache-Control': 'public, max-age=31536000, immutable'
