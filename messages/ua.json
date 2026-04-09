@@ -133,6 +133,7 @@
 	"sys_dice_rolled": "{charName} кинув {expression}",
 	"sys_dice_result": "Підсумок: {rolls} = {result}",
 	"sys_approve": "схвалити",
+	"sys_reject": "відхилити",
 	"game_dashboard_no_characters": "Персонажів поки немає.",
 	"game_dashboard_pending": "Очікує",
 	"game_dashboard_reject": "Відхилити",

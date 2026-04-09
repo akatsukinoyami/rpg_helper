@@ -133,6 +133,7 @@
 	"sys_dice_rolled": "{charName} rolled {expression}",
 	"sys_dice_result": "Result: {rolls} = {result}",
 	"sys_approve": "approve",
+	"sys_reject": "reject",
 	"game_dashboard_no_characters": "No characters yet.",
 	"game_dashboard_pending": "Pending",
 	"game_dashboard_reject": "Reject",

@@ -133,6 +133,7 @@
 	"sys_dice_rolled": "{charName} бросил {expression}",
 	"sys_dice_result": "Итог: {rolls} = {result}",
 	"sys_approve": "одобрить",
+	"sys_reject": "отклонить",
 	"game_dashboard_no_characters": "Персонажей пока нет.",
 	"game_dashboard_pending": "Ожидает",
 	"game_dashboard_reject": "Отклонить",

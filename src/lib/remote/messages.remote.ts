@@ -21,6 +21,37 @@ type AnyTx = PgTransaction<PostgresJsQueryResultHKT, typeof schema, ExtractTable
 
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
+const fromLocation = alias(locations, 'from_location');
+const toLocation = alias(locations, 'to_location');
+
+/**
+ * Correlated scalar subquery: returns the single system event attached to a message row,
+ * or NULL for regular text/move messages. Uses UNION ALL + LIMIT 1 so PG short-circuits
+ * on first match — no extra joins needed.
+ */
+const eventSubquery = sql<import('$lib/types').SystemEvent | null>`(
+  SELECT json_build_object('type','diceRoll','id',dr.id,'expression',dr.expression,
+    'rolls',dr.results->'dice','modifier',(dr.results->>'modifier')::int,'result',(dr.results->>'total')::int)
+  FROM dice_rolls dr
+  WHERE dr.message_location_id = ${messages.locationId} AND dr.message_id = ${messages.id}
+  UNION ALL
+  SELECT json_build_object('type','characterChange','id',sp.id,'stat',sp.field,
+    'delta',sp.delta,'reason',sp.reason,'status',sp.status)
+  FROM stat_proposals sp
+  WHERE sp.message_location_id = ${messages.locationId} AND sp.message_id = ${messages.id}
+  UNION ALL
+  SELECT json_build_object('type','itemChange','id',ip.id,'charItemId',ip.char_item_id,
+    'itemTypeId',ip.item_type_id,'deltaQty',ip.delta_qty,'deltaDur',ip.delta_dur,
+    'reason',ip.reason,'status',ip.status)
+  FROM item_proposals ip
+  WHERE ip.message_location_id = ${messages.locationId} AND ip.message_id = ${messages.id}
+  UNION ALL
+  SELECT json_build_object('type','skillChange','id',skp.id,'skillTypeId',skp.skill_type_id,
+    'action',skp.action,'reason',skp.reason,'status',skp.status)
+  FROM skill_proposals skp
+  WHERE skp.message_location_id = ${messages.locationId} AND skp.message_id = ${messages.id}
+  LIMIT 1
+)`;
 
 /** 
  * @description Compute the next per-location message ID inside a transaction, using an advisory lock. 
@@ -57,12 +88,18 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 			characterName: characters.name,
 			characterImage: characters.image,
 			moveId: messages.moveId,
+			moveFromLocation: fromLocation,
+			moveToLocation: toLocation,
+			event: eventSubquery,
 			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
 		})
 		.from(messages)
 		.leftJoin(characters, eq(messages.characterId, characters.id))
+		.leftJoin(moves, eq(messages.moveId, moves.id))
+		.leftJoin(fromLocation, eq(moves.fromLocationId, fromLocation.id))
+		.leftJoin(toLocation, eq(moves.toLocationId, toLocation.id))
 		.leftJoin(replyMsg, and(
 			eq(replyMsg.locationId, messages.locationId),
 			eq(replyMsg.id, messages.replyToId)
@@ -89,6 +126,9 @@ export const feed = query(async () => {
 			characterName: characters.name,
 			characterImage: characters.image,
 			moveId: messages.moveId,
+			moveFromLocationName: fromLocation.name,
+			moveToLocationName: toLocation.name,
+			event: eventSubquery,
 			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
@@ -96,6 +136,9 @@ export const feed = query(async () => {
 		.from(messages)
 		.innerJoin(locations, eq(messages.locationId, locations.id))
 		.leftJoin(characters, eq(messages.characterId, characters.id))
+		.leftJoin(moves, eq(messages.moveId, moves.id))
+		.leftJoin(fromLocation, eq(moves.fromLocationId, fromLocation.id))
+		.leftJoin(toLocation, eq(moves.toLocationId, toLocation.id))
 		.leftJoin(replyMsg, and(
 			eq(replyMsg.locationId, messages.locationId),
 			eq(replyMsg.id, messages.replyToId)

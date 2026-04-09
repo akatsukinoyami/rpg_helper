@@ -57,9 +57,12 @@ export interface DiceRollEvent {
 	result: number;
 }
 
-export type SystemEvent =
-	| MoveEvent
+export type ProposalEvent =
 	| CharacterChangeEvent
 	| ItemChangeEvent
-	| SkillChangeEvent
+	| SkillChangeEvent;
+
+export type SystemEvent =
+	| MoveEvent
+	| ProposalEvent
 	| DiceRollEvent;

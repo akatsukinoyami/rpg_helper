@@ -1,4 +1,6 @@
 <script lang="ts" module>
+	import type { SystemEvent, ProposalEventType, ProposalEvent } from '$lib/types';
+
 	export type MsgView = 'compact' | 'forum';
 
 	export interface MessageData {
@@ -13,10 +15,12 @@
 		locationName?: string;
 		locationId?: string;
 		moveId?: string | null;
+		moveFromLocation?: { id: string; name: string } | null;
+		moveToLocation?: { id: string; name: string } | null;
 		replyToId?: string | null;
 		replyContent?: string | null;
 		replyCharacterName?: string | null;
-		events?: import('$lib/types').SystemEvent[];
+		event?: SystemEvent | null;
 	}
 
 	export interface Props {
@@ -35,11 +39,10 @@
 	import MessageForm from '$lib/partials/MessageForm.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import { renderMarkdown } from '$lib/md';
+	import MessageSystem from '$lib/partials/MessageSystem.svelte';
 	import * as messages from '$lib/remote/messages.remote';
 	import * as proposals from '$lib/remote/proposals.remote';
-
 	import * as m from '$lib/paraglide/messages';
-	import type { SystemEvent, CharacterChangeEvent, ItemChangeEvent, SkillChangeEvent, ProposalEventType } from '$lib/types';
 
 	let { msg, view, isGm = false, myCharacterId = null, onReply }: Props = $props();
 
@@ -71,36 +74,6 @@
 	let annotating = $state(false);
 	let annotationDraft = $state(untrack(() => msg.gmAnnotation ?? ''));
 	let deletePending = $state(false);
-
-	const statLabels: Record<string, string> = {
-		hp: 'HP', mp: 'MP', maxHp: 'Max HP', maxMp: 'Max MP',
-		str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA'
-	};
-
-	function signedDelta(n: number): string {
-		return n > 0 ? `+${n}` : `${n}`;
-	}
-
-	function eventLineClass(event: SystemEvent): string {
-		if (event.type === 'move' || event.type === 'diceRoll') return 'text-gray-400';
-		const e = event as CharacterChangeEvent | ItemChangeEvent | SkillChangeEvent;
-		if (e.status === 'rejected') return 'text-gray-300 line-through';
-		if (e.status === 'pending') return 'text-gray-400';
-		// approved — color by direction
-		if (event.type === 'characterChange') return event.delta > 0 ? 'text-green-600' : 'text-red-500';
-		if (event.type === 'itemChange') {
-			const d = event.deltaQty ?? event.deltaDur ?? 0;
-			return d > 0 ? 'text-green-600' : 'text-red-500';
-		}
-		if (event.type === 'skillChange') return event.action === 'add' ? 'text-green-600' : 'text-red-500';
-		return 'text-gray-400';
-	}
-
-	function diceRollsText(rolls: number[], modifier: number): string {
-		const parts = rolls.join(', ');
-		if (modifier === 0) return parts;
-		return modifier > 0 ? `${parts} (+${modifier})` : `${parts} (${modifier})`;
-	}
 
 	async function handleDelete() {
 		if (deletePending) return;
@@ -249,11 +222,47 @@
 	</footer>
 {/snippet}
 
+{#snippet approvalButtons({ status,  type,  id }: ProposalEvent)}
+	{#if isGm && status === 'pending'}
+		<button 
+			class="ml-1 text-yellow-600 hover:underline"
+			onclick={() => proposals.approve({ type, id })} 
+		>{m.sys_approve()}</button>
+		<button 
+			class="ml-1 text-red-500 hover:underline"
+			onclick={() => proposals.reject({ type, id })} 
+		>{m.sys_reject()}</button>
+	{/if}
+{/snippet}
+
 
 {#if isSystem}
-	<message class="px-2 py-0.5">
-		
-	</message>
+	<MessageSystem {msg}>
+		{#if msg.moveFromLocation && msg.moveToLocation}
+			{msg.moveFromLocation.name} → {msg.moveToLocation.name}
+		{:else if msg.event?.type === 'diceRoll'}
+			🎲 {msg.event.expression}: [{msg.event.rolls.join(', ')}]{msg.event.modifier !== 0 ? ` ${msg.event.modifier > 0 ? '+' : ''}${msg.event.modifier}` : ''} = <strong>{msg.event.result}</strong>
+		{:else if msg.event?.type === 'characterChange'}
+			{msg.event.stat} {msg.event.delta > 0 ? '+' : ''}{msg.event.delta}
+			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
+			<span class="opacity-60">({msg.event.status})</span>
+			{@render approvalButtons(msg.event)}
+		{:else if msg.event?.type === 'itemChange'}
+			{msg.event.itemTypeName ?? msg.event.itemTypeId}
+			{#if msg.event.deltaQty != null} qty {msg.event.deltaQty > 0 ? '+' : ''}{msg.event.deltaQty}{/if}
+			{#if msg.event.deltaDur != null} dur {msg.event.deltaDur > 0 ? '+' : ''}{msg.event.deltaDur}{/if}
+			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
+			<span class="opacity-60">({msg.event.status})</span>
+			{@render approvalButtons(msg.event)}
+		{:else if msg.event?.type === 'skillChange'}
+			{msg.event.action === 'add' ? '+' : '−'} {msg.event.skillTypeName ?? msg.event.skillTypeId}
+			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
+			<span class="opacity-60">({msg.event.status})</span>
+			{@render approvalButtons(msg.event)}
+		{:else}
+			[system]
+		{/if}
+	</MessageSystem>
 {:else if view === 'compact'}
 	<message class="group flex items-start gap-2">
 		{@render avatar('h-5 w-5 text-[10px]')}
