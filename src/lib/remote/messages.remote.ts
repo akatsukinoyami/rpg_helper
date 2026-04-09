@@ -1,13 +1,17 @@
 import { command, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { characters, locations, messages } from '$lib/server/db/schema';
+import {
+	characters,
+	locations,
+	messages,
+	moves
+} from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm, isGm } from '$lib/remote/utils';
-import { processDice } from '$lib/server/dice';
 
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
@@ -24,6 +28,7 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 			characterId: messages.characterId,
 			characterName: characters.name,
 			characterImage: characters.image,
+			moveId: messages.moveId,
 			replyToId: messages.replyToId,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
@@ -52,6 +57,7 @@ export const feed = query(async () => {
 			locationName: locations.name,
 			characterName: characters.name,
 			characterImage: characters.image,
+			moveId: messages.moveId,
 			replyToId: messages.replyToId,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
@@ -64,6 +70,7 @@ export const feed = query(async () => {
 		.where(and(isNull(messages.deletedAt), eq(locations.gameId, gameId)))
 		.orderBy(asc(messages.createdAt));
 });
+
 
 export const send = command(
 	v.object({
@@ -84,14 +91,30 @@ export const send = command(
 
 		if (!character) error(403, 'No character in this game');
 
-		const processed = processDice(content);
+		// Detect location change: find last message this character sent in this game
+		const [lastMsg] = await db
+			.select({ locationId: messages.locationId })
+			.from(messages)
+			.where(
+				and(
+					eq(messages.characterId, character.id),
+					isNull(messages.deletedAt),
+					isNull(messages.moveId) // only text messages count
+				)
+			)
+			.orderBy(desc(messages.createdAt))
+			.limit(1);
+
+		if (lastMsg && lastMsg.locationId !== locationId) {
+			await createMoveMessages(character.id, lastMsg.locationId, locationId, gameId);
+		}
 
 		const [inserted] = await db
 			.insert(messages)
 			.values({
 				locationId,
-				characterId: character?.id ?? null,
-				content: processed,
+				characterId: character.id,
+				content,
 				replyToId: replyToId || null
 			})
 			.returning({ id: messages.id, createdAt: messages.createdAt });
@@ -101,8 +124,8 @@ export const send = command(
 			payload: {
 				messageId: inserted.id,
 				locationId,
-				characterId: character?.id ?? null,
-				content: processed,
+				characterId: character.id,
+				content,
 				createdAt: inserted.createdAt.toISOString()
 			}
 		});
@@ -110,6 +133,29 @@ export const send = command(
 		await index(locationId).refresh();
 	}
 );
+
+async function createMoveMessages(
+	characterId: string,
+	fromLocationId: string,
+	toLocationId: string,
+	gameId: string
+) {
+	const [move] = await db
+		.insert(moves)
+		.values({ characterId, fromLocationId, toLocationId })
+		.returning({ id: moves.id });
+
+	// Departure message in old location, arrival message in new location
+	await db.insert(messages).values([
+		{ locationId: fromLocationId, characterId, moveId: move.id },
+		{ locationId: toLocationId, characterId, moveId: move.id }
+	]);
+
+	broadcast(gameId, { type: 'location:revealed', payload: { locationId: fromLocationId } });
+	broadcast(gameId, { type: 'location:revealed', payload: { locationId: toLocationId } });
+
+	await Promise.all([index(fromLocationId).refresh(), index(toLocationId).refresh()]);
+}
 
 const contentSchema = v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(4096));
 const messageIdSchema = v.pipe(v.string(), v.trim(), v.minLength(1));
@@ -120,7 +166,12 @@ async function getMessageAndCheckAccess(messageId: string) {
 	const gameId = params.id!;
 
 	const [msg] = await db
-		.select({ characterId: messages.characterId, locationId: messages.locationId })
+		.select({
+			characterId: messages.characterId,
+			locationId: messages.locationId,
+			moveId: messages.moveId,
+			content: messages.content
+		})
 		.from(messages)
 		.where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
 		.limit(1);
@@ -145,18 +196,20 @@ export const edit = command(
 	v.object({ messageId: messageIdSchema, content: contentSchema }),
 	async ({ messageId, content }) => {
 		const { msg, gameId } = await getMessageAndCheckAccess(messageId);
-		const processed = processDice(content);
+
+		// System messages (moveId set or content null) cannot be edited
+		if (msg.moveId || msg.content === null) error(400, 'System messages cannot be edited');
 
 		await db
 			.update(messages)
-			.set({ content: processed, editedAt: new Date() })
+			.set({ content, editedAt: new Date() })
 			.where(eq(messages.id, messageId));
 
 		broadcast(gameId, {
 			type: 'message:edited',
 			payload: {
 				messageId,
-				content: processed,
+				content,
 				gmAnnotation: null,
 				editedAt: new Date().toISOString()
 			}
@@ -169,9 +222,30 @@ export const edit = command(
 export const remove = command(messageIdSchema, async (messageId) => {
 	const { msg, gameId } = await getMessageAndCheckAccess(messageId);
 
-	await db.update(messages).set({ deletedAt: new Date() }).where(eq(messages.id, messageId));
+	if (msg.moveId) {
+		// System move message: delete the moves row — cascades to both departure + arrival messages
+		await db.delete(moves).where(eq(moves.id, msg.moveId));
 
-	broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+		// Also broadcast deletion of the sibling move message (fetched via the move)
+		const sibling = await db
+			.select({ id: messages.id, locationId: messages.locationId })
+			.from(messages)
+			.where(and(eq(messages.moveId, msg.moveId), ne(messages.id, messageId)))
+			.limit(1);
+		if (sibling[0]) {
+			broadcast(gameId, { type: 'message:deleted', payload: { messageId: sibling[0].id } });
+			await index(sibling[0].locationId).refresh();
+		}
+	} else if (msg.content === null) {
+		// Other system message (proposal/dice): hard delete, cascade handles linked rows
+		await db.delete(messages).where(eq(messages.id, messageId));
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+	} else {
+		// Text message: soft delete
+		await db.update(messages).set({ deletedAt: new Date() }).where(eq(messages.id, messageId));
+		broadcast(gameId, { type: 'message:deleted', payload: { messageId } });
+	}
 
 	await index(msg.locationId).refresh();
 });
@@ -196,11 +270,11 @@ export const annotate = command(
 
 		if (!msg) error(404, 'Message not found');
 
-		const processedAnnotation = annotation ? processDice(annotation) : null;
+		const processedAnnotation = annotation || null;
 
 		await db
 			.update(messages)
-			.set({ gmAnnotation: processedAnnotation || null })
+			.set({ gmAnnotation: processedAnnotation })
 			.where(eq(messages.id, messageId));
 
 		broadcast(gameId, {

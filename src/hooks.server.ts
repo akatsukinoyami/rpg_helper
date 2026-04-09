@@ -6,10 +6,17 @@ import { auth } from '$lib/server/auth';
 import { attachBunWs } from '$lib/server/ws/bun-adapter';
 import * as m from '$lib/paraglide/messages';
 
-const handleParaglide: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ request, locale }) => {
-		event.request = request;
+const handleParaglide: Handle = ({ event, resolve }) => {
+	// Pass a body-less request to Paraglide — it only needs URL + headers for locale
+	// detection (cookie strategy). Sharing event.request directly would disturb its
+	// body stream, breaking binary form deserialization on POST requests.
+	// Strip Sec-Fetch-Dest so Paraglide doesn't redirect to /{locale}/... URLs.
+	const headers = new Headers(event.request.headers);
+	headers.delete('Sec-Fetch-Dest');
 
+	const paraglideReq = new Request(event.request.url, { method: 'GET', headers });
+
+	return paraglideMiddleware(paraglideReq, ({ locale }) => {
 		return resolve(event, {
 			transformPageChunk: ({ html }) =>
 				html
@@ -17,6 +24,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 					.replace('%paraglide.dir%', getTextDirection(locale))
 		});
 	});
+};
 
 const handleAuth: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/api/auth')) {

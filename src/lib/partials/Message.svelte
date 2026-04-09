@@ -3,7 +3,7 @@
 
 	export interface MessageData {
 		id: string;
-		content: string;
+		content: string | null;
 		createdAt: Date | string;
 		editedAt?: Date | string | null;
 		gmAnnotation?: string | null;
@@ -12,9 +12,11 @@
 		characterImage?: string | null;
 		locationName?: string;
 		locationId?: string;
+		moveId?: string | null;
 		replyToId?: string | null;
 		replyContent?: string | null;
 		replyCharacterName?: string | null;
+		events?: import('$lib/types').SystemEvent[];
 	}
 
 	export interface Props {
@@ -30,13 +32,18 @@
 	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
 	import { untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import MessageForm from '$lib/components/MessageForm.svelte';
+	import MessageForm from '$lib/partials/MessageForm.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import { renderMarkdown } from '$lib/md';
 	import * as messages from '$lib/remote/messages.remote';
+	import * as proposals from '$lib/remote/proposals.remote';
+
 	import * as m from '$lib/paraglide/messages';
+	import type { SystemEvent, CharacterChangeEvent, ItemChangeEvent, SkillChangeEvent, ProposalEventType } from '$lib/types';
 
 	let { msg, view, isGm = false, myCharacterId = null, onReply }: Props = $props();
+
+	const isSystem = $derived(msg.content === null);
 
 	const name = $derived(msg.characterName ?? m.message_gm());
 
@@ -55,15 +62,45 @@
 		new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 	);
 
-	const rendered = $derived(renderMarkdown(msg.content));
+	const rendered = $derived(msg.content ? renderMarkdown(msg.content) : '');
 
 	const isOwner = $derived(!!myCharacterId && myCharacterId === msg.characterId);
-	const canEdit = $derived(isOwner || isGm);
+	const canEdit = $derived((isOwner || isGm) && !isSystem);
 
 	let editing = $state(false);
 	let annotating = $state(false);
 	let annotationDraft = $state(untrack(() => msg.gmAnnotation ?? ''));
 	let deletePending = $state(false);
+
+	const statLabels: Record<string, string> = {
+		hp: 'HP', mp: 'MP', maxHp: 'Max HP', maxMp: 'Max MP',
+		str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA'
+	};
+
+	function signedDelta(n: number): string {
+		return n > 0 ? `+${n}` : `${n}`;
+	}
+
+	function eventLineClass(event: SystemEvent): string {
+		if (event.type === 'move' || event.type === 'diceRoll') return 'text-gray-400';
+		const e = event as CharacterChangeEvent | ItemChangeEvent | SkillChangeEvent;
+		if (e.status === 'rejected') return 'text-gray-300 line-through';
+		if (e.status === 'pending') return 'text-gray-400';
+		// approved — color by direction
+		if (event.type === 'characterChange') return event.delta > 0 ? 'text-green-600' : 'text-red-500';
+		if (event.type === 'itemChange') {
+			const d = event.deltaQty ?? event.deltaDur ?? 0;
+			return d > 0 ? 'text-green-600' : 'text-red-500';
+		}
+		if (event.type === 'skillChange') return event.action === 'add' ? 'text-green-600' : 'text-red-500';
+		return 'text-gray-400';
+	}
+
+	function diceRollsText(rolls: number[], modifier: number): string {
+		const parts = rolls.join(', ');
+		if (modifier === 0) return parts;
+		return modifier > 0 ? `${parts} (+${modifier})` : `${parts} (${modifier})`;
+	}
 
 	async function handleDelete() {
 		if (deletePending) return;
@@ -75,6 +112,24 @@
 		}
 	}
 
+	async function handleEventDelete(event: SystemEvent) {
+		if (deletePending) return;
+		deletePending = true;
+		try {
+			if (event.type === 'move' || event.type === 'diceRoll') {
+				await messages.remove(msg.id);
+			} else {
+				await proposals.remove({ type: event.type as ProposalEventType, id: event.id });
+			}
+		} finally {
+			deletePending = false;
+		}
+	}
+
+	async function handleApprove(event: SystemEvent) {
+		await proposals.approve({ type: event.type as ProposalEventType, id: event.id });
+	}
+
 	async function saveAnnotation(e: SubmitEvent) {
 		e.preventDefault();
 		await messages.annotate({ messageId: msg.id, annotation: annotationDraft });
@@ -84,7 +139,11 @@
 
 {#snippet avatar(className: string)}
 	<span
-		class={[className, "mt-0.5 flex shrink-0 items-center justify-center text-[10px] font-semibold text-white bg-contain"]}
+		class={[
+			className, 
+			msg.characterImage ? 'rounded-md' : 'rounded-full', 
+			"mt-0.5 flex shrink-0 items-center justify-center font-semibold text-white bg-contain"
+		]}
 		style={msg.characterImage ? `background-image: url(${msg.characterImage})` : `background-color: hsl(${hue} 50% 45%)`}
 	>{initials}</span>
 {/snippet}
@@ -140,7 +199,7 @@
 		<MessageForm
 			locationId={msg.locationId ?? ''}
 			messageId={msg.id}
-			initialContent={msg.content}
+			initialContent={msg.content ?? ''}
 			myCharacterId={myCharacterId ?? msg.characterId}
 			onDone={() => editing = false}
 		/>
@@ -149,7 +208,7 @@
 		<div class="msg-content">{@html rendered}</div>
 		{#if msg.gmAnnotation}
 			<p class="text-[11px] text-indigo-600 border-l-2 border-indigo-300 pl-1.5 mt-0.5 italic">
-				<span class="font-bold">ГМ:</span> 
+				<span class="font-bold">ГМ:</span>
 				{msg.gmAnnotation}
 			</p>
 		{/if}
@@ -181,7 +240,6 @@
 	{/if}
 {/snippet}
 
-
 {#snippet footer()}
 	<footer class={["bg-gray-50 p-1 flex", msg.editedAt ? '' : 'items-end']}>
 		{#if msg.editedAt}
@@ -191,9 +249,62 @@
 	</footer>
 {/snippet}
 
-{#if view === 'compact'}
+{#snippet systemEventLine(event: SystemEvent)}
+	{@const lineClass = eventLineClass(event)}
+	{@const isPendingProposal = (event.type === 'characterChange' || event.type === 'itemChange' || event.type === 'skillChange') && event.status === 'pending'}
+	<div class="flex items-center gap-2 py-0.5 select-none">
+		<span class="flex-1 border-t border-dashed border-gray-200"></span>
+		<span class={['text-[11px] flex items-center gap-1.5 font-mono', lineClass]}>
+			{#if event.type === 'move'}
+				{m.sys_moved({ charName: name, from: event.fromLocationName ?? event.fromLocationId, to: event.toLocationName ?? event.toLocationId })}
+			{:else if event.type === 'characterChange'}
+				{m.sys_stat_changed({ charName: name, stat: statLabels[event.stat] ?? event.stat, delta: signedDelta(event.delta) })}
+			{:else if event.type === 'itemChange'}
+				{@const delta = event.deltaQty != null
+					? `${signedDelta(event.deltaQty)} qty`
+					: `${signedDelta(event.deltaDur ?? 0)} dur`}
+				{m.sys_item_changed({ charName: name, itemName: event.itemTypeName ?? event.itemTypeId, delta })}
+			{:else if event.type === 'skillChange'}
+				{#if event.action === 'add'}
+					{m.sys_skill_acquired({ charName: name, skillName: event.skillTypeName ?? event.skillTypeId })}
+				{:else}
+					{m.sys_skill_lost({ charName: name, skillName: event.skillTypeName ?? event.skillTypeId })}
+				{/if}
+			{:else if event.type === 'diceRoll'}
+				{m.sys_dice_rolled({ charName: name, expression: event.expression })}
+				<span class="text-gray-300">·</span>
+				{m.sys_dice_result({ rolls: diceRollsText(event.rolls, event.modifier), result: String(event.result) })}
+			{/if}
+
+			{#if isGm}
+				{#if isPendingProposal}
+					<button
+						type="button"
+						class="cursor-pointer text-yellow-500 hover:text-yellow-700 transition-colors"
+						onclick={() => handleApprove(event)}
+					>{m.sys_approve()}</button>
+				{/if}
+				<button
+					type="button"
+					class="cursor-pointer text-red-400 hover:text-red-600 transition-colors"
+					disabled={deletePending}
+					onclick={() => handleEventDelete(event)}
+				>{m.message_delete()}</button>
+			{/if}
+		</span>
+		<span class="flex-1 border-t border-dashed border-gray-200"></span>
+	</div>
+{/snippet}
+
+{#if isSystem}
+	<div class="px-2 py-0.5">
+		{#each msg.events ?? [] as event}
+			{@render systemEventLine(event)}
+		{/each}
+	</div>
+{:else if view === 'compact'}
 	<message class="group flex items-start gap-2">
-		{@render avatar('h-5 w-5 rounded-full')}
+		{@render avatar('h-5 w-5 text-[10px]')}
 
 		<div class="flex flex-col gap-0.5 min-w-0 flex-1">
 			<div class="flex items-baseline gap-2">
@@ -202,7 +313,6 @@
 				{#if msg.locationName}
 					<span class="text-[12px] text-gray-400">{msg.locationName}</span>
 				{/if}
-				
 			</div>
 			{@render replyPreview()}
 			{@render content()}
@@ -221,7 +331,7 @@
 		</header>
 
 		<avatar class="block">
-			{@render avatar('h-24 w-24 rounded-md')}
+			{@render avatar('h-24 w-24 text-10')}
 		</avatar>
 
 		<section class="flex-1 min-w-0">
@@ -230,7 +340,7 @@
 		</section>
 
 		<div class="bg-gray-50 p-1"></div>
-		
+
 		{@render footer()}
 	</message>
 {/if}

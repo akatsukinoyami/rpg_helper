@@ -13,7 +13,7 @@ function roll(count: number, sides: number, modStr: string | undefined): string 
 	const modifier = modStr ? parseInt(modStr, 10) : 0;
 	const total = dice.reduce((a, b) => a + b, 0) + modifier;
 
-	const diceList = dice.join(', ');
+	const diceList = dice.join(' + ');
 	const modDisplay = modifier > 0 ? ` (+${modifier})` : modifier < 0 ? ` (${modifier})` : '';
 
 	return `[${count}d${sides}${modStr ?? ''}: ${diceList}${modDisplay} = ${total}]`;

@@ -6,8 +6,8 @@
 	import * as m from '$lib/paraglide/messages';
 	import { type PageData } from './$types';
 	import { WS_CONTEXT_KEY, type WsStore } from '$lib/ws/wsStore.svelte';
-	import Message, { type MessageData } from '$lib/components/Message.svelte';
-	import MessageForm, { type ReplyTarget } from '$lib/components/MessageForm.svelte';
+	import Message, { type MessageData } from '$lib/partials/Message.svelte';
+	import MessageForm, { type ReplyTarget } from '$lib/partials/MessageForm.svelte';
 
 	let { data }: { data: PageData & { myCharacterId: string | null; isGm: boolean } } = $props();
 

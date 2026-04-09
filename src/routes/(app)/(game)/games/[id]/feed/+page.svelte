@@ -3,7 +3,7 @@
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
 	import { WS_CONTEXT_KEY, type WsStore } from '$lib/ws/wsStore.svelte';
-	import Message from '$lib/components/Message.svelte';
+	import Message from '$lib/partials/Message.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData & { isGm: boolean; myCharacterId: string | null } } = $props();

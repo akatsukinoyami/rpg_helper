@@ -15,6 +15,8 @@
 		"db:generate": "drizzle-kit generate --config drizzle.config.ts",
 		"db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
 		"db:seed": "bun src/lib/server/db/seeds/index.ts",
+		"db:drop": "bun src/lib/server/db/drop.ts",
+		"db:run": "docker compose up -d --build --force-recreate db",
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {

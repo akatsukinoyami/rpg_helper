@@ -24,13 +24,13 @@ export interface MessageCreatedPayload {
 	messageId: string;
 	locationId: string;
 	characterId: string | null;
-	content: string;
+	content: string | null;
 	createdAt: string;
 }
 
 export interface MessageEditedPayload {
 	messageId: string;
-	content: string;
+	content: string | null;
 	gmAnnotation: string | null;
 	editedAt: string;
 }

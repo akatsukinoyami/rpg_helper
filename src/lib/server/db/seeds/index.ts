@@ -271,9 +271,9 @@ async function seed() {
 	console.log('Purging database...');
 	await client.unsafe(`
 		TRUNCATE TABLE
-			char_skills, char_items, item_proposals, stat_proposals,
+			char_skills, char_items, item_proposals, stat_proposals, skill_proposals,
 			character_visibility, character_items, character_skills, character_edit_proposals,
-			messages, dice_rolls,
+			moves, messages, dice_rolls,
 			characters,
 			item_types, skill_types, locations,
 			race_skills, games,
