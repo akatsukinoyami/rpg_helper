@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { mdiSend } from "@mdi/js";
-  import Button from "$lib/components/Button.svelte";
-  import InputNumber from "$lib/components/InputNumber.svelte";
-  import InputSelect from "$lib/components/InputSelect.svelte";
-  import InputText from "$lib/components/InputText.svelte";
+	import { mdiSend } from '@mdi/js';
+	import Button from '$lib/components/Button.svelte';
+	import InputNumber from '$lib/components/InputNumber.svelte';
+	import InputSelect from '$lib/components/InputSelect.svelte';
+	import InputText from '$lib/components/InputText.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import * as itemTypesRemote from '$lib/remote/item-types.remote';
 
-  let { activeAction = $bindable(), locationId } = $props();
+	let { activeAction = $bindable(), locationId } = $props();
 
 	const itemsQuery = itemTypesRemote.index();
 	let itemTypeId = $state('');
@@ -21,18 +21,18 @@
 	async function submitItem() {
 		if (!itemTypeId || itemSubmitting) return;
 		itemSubmitting = true;
-    const isDur = selectedItem?.trackingMode === 'durability';
+		const isDur = selectedItem?.trackingMode === 'durability';
 
-    proposals
-      .sendItem({
+		proposals
+			.sendItem({
 				locationId,
 				itemTypeId,
 				deltaQty: isDur ? undefined : itemDelta,
 				deltaDur: isDur ? itemDelta : undefined,
 				reason: itemReason || undefined
 			})
-      .then(() => (activeAction = null, itemReason = ''))
-      .finally(() => (itemSubmitting = false));
+			.then(() => ((activeAction = null), (itemReason = '')))
+			.finally(() => (itemSubmitting = false));
 	}
 </script>
 

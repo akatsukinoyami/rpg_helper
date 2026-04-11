@@ -1,6 +1,13 @@
 import { and, eq, or } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { diceRolls, itemProposals, messages, moves, skillProposals, statProposals } from '$lib/server/db/schema';
+import {
+	diceRolls,
+	itemProposals,
+	messages,
+	moves,
+	skillProposals,
+	statProposals
+} from '$lib/server/db/schema';
 
 type MsgKey = { locationId: string; id: number };
 
@@ -17,37 +24,25 @@ export async function getEventsForMessages(msgKeys: MsgKey[]) {
 
 	const proposalCondition = or(
 		...msgKeys.map((k) =>
-			and(
-				eq(statProposals.messageLocationId, k.locationId),
-				eq(statProposals.messageId, k.id)
-			)
+			and(eq(statProposals.messageLocationId, k.locationId), eq(statProposals.messageId, k.id))
 		)
 	)!;
 
 	const itemCondition = or(
 		...msgKeys.map((k) =>
-			and(
-				eq(itemProposals.messageLocationId, k.locationId),
-				eq(itemProposals.messageId, k.id)
-			)
+			and(eq(itemProposals.messageLocationId, k.locationId), eq(itemProposals.messageId, k.id))
 		)
 	)!;
 
 	const skillCondition = or(
 		...msgKeys.map((k) =>
-			and(
-				eq(skillProposals.messageLocationId, k.locationId),
-				eq(skillProposals.messageId, k.id)
-			)
+			and(eq(skillProposals.messageLocationId, k.locationId), eq(skillProposals.messageId, k.id))
 		)
 	)!;
 
 	const diceCondition = or(
 		...msgKeys.map((k) =>
-			and(
-				eq(diceRolls.messageLocationId, k.locationId),
-				eq(diceRolls.messageId, k.id)
-			)
+			and(eq(diceRolls.messageLocationId, k.locationId), eq(diceRolls.messageId, k.id))
 		)
 	)!;
 

@@ -65,7 +65,12 @@ export const roll = command(
 			const [inserted] = await tx
 				.insert(messages)
 				.values({ locationId, id, characterId: character.id })
-				.returning({ locationId: messages.locationId, id: messages.id, ref: messages.ref, createdAt: messages.createdAt });
+				.returning({
+					locationId: messages.locationId,
+					id: messages.id,
+					ref: messages.ref,
+					createdAt: messages.createdAt
+				});
 			return inserted;
 		});
 
@@ -98,28 +103,27 @@ export const roll = command(
 	}
 );
 
-export const deleteRoll = command(
-	refSchema,
-	async (messageRef) => {
-		const { params } = getRequestEvent();
-		const gameId = params.id!;
-		await assertGm(gameId);
+export const deleteRoll = command(refSchema, async (messageRef) => {
+	const { params } = getRequestEvent();
+	const gameId = params.id!;
+	await assertGm(gameId);
 
-		const locationId = messageRef.split('#')[0];
-		const messageId = parseInt(messageRef.split('#')[1], 10);
+	const locationId = messageRef.split('#')[0];
+	const messageId = parseInt(messageRef.split('#')[1], 10);
 
-		const [msg] = await db
-			.select({ locationId: messages.locationId })
-			.from(messages)
-			.where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)))
-			.limit(1);
+	const [msg] = await db
+		.select({ locationId: messages.locationId })
+		.from(messages)
+		.where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)))
+		.limit(1);
 
-		if (!msg) error(404, 'Message not found');
+	if (!msg) error(404, 'Message not found');
 
-		// Hard delete — cascades to diceRolls row
-		await db.delete(messages).where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)));
+	// Hard delete — cascades to diceRolls row
+	await db
+		.delete(messages)
+		.where(and(eq(messages.locationId, locationId), eq(messages.id, messageId)));
 
-		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
-		await index(locationId).refresh();
-	}
-);
+	broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
+	await index(locationId).refresh();
+});

@@ -25,19 +25,19 @@ export interface Stats {
 	int: number;
 	wis: number;
 	cha: number;
-};
+}
 
 export interface ItemEffect {
 	stat?: keyof Stats;
 	modifier?: number;
 	description?: string;
-};
+}
 
 export interface DiceResult {
 	dice: number[];
 	modifier: number;
 	total: number;
-};
+}
 
 export type Locale = 'en' | 'ru' | 'ua';
 export type LocalizedText = Partial<Record<Locale, string>>;
@@ -101,7 +101,9 @@ export const verification = pgTable('verification', {
 // ---------------------------------------------------------------------------
 
 export const games = pgTable('games', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
@@ -114,7 +116,9 @@ export const games = pgTable('games', {
 });
 
 export const races = pgTable('races', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -124,7 +128,9 @@ export const races = pgTable('races', {
 });
 
 export const skills = pgTable('skills', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	name: jsonb('name').$type<LocalizedText>().notNull(),
 	description: jsonb('description').$type<LocalizedText>(),
 	statModifiers: jsonb('stat_modifiers').$type<Partial<Stats>>(),
@@ -145,7 +151,9 @@ export const raceSkills = pgTable(
 );
 
 export const items = pgTable('items', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	name: jsonb('name').$type<LocalizedText>().notNull(),
 	description: jsonb('description').$type<LocalizedText>(),
 	type: varchar('type', { enum: ['usable', 'sellable', 'both'] }).notNull(),
@@ -155,7 +163,9 @@ export const items = pgTable('items', {
 });
 
 export const characters = pgTable('characters', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
@@ -215,7 +225,9 @@ export const characterItems = pgTable(
 );
 
 export const characterEditProposals = pgTable('character_edit_proposals', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
@@ -254,7 +266,9 @@ export const characterVisibility = pgTable(
 // ---------------------------------------------------------------------------
 
 export const locations = pgTable('locations', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	gameId: text('game_id')
 		.notNull()
 		.references(() => games.id, { onDelete: 'cascade' }),
@@ -271,7 +285,9 @@ export const locations = pgTable('locations', {
 // ---------------------------------------------------------------------------
 
 export const moves = pgTable('moves', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
@@ -321,13 +337,26 @@ export const messages = pgTable(
 // Stat change proposals
 // ---------------------------------------------------------------------------
 
-export const statFieldEnum = pgEnum('stat_field', ['hp', 'mp', 'maxHp', 'maxMp', 'str', 'dex', 'con', 'int', 'wis', 'cha']);
+export const statFieldEnum = pgEnum('stat_field', [
+	'hp',
+	'mp',
+	'maxHp',
+	'maxMp',
+	'str',
+	'dex',
+	'con',
+	'int',
+	'wis',
+	'cha'
+]);
 export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
 
 export const statProposals = pgTable(
 	'stat_proposals',
 	{
-		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => generateId()),
 		messageLocationId: text('message_location_id').notNull(),
 		messageId: integer('message_id').notNull(),
 		messageRef: text('message_ref').generatedAlwaysAs(
@@ -360,7 +389,9 @@ export const statProposals = pgTable(
 export const trackingModeEnum = pgEnum('tracking_mode', ['durability', 'quantity']);
 
 export const itemTypes = pgTable('item_types', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -372,7 +403,9 @@ export const itemTypes = pgTable('item_types', {
 });
 
 export const charItems = pgTable('char_items', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	characterId: text('character_id')
 		.notNull()
 		.references(() => characters.id, { onDelete: 'cascade' }),
@@ -391,7 +424,9 @@ export const charItems = pgTable('char_items', {
 export const itemProposals = pgTable(
 	'item_proposals',
 	{
-		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => generateId()),
 		messageLocationId: text('message_location_id').notNull(),
 		messageId: integer('message_id').notNull(),
 		messageRef: text('message_ref').generatedAlwaysAs(
@@ -426,7 +461,9 @@ export const itemProposals = pgTable(
 // ---------------------------------------------------------------------------
 
 export const skillTypes = pgTable('skill_types', {
-	id: text('id').primaryKey().$defaultFn(() => generateId()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateId()),
 	gameId: text('game_id').references(() => games.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -456,7 +493,9 @@ export const skillActionEnum = pgEnum('skill_action', ['add', 'remove']);
 export const skillProposals = pgTable(
 	'skill_proposals',
 	{
-		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => generateId()),
 		messageLocationId: text('message_location_id').notNull(),
 		messageId: integer('message_id').notNull(),
 		messageRef: text('message_ref').generatedAlwaysAs(
@@ -491,7 +530,9 @@ export const skillProposals = pgTable(
 export const diceRolls = pgTable(
 	'dice_rolls',
 	{
-		id: text('id').primaryKey().$defaultFn(() => generateId()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => generateId()),
 		messageLocationId: text('message_location_id').notNull(),
 		messageId: integer('message_id').notNull(),
 		messageRef: text('message_ref').generatedAlwaysAs(
@@ -613,8 +654,16 @@ export const diceRollsRelations = relations(diceRolls, ({ one }) => ({
 
 export const movesRelations = relations(moves, ({ one, many }) => ({
 	character: one(characters, { fields: [moves.characterId], references: [characters.id] }),
-	fromLocation: one(locations, { fields: [moves.fromLocationId], references: [locations.id], relationName: 'moveFrom' }),
-	toLocation: one(locations, { fields: [moves.toLocationId], references: [locations.id], relationName: 'moveTo' }),
+	fromLocation: one(locations, {
+		fields: [moves.fromLocationId],
+		references: [locations.id],
+		relationName: 'moveFrom'
+	}),
+	toLocation: one(locations, {
+		fields: [moves.toLocationId],
+		references: [locations.id],
+		relationName: 'moveTo'
+	}),
 	messages: many(messages)
 }));
 

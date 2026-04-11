@@ -20,13 +20,13 @@
 		mdiFlash
 	} from '@mdi/js';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import * as m from '$lib/paraglide/messages';
 	import MessagePanel from '$lib/partials/message/MessagePanel.svelte';
 	import * as messages from '$lib/remote/messages.remote';
 	import type { GameLabels } from '$lib/utils/stats';
-    import ButtonSmall from '$lib/components/ButtonSmall.svelte';
 
 	const MAX_LENGTH = 4096;
 
@@ -174,11 +174,11 @@
 		{ icon: mdiLink, title: 'Link', onclick: () => insertMarkdown('[', '](url)') },
 		{ icon: mdiImage, title: 'Image', onclick: () => insertMarkdown('![', '](url)') }
 	];
-	
+
 	const panelButton = [
-		{ id: 'dice',  icon: mdiDiceMultiple, title: 'Roll dice' },
-		{ id: 'stat',  icon: mdiTune, title: 'Propose stat change' },
-		{ id: 'item',  icon: mdiBriefcase, title: 'Propose item change' },
+		{ id: 'dice', icon: mdiDiceMultiple, title: 'Roll dice' },
+		{ id: 'stat', icon: mdiTune, title: 'Propose stat change' },
+		{ id: 'item', icon: mdiBriefcase, title: 'Propose item change' },
 		{ id: 'skill', icon: mdiFlash, title: 'Propose skill change' }
 	] as const;
 </script>

@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { mdiCheck, mdiClose, mdiDelete } from '@mdi/js';
+	import { mdiCheck, mdiClose, mdiDelete } from '@mdi/js';
 	import * as m from '$lib/paraglide/messages';
 	import * as messages from '$lib/remote/messages.remote';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import { type ProposalEventType, type SystemEvent } from '$lib/types';
-  import { buildStatLabels, statLabel, type GameLabels } from '$lib/utils/stats';
-  import ButtonSmall from '$lib/components/ButtonSmall.svelte';
+	import { buildStatLabels, statLabel, type GameLabels } from '$lib/utils/stats';
+	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
 
-  let { msg, isGm, game }: { msg: any; isGm: boolean; game?: GameLabels } = $props();
+	let { msg, isGm, game }: { msg: any; isGm: boolean; game?: GameLabels } = $props();
 
-  let statLabels = $derived(buildStatLabels(game));
-  const statuses = { pending: m.game_dashboard_pending, approved: m.game_dashboard_approved, rejected: m.game_dashboard_rejected };
+	let statLabels = $derived(buildStatLabels(game));
+	const statuses = {
+		pending: m.game_dashboard_pending,
+		approved: m.game_dashboard_approved,
+		rejected: m.game_dashboard_rejected
+	};
 
-  const guessProposalColor = (state: boolean) => state ? 'text-green-800' : 'text-red-700';
-  const time = $derived(
+	const guessProposalColor = (state: boolean) => (state ? 'text-green-800' : 'text-red-700');
+	const time = $derived(
 		new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 	);
 

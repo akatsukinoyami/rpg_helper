@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { mdiClose } from '@mdi/js';
-  import Button from '$lib/components/Button.svelte';
-  import MessagePanelDice from './MessagePanelDice.svelte';
-  import MessagePanelItem from './MessagePanelItem.svelte';
-  import MessagePanelSkill from './MessagePanelSkill.svelte';
-  import MessagePanelStats from './MessagePanelStats.svelte';
+	import { mdiClose } from '@mdi/js';
+	import Button from '$lib/components/Button.svelte';
+	import MessagePanelDice from './MessagePanelDice.svelte';
+	import MessagePanelItem from './MessagePanelItem.svelte';
+	import MessagePanelSkill from './MessagePanelSkill.svelte';
+	import MessagePanelStats from './MessagePanelStats.svelte';
 
-  let { activeAction = $bindable(), locationId, game } = $props();
-
+	let { activeAction = $bindable(), locationId, game } = $props();
 </script>
 
 {#if activeAction}

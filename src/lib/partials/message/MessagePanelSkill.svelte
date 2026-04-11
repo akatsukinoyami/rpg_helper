@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { mdiSend } from "@mdi/js";
-  import Button from "$lib/components/Button.svelte";
-  import InputSelect from "$lib/components/InputSelect.svelte";
-  import InputText from "$lib/components/InputText.svelte";
+	import { mdiSend } from '@mdi/js';
+	import Button from '$lib/components/Button.svelte';
+	import InputSelect from '$lib/components/InputSelect.svelte';
+	import InputText from '$lib/components/InputText.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import * as skillTypesRemote from '$lib/remote/skill-types.remote';
 
-  let { activeAction = $bindable(), locationId } = $props();
+	let { activeAction = $bindable(), locationId } = $props();
 
 	const skillsQuery = skillTypesRemote.index();
 	let skillTypeId = $state('');
@@ -18,10 +18,10 @@
 	async function submitSkill() {
 		if (!skillTypeId || skillSubmitting) return;
 		skillSubmitting = true;
-    proposals
-      .sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined })
-      .then(() => (activeAction = null, skillReason = ''))
-      .finally(() => (skillSubmitting = false));
+		proposals
+			.sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined })
+			.then(() => ((activeAction = null), (skillReason = '')))
+			.finally(() => (skillSubmitting = false));
 	}
 </script>
 

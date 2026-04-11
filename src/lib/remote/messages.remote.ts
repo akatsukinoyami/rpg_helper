@@ -8,16 +8,15 @@ import type { ExtractTablesWithRelations } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import type * as schema from '$lib/server/db/schema';
-import {
-	characters,
-	locations,
-	messages,
-	moves
-} from '$lib/server/db/schema';
+import { characters, locations, messages, moves } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm, isGm } from '$lib/remote/utils';
 
-type AnyTx = PgTransaction<PostgresJsQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
+type AnyTx = PgTransaction<
+	PostgresJsQueryResultHKT,
+	typeof schema,
+	ExtractTablesWithRelations<typeof schema>
+>;
 
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
@@ -53,8 +52,8 @@ const eventSubquery = sql<import('$lib/types').SystemEvent | null>`(
   LIMIT 1
 )`;
 
-/** 
- * @description Compute the next per-location message ID inside a transaction, using an advisory lock. 
+/**
+ * @description Compute the next per-location message ID inside a transaction, using an advisory lock.
  **/
 async function nextMessageId(locationId: string, tx: AnyTx): Promise<number> {
 	await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
@@ -65,8 +64,8 @@ async function nextMessageId(locationId: string, tx: AnyTx): Promise<number> {
 	return (row?.max ?? 0) + 1;
 }
 
-/** 
- * @description WHERE clause that matches a message by its ref string ("locationId#integer"). 
+/**
+ * @description WHERE clause that matches a message by its ref string ("locationId#integer").
  **/
 function whereRef(ref: string) {
 	return and(
@@ -91,7 +90,9 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 			moveFromLocation: fromLocation,
 			moveToLocation: toLocation,
 			event: eventSubquery,
-			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
+			replyToId: sql<
+				string | null
+			>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
 		})
@@ -100,10 +101,10 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 		.leftJoin(moves, eq(messages.moveId, moves.id))
 		.leftJoin(fromLocation, eq(moves.fromLocationId, fromLocation.id))
 		.leftJoin(toLocation, eq(moves.toLocationId, toLocation.id))
-		.leftJoin(replyMsg, and(
-			eq(replyMsg.locationId, messages.locationId),
-			eq(replyMsg.id, messages.replyToId)
-		))
+		.leftJoin(
+			replyMsg,
+			and(eq(replyMsg.locationId, messages.locationId), eq(replyMsg.id, messages.replyToId))
+		)
 		.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
 		.where(and(isNull(messages.deletedAt), eq(messages.locationId, locationId)))
 		.orderBy(asc(messages.createdAt));
@@ -129,7 +130,9 @@ export const feed = query(async () => {
 			moveFromLocationName: fromLocation.name,
 			moveToLocationName: toLocation.name,
 			event: eventSubquery,
-			replyToId: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
+			replyToId: sql<
+				string | null
+			>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 			replyContent: replyMsg.content,
 			replyCharacterName: replyChar.name
 		})
@@ -139,10 +142,10 @@ export const feed = query(async () => {
 		.leftJoin(moves, eq(messages.moveId, moves.id))
 		.leftJoin(fromLocation, eq(moves.fromLocationId, fromLocation.id))
 		.leftJoin(toLocation, eq(moves.toLocationId, toLocation.id))
-		.leftJoin(replyMsg, and(
-			eq(replyMsg.locationId, messages.locationId),
-			eq(replyMsg.id, messages.replyToId)
-		))
+		.leftJoin(
+			replyMsg,
+			and(eq(replyMsg.locationId, messages.locationId), eq(replyMsg.id, messages.replyToId))
+		)
 		.leftJoin(replyChar, eq(replyMsg.characterId, replyChar.id))
 		.where(and(isNull(messages.deletedAt), eq(locations.gameId, gameId)))
 		.orderBy(asc(messages.createdAt));
@@ -188,9 +191,7 @@ export const send = command(
 		}
 
 		// Extract replyToId integer from ref (same location guaranteed)
-		const replyToInt = replyToId
-			? parseInt(replyToId.split('#')[1], 10)
-			: null;
+		const replyToInt = replyToId ? parseInt(replyToId.split('#')[1], 10) : null;
 
 		const inserted = await db.transaction(async (tx) => {
 			const id = await nextMessageId(locationId, tx);
@@ -331,11 +332,16 @@ export const remove = command(refSchema, async (messageRef) => {
 		}
 	} else if (msg.content === null) {
 		// Other system message (proposal/dice): hard delete, cascade handles linked rows
-		await db.delete(messages).where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
+		await db
+			.delete(messages)
+			.where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
 		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
 	} else {
 		// Text message: soft delete
-		await db.update(messages).set({ deletedAt: new Date() }).where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
+		await db
+			.update(messages)
+			.set({ deletedAt: new Date() })
+			.where(and(eq(messages.locationId, msg.locationId), eq(messages.id, msg.id)));
 		broadcast(gameId, { type: 'message:deleted', payload: { messageId: messageRef } });
 	}
 

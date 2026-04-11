@@ -54,14 +54,36 @@ async function applyStatDelta(characterId: string, field: string, delta: number)
 	if (statNames.has(field)) {
 		await db
 			.update(characters)
-			.set({ stats: sql`jsonb_set(stats, ${sql.raw(`'{${field}}'`)}, to_jsonb((stats->>${field})::int + ${delta}))` })
+			.set({
+				stats: sql`jsonb_set(stats, ${sql.raw(`'{${field}}'`)}, to_jsonb((stats->>${field})::int + ${delta}))`
+			})
 			.where(eq(characters.id, characterId));
 	} else {
 		switch (field) {
-			case 'hp':    await db.update(characters).set({ hp:    sql`hp + ${delta}`     }).where(eq(characters.id, characterId)); break;
-			case 'mp':    await db.update(characters).set({ mp:    sql`mp + ${delta}`     }).where(eq(characters.id, characterId)); break;
-			case 'maxHp': await db.update(characters).set({ maxHp: sql`max_hp + ${delta}` }).where(eq(characters.id, characterId)); break;
-			case 'maxMp': await db.update(characters).set({ maxMp: sql`max_mp + ${delta}` }).where(eq(characters.id, characterId)); break;
+			case 'hp':
+				await db
+					.update(characters)
+					.set({ hp: sql`hp + ${delta}` })
+					.where(eq(characters.id, characterId));
+				break;
+			case 'mp':
+				await db
+					.update(characters)
+					.set({ mp: sql`mp + ${delta}` })
+					.where(eq(characters.id, characterId));
+				break;
+			case 'maxHp':
+				await db
+					.update(characters)
+					.set({ maxHp: sql`max_hp + ${delta}` })
+					.where(eq(characters.id, characterId));
+				break;
+			case 'maxMp':
+				await db
+					.update(characters)
+					.set({ maxMp: sql`max_mp + ${delta}` })
+					.where(eq(characters.id, characterId));
+				break;
 		}
 	}
 }
@@ -71,7 +93,12 @@ async function refreshMessage(gameId: string, messageRef: string, type: 'edited'
 	if (type === 'edited') {
 		broadcast(gameId, {
 			type: 'message:edited',
-			payload: { messageId: messageRef, content: null, gmAnnotation: null, editedAt: new Date().toISOString() }
+			payload: {
+				messageId: messageRef,
+				content: null,
+				gmAnnotation: null,
+				editedAt: new Date().toISOString()
+			}
 		});
 	} else {
 		broadcast(gameId, {
@@ -82,14 +109,29 @@ async function refreshMessage(gameId: string, messageRef: string, type: 'edited'
 	await index(locationId).refresh();
 }
 
-function broadcastSystemMessage(gameId: string, messageRef: string, locationId: string, characterId: string) {
+function broadcastSystemMessage(
+	gameId: string,
+	messageRef: string,
+	locationId: string,
+	characterId: string
+) {
 	broadcast(gameId, {
 		type: 'message:created',
-		payload: { messageId: messageRef, locationId, characterId, content: null, createdAt: new Date().toISOString() }
+		payload: {
+			messageId: messageRef,
+			locationId,
+			characterId,
+			content: null,
+			createdAt: new Date().toISOString()
+		}
 	});
 }
 
-async function _getProposal<T extends keyof typeof proposalTables>(type: T, proposalId: string, deletion = false) {
+async function _getProposal<T extends keyof typeof proposalTables>(
+	type: T,
+	proposalId: string,
+	deletion = false
+) {
 	const table = proposalTables[type];
 	const [proposal] = await db
 		.select()
@@ -103,7 +145,9 @@ async function _getProposal<T extends keyof typeof proposalTables>(type: T, prop
 
 	return proposal;
 }
-type ProposalOf<T extends keyof typeof proposalTables> = Awaited<ReturnType<typeof _getProposal<T>>>;
+type ProposalOf<T extends keyof typeof proposalTables> = Awaited<
+	ReturnType<typeof _getProposal<T>>
+>;
 
 // ---------------------------------------------------------------------------
 // Proposal type schema
@@ -119,7 +163,7 @@ const proposalIdSchema = v.pipe(v.string(), v.trim(), v.minLength(1));
 const proposalTables = {
 	characterChange: statProposals,
 	itemChange: itemProposals,
-	skillChange: skillProposals,
+	skillChange: skillProposals
 };
 
 const applyApprove = {
@@ -141,14 +185,12 @@ const applyApprove = {
 					.where(eq(charItems.id, proposal.charItemId));
 			}
 		} else {
-			await db
-				.insert(charItems)
-				.values({
-					characterId: proposal.characterId,
-					itemTypeId: proposal.itemTypeId,
-					quantity: proposal.deltaQty ?? null,
-					durability: proposal.deltaDur ?? null
-				});
+			await db.insert(charItems).values({
+				characterId: proposal.characterId,
+				itemTypeId: proposal.itemTypeId,
+				quantity: proposal.deltaQty ?? null,
+				durability: proposal.deltaDur ?? null
+			});
 		}
 	},
 	async skillChange(proposal: ProposalOf<'skillChange'>) {
@@ -163,12 +205,14 @@ const applyApprove = {
 		} else {
 			await db
 				.delete(charSkills)
-				.where(and(
-					eq(charSkills.characterId, proposal.characterId),
-					eq(charSkills.skillTypeId, proposal.skillTypeId)
-				));
+				.where(
+					and(
+						eq(charSkills.characterId, proposal.characterId),
+						eq(charSkills.skillTypeId, proposal.skillTypeId)
+					)
+				);
 		}
-	},
+	}
 };
 
 export const approve = command(
@@ -240,10 +284,12 @@ const removePropose = {
 			if (proposal.action === 'add') {
 				await db
 					.delete(charSkills)
-					.where(and(
-						eq(charSkills.characterId, proposal.characterId),
-						eq(charSkills.skillTypeId, proposal.skillTypeId)
-					));
+					.where(
+						and(
+							eq(charSkills.characterId, proposal.characterId),
+							eq(charSkills.skillTypeId, proposal.skillTypeId)
+						)
+					);
 			} else {
 				await db
 					.insert(charSkills)
@@ -269,12 +315,14 @@ export const remove = command(
 		await (removePropose[type] as (p: typeof proposal) => Promise<void>)(proposal);
 
 		// Hard delete the system message — cascade removes the proposal row
-		await db.delete(messages).where(
-			and(
-				eq(messages.locationId, proposal.messageLocationId),
-				eq(messages.id, proposal.messageId)
-			)
-		);
+		await db
+			.delete(messages)
+			.where(
+				and(
+					eq(messages.locationId, proposal.messageLocationId),
+					eq(messages.id, proposal.messageId)
+				)
+			);
 
 		const ref = `${proposal.messageLocationId}#${proposal.messageId}`;
 		await refreshMessage(gameId, ref, 'deleted');
@@ -285,7 +333,18 @@ export const remove = command(
 // Send commands (per-type, called from message form)
 // ---------------------------------------------------------------------------
 
-const statFieldValues = ['hp', 'mp', 'maxHp', 'maxMp', 'str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+const statFieldValues = [
+	'hp',
+	'mp',
+	'maxHp',
+	'maxMp',
+	'str',
+	'dex',
+	'con',
+	'int',
+	'wis',
+	'cha'
+] as const;
 
 export const sendStat = command(
 	v.object({

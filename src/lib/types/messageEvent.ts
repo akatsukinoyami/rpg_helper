@@ -1,4 +1,9 @@
-export type SystemEventType = 'move' | 'characterChange' | 'itemChange' | 'skillChange' | 'diceRoll';
+export type SystemEventType =
+	| 'move'
+	| 'characterChange'
+	| 'itemChange'
+	| 'skillChange'
+	| 'diceRoll';
 export type ProposalEventType = 'characterChange' | 'itemChange' | 'skillChange';
 
 export type ProposalStatus = 'pending' | 'approved' | 'rejected';
@@ -57,12 +62,6 @@ export interface DiceRollEvent {
 	result: number;
 }
 
-export type ProposalEvent =
-	| CharacterChangeEvent
-	| ItemChangeEvent
-	| SkillChangeEvent;
+export type ProposalEvent = CharacterChangeEvent | ItemChangeEvent | SkillChangeEvent;
 
-export type SystemEvent =
-	| MoveEvent
-	| ProposalEvent
-	| DiceRollEvent;
+export type SystemEvent = MoveEvent | ProposalEvent | DiceRollEvent;

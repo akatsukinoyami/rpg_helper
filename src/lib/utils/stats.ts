@@ -13,8 +13,8 @@ export function buildStatLabels(game?: GameLabels) {
 		con: m.stat_con(),
 		int: m.stat_int(),
 		wis: m.stat_wis(),
-		cha: m.stat_cha(),
-	}
+		cha: m.stat_cha()
+	};
 }
 
 export type StatLabels = ReturnType<typeof buildStatLabels>;
