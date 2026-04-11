@@ -136,6 +136,7 @@
 	"sys_reject": "reject",
 	"stat_hp": "HP",
 	"stat_mp": "MP",
+	"stat_max_prefix": "Max",
 	"stat_maxHp": "Max HP",
 	"stat_maxMp": "Max MP",
 	"stat_str": "STR",

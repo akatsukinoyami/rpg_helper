@@ -3,7 +3,7 @@
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
 	import { WS_CONTEXT_KEY, type WsStore } from '$lib/ws/wsStore.svelte';
-	import Message from '$lib/partials/Message.svelte';
+	import Message from '$lib/partials/message/Message.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData & { isGm: boolean; myCharacterId: string | null } } = $props();
@@ -28,7 +28,7 @@
 {:else}
 	<div class="flex flex-col gap-1.5">
 		{#each feedQuery.current as msg (msg.id)}
-			<Message {msg} view={data.msgView} isGm={data.isGm} myCharacterId={data.myCharacterId} />
+			<Message {msg} view={data.msgView} isGm={data.isGm} myCharacterId={data.myCharacterId} game={data.game} />
 		{/each}
 	</div>
 {/if}

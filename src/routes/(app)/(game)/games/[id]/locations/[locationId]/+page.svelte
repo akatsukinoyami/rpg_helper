@@ -6,8 +6,8 @@
 	import * as m from '$lib/paraglide/messages';
 	import { type PageData } from './$types';
 	import { WS_CONTEXT_KEY, type WsStore } from '$lib/ws/wsStore.svelte';
-	import Message, { type MessageData } from '$lib/partials/Message.svelte';
-	import MessageForm, { type ReplyTarget } from '$lib/partials/MessageForm.svelte';
+	import Message, { type MessageData } from '$lib/partials/message/Message.svelte';
+	import MessageForm, { type ReplyTarget } from '$lib/partials/message/MessageForm.svelte';
 
 	let { data }: { data: PageData & { myCharacterId: string | null; isGm: boolean } } = $props();
 
@@ -57,6 +57,7 @@
 							view={data.msgView}
 							isGm={data.isGm}
 							myCharacterId={data.myCharacterId}
+							game={data.game}
 							onReply={data.myCharacterId ? handleReply : undefined}
 						/>
 					{/each}

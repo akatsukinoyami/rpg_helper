@@ -136,6 +136,7 @@
 	"sys_reject": "отклонить",
 	"stat_hp": "ХП",
 	"stat_mp": "МП",
+	"stat_max_prefix": "Макс",
 	"stat_maxHp": "Макс ХП",
 	"stat_maxMp": "Макс МП",
 	"stat_str": "СИЛ",

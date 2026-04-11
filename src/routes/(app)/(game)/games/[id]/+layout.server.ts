@@ -10,7 +10,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const game = await db.query.games.findFirst({
 		where: eq(games.id, params.id),
 		with: { gm: { columns: { id: true, name: true } } },
-		columns: { id: true, name: true, description: true, image: true, gmUserId: true }
+		columns: { id: true, name: true, description: true, image: true, gmUserId: true, hpLabel: true, mpLabel: true }
 	});
 
 	if (!game) error(404);

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { SystemEvent, ProposalEventType, ProposalEvent } from '$lib/types';
+	import type { SystemEvent } from '$lib/types';
 
 	export type MsgView = 'compact' | 'forum';
 
@@ -28,6 +28,7 @@
 		view: MsgView;
 		isGm?: boolean;
 		myCharacterId?: string | null;
+		game?: { hpLabel: string; mpLabel: string };
 		onReply?: (msg: MessageData) => void;
 	}
 </script>
@@ -36,15 +37,15 @@
 	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
 	import { untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import MessageForm from '$lib/partials/MessageForm.svelte';
+	import MessageForm from '$lib/partials/message/MessageForm.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import { renderMarkdown } from '$lib/md';
-	import MessageSystem from '$lib/partials/MessageSystem.svelte';
+	import MessageSystem from '$lib/partials/message/MessageSystem.svelte';
 	import * as messages from '$lib/remote/messages.remote';
-	import * as proposals from '$lib/remote/proposals.remote';
 	import * as m from '$lib/paraglide/messages';
+	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
 
-	let { msg, view, isGm = false, myCharacterId = null, onReply }: Props = $props();
+	let { msg, view, isGm = false, myCharacterId = null, game, onReply }: Props = $props();
 
 	const isSystem = $derived(msg.content === null);
 
@@ -85,24 +86,6 @@
 		}
 	}
 
-	async function handleEventDelete(event: SystemEvent) {
-		if (deletePending) return;
-		deletePending = true;
-		try {
-			if (event.type === 'move' || event.type === 'diceRoll') {
-				await messages.remove(msg.id);
-			} else {
-				await proposals.remove({ type: event.type as ProposalEventType, id: event.id });
-			}
-		} finally {
-			deletePending = false;
-		}
-	}
-
-	async function handleApprove(event: SystemEvent) {
-		await proposals.approve({ type: event.type as ProposalEventType, id: event.id });
-	}
-
 	async function saveAnnotation(e: SubmitEvent) {
 		e.preventDefault();
 		await messages.annotate({ messageId: msg.id, annotation: annotationDraft });
@@ -124,45 +107,33 @@
 {#snippet actions()}
 	{#if myCharacterId || canEdit}
 		<div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
-			{#if myCharacterId && onReply}
-				<button
-					type="button"
-					title={m.message_reply()}
-					class="p-0.5 rounded text-gray-400 hover:text-gray-700 cursor-pointer"
-					onclick={() => onReply(msg)}
-				>
-					<Icon path={mdiReply} size={13} pathClass="fill-current" />
-				</button>
-			{/if}
-			{#if canEdit}
-				<button
-					type="button"
-					title={m.message_edit()}
-					class="p-0.5 rounded text-gray-400 hover:text-gray-700 cursor-pointer"
-					onclick={() => { editing = true; annotating = false; }}
-				>
-					<Icon path={mdiPencil} size={13} pathClass="fill-current" />
-				</button>
-				{#if isGm}
-					<button
-						type="button"
-						title={m.message_gm_comment()}
-						class="p-0.5 rounded text-gray-400 hover:text-indigo-600 cursor-pointer"
-						onclick={() => { annotating = !annotating; editing = false; annotationDraft = msg.gmAnnotation ?? ''; }}
-					>
-						<Icon path={mdiCommentEdit} size={13} pathClass="fill-current" />
-					</button>
-				{/if}
-				<button
-					type="button"
-					title={m.message_delete()}
-					class="p-0.5 rounded text-gray-400 hover:text-red-600 cursor-pointer"
-					onclick={handleDelete}
-					disabled={deletePending}
-				>
-					<Icon path={mdiDelete} size={13} pathClass="fill-current" />
-				</button>
-			{/if}
+			<ButtonSmall 
+				title={m.message_reply()}
+				onclick={() => onReply?.(msg)}
+				visible={!!(myCharacterId && onReply)}
+				icon={mdiReply}
+			/>
+			<ButtonSmall 
+				title={m.message_edit()}
+				onclick={() => { editing = true; annotating = false; }}
+				visible={canEdit}
+				icon={mdiPencil}
+			/>
+			<ButtonSmall 
+				class="hover:text-indigo-600"
+				title={m.message_gm_comment()}
+				onclick={() => { annotating = !annotating; editing = false; annotationDraft = msg.gmAnnotation ?? ''; }}
+				visible={canEdit && isGm}
+				icon={mdiCommentEdit}
+			/>
+			<ButtonSmall 
+				class="hover:text-red-600"
+				title={m.message_delete()}
+				onclick={handleDelete}
+				disabled={deletePending}
+				visible={canEdit}
+				icon={mdiDelete}
+			/>
 		</div>
 	{/if}
 {/snippet}
@@ -222,47 +193,8 @@
 	</footer>
 {/snippet}
 
-{#snippet approvalButtons({ status,  type,  id }: ProposalEvent)}
-	{#if isGm && status === 'pending'}
-		<button 
-			class="ml-1 text-yellow-600 hover:underline"
-			onclick={() => proposals.approve({ type, id })} 
-		>{m.sys_approve()}</button>
-		<button 
-			class="ml-1 text-red-500 hover:underline"
-			onclick={() => proposals.reject({ type, id })} 
-		>{m.sys_reject()}</button>
-	{/if}
-{/snippet}
-
-
 {#if isSystem}
-	<MessageSystem {msg}>
-		{#if msg.moveFromLocation && msg.moveToLocation}
-			{msg.moveFromLocation.name} → {msg.moveToLocation.name}
-		{:else if msg.event?.type === 'diceRoll'}
-			🎲 {msg.event.expression}: [{msg.event.rolls.join(', ')}]{msg.event.modifier !== 0 ? ` ${msg.event.modifier > 0 ? '+' : ''}${msg.event.modifier}` : ''} = <strong>{msg.event.result}</strong>
-		{:else if msg.event?.type === 'characterChange'}
-			{msg.event.stat} {msg.event.delta > 0 ? '+' : ''}{msg.event.delta}
-			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
-			<span class="opacity-60">({msg.event.status})</span>
-			{@render approvalButtons(msg.event)}
-		{:else if msg.event?.type === 'itemChange'}
-			{msg.event.itemTypeName ?? msg.event.itemTypeId}
-			{#if msg.event.deltaQty != null} qty {msg.event.deltaQty > 0 ? '+' : ''}{msg.event.deltaQty}{/if}
-			{#if msg.event.deltaDur != null} dur {msg.event.deltaDur > 0 ? '+' : ''}{msg.event.deltaDur}{/if}
-			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
-			<span class="opacity-60">({msg.event.status})</span>
-			{@render approvalButtons(msg.event)}
-		{:else if msg.event?.type === 'skillChange'}
-			{msg.event.action === 'add' ? '+' : '−'} {msg.event.skillTypeName ?? msg.event.skillTypeId}
-			{#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
-			<span class="opacity-60">({msg.event.status})</span>
-			{@render approvalButtons(msg.event)}
-		{:else}
-			[system]
-		{/if}
-	</MessageSystem>
+	<MessageSystem {msg} {isGm} {game} />
 {:else if view === 'compact'}
 	<message class="group flex items-start gap-2">
 		{@render avatar('h-5 w-5 text-[10px]')}

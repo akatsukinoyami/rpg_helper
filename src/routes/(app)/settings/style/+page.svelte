@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonRadioSet from '$lib/components/InputButtonRadioSet.svelte';
-	import Message from '$lib/partials/Message.svelte';
+	import Message from '$lib/partials/message/Message.svelte';
 	import Palette from '$lib/components/Palette.svelte';
 	import { langLabels, modeLabels, schemeLabels } from '$lib/constants/labels';
 	import * as m from '$lib/paraglide/messages';
