@@ -18,17 +18,18 @@ import { generateId } from './id';
 // Shared types
 // ---------------------------------------------------------------------------
 
-export interface Stats {
-	str: number;
-	dex: number;
-	con: number;
-	int: number;
-	wis: number;
-	cha: number;
+export interface StatDef {
+	key: string;       // immutable
+	label: string;     // editable
+	isVital: boolean;  // immutable — vitals have current/max and render as bars
+	color: string;     // editable
+	sortOrder: number; // editable
 }
 
+export type Vitals = Record<string, { current: number; max: number }>;
+export type Stats = Record<string, number>;
+
 export interface ItemEffect {
-	stat?: keyof Stats;
 	modifier?: number;
 	description?: string;
 }
@@ -110,8 +111,7 @@ export const games = pgTable('games', {
 	gmUserId: text('gm_user_id')
 		.notNull()
 		.references(() => user.id),
-	hpLabel: varchar('hp_label', { length: 50 }).default('HP').notNull(),
-	mpLabel: varchar('mp_label', { length: 50 }).default('MP').notNull(),
+	statDefs: jsonb('stat_defs').$type<StatDef[]>().default([]).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
@@ -123,7 +123,7 @@ export const races = pgTable('races', {
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	image: text('image'),
-	baseStats: jsonb('base_stats').$type<Stats>().notNull(),
+	baseStats: jsonb('base_stats').$type<Stats>().default({}).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
@@ -181,14 +181,11 @@ export const characters = pgTable('characters', {
 	image: text('image'),
 	bodyDescription: text('body_description'),
 	prehistory: text('prehistory'),
-	stats: jsonb('stats').$type<Stats>().notNull(),
+	vitals: jsonb('vitals').$type<Vitals>().default({}).notNull(),
+	stats: jsonb('stats').$type<Stats>().default({}).notNull(),
 	status: varchar('status', { enum: ['pending', 'approved', 'rejected'] })
 		.default('pending')
 		.notNull(),
-	hp: integer('hp').default(0).notNull(),
-	maxHp: integer('max_hp').default(0).notNull(),
-	mp: integer('mp').default(0).notNull(),
-	maxMp: integer('max_mp').default(0).notNull(),
 	currentLocationId: text('current_location_id').references(() => locations.id, {
 		onDelete: 'set null'
 	}),
@@ -337,18 +334,6 @@ export const messages = pgTable(
 // Stat change proposals
 // ---------------------------------------------------------------------------
 
-export const statFieldEnum = pgEnum('stat_field', [
-	'hp',
-	'mp',
-	'maxHp',
-	'maxMp',
-	'str',
-	'dex',
-	'con',
-	'int',
-	'wis',
-	'cha'
-]);
 export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
 
 export const statProposals = pgTable(
@@ -368,7 +353,7 @@ export const statProposals = pgTable(
 		proposedBy: text('proposed_by')
 			.notNull()
 			.references(() => user.id),
-		field: statFieldEnum('field').notNull(),
+		field: varchar('field', { length: 50 }).notNull(),
 		delta: integer('delta').notNull(),
 		reason: text('reason'),
 		status: proposalStatusEnum('status').default('pending').notNull(),

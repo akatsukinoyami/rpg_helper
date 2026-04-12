@@ -28,7 +28,7 @@
 {:else}
 	<div class="flex flex-col gap-1.5">
 		{#each feedQuery.current as msg (msg.id)}
-			<Message {msg} view={data.msgView} isGm={data.isGm} myCharacterId={data.myCharacterId} game={data.game} />
+			<Message {msg} view={data.msgView} isGm={data.isGm} myCharacterId={data.myCharacterId} statDefs={data.game.statDefs} />
 		{/each}
 	</div>
 {/if}

@@ -7,10 +7,12 @@ import {
 	characters,
 	charItems,
 	charSkills,
+	games,
 	itemProposals,
 	messages,
 	skillProposals,
-	statProposals
+	statProposals,
+	type StatDef
 } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm } from '$lib/remote/utils';
@@ -20,7 +22,14 @@ import { index } from '$lib/remote/messages.remote';
 // Helpers
 // ---------------------------------------------------------------------------
 
-const statNames = new Set(['str', 'dex', 'con', 'int', 'wis', 'cha']);
+async function getGameStatDefs(gameId: string): Promise<StatDef[]> {
+	const [game] = await db.select({ statDefs: games.statDefs }).from(games).where(eq(games.id, gameId)).limit(1);
+	return (game?.statDefs ?? []) as StatDef[];
+}
+
+function resolveStatDef(defs: StatDef[], field: string): StatDef | undefined {
+	return defs.find((d) => d.key === field || (d.isVital && `max${d.key[0].toUpperCase()}${d.key.slice(1)}` === field));
+}
 
 async function getCharacterInGame(userId: string, gameId: string) {
 	const [character] = await db
@@ -50,41 +59,31 @@ async function insertSystemMessage(locationId: string, characterId: string) {
 	});
 }
 
-async function applyStatDelta(characterId: string, field: string, delta: number) {
-	if (statNames.has(field)) {
+async function applyStatDelta(characterId: string, field: string, delta: number, isVital: boolean) {
+	if (isVital) {
+		// vitals[key].current or vitals[maxKey].max
+		const maxPrefix = 'max';
+		const isMax = field.startsWith(maxPrefix) && field[maxPrefix.length] === field[maxPrefix.length].toUpperCase();
+		const [column, subkey] = isMax
+			? [field[maxPrefix.length].toLowerCase() + field.slice(maxPrefix.length + 1), 'max']
+			: [field, 'current'];
 		await db
 			.update(characters)
 			.set({
-				stats: sql`jsonb_set(stats, ${sql.raw(`'{${field}}'`)}, to_jsonb((stats->>${field})::int + ${delta}))`
+				vitals: sql`jsonb_set(
+					CASE WHEN vitals ? ${column} THEN vitals ELSE jsonb_set(vitals, ${`{${column}}`}, '{"current":0,"max":0}') END,
+					${`{${column},${subkey}}`},
+					to_jsonb(coalesce((vitals -> ${column} ->> ${subkey})::int, 0) + ${delta})
+				)`
 			})
 			.where(eq(characters.id, characterId));
 	} else {
-		switch (field) {
-			case 'hp':
-				await db
-					.update(characters)
-					.set({ hp: sql`hp + ${delta}` })
-					.where(eq(characters.id, characterId));
-				break;
-			case 'mp':
-				await db
-					.update(characters)
-					.set({ mp: sql`mp + ${delta}` })
-					.where(eq(characters.id, characterId));
-				break;
-			case 'maxHp':
-				await db
-					.update(characters)
-					.set({ maxHp: sql`max_hp + ${delta}` })
-					.where(eq(characters.id, characterId));
-				break;
-			case 'maxMp':
-				await db
-					.update(characters)
-					.set({ maxMp: sql`max_mp + ${delta}` })
-					.where(eq(characters.id, characterId));
-				break;
-		}
+		await db
+			.update(characters)
+			.set({
+				stats: sql`jsonb_set(stats, ${`{${field}}`}, to_jsonb(coalesce((stats ->> ${field})::int, 0) + ${delta}))`
+			})
+			.where(eq(characters.id, characterId));
 	}
 }
 
@@ -167,8 +166,10 @@ const proposalTables = {
 };
 
 const applyApprove = {
-	async characterChange(proposal: ProposalOf<'characterChange'>) {
-		await applyStatDelta(proposal.characterId, proposal.field, proposal.delta);
+	async characterChange(proposal: ProposalOf<'characterChange'>, gameId: string) {
+		const defs = await getGameStatDefs(gameId);
+		const def = resolveStatDef(defs, proposal.field);
+		await applyStatDelta(proposal.characterId, proposal.field, proposal.delta, def?.isVital ?? false);
 	},
 	async itemChange(proposal: ProposalOf<'itemChange'>) {
 		if (proposal.charItemId) {
@@ -224,7 +225,7 @@ export const approve = command(
 
 		const proposal = await _getProposal(type, id);
 
-		await (applyApprove[type] as (p: typeof proposal) => Promise<void>)(proposal);
+		await (applyApprove[type] as (p: typeof proposal, gameId: string) => Promise<void>)(proposal, gameId);
 
 		await db
 			.update(proposalTables[type])
@@ -256,9 +257,11 @@ export const reject = command(
 );
 
 const removePropose = {
-	async characterChange(proposal: ProposalOf<'characterChange'>) {
+	async characterChange(proposal: ProposalOf<'characterChange'>, gameId: string) {
 		if (proposal.status === 'approved') {
-			await applyStatDelta(proposal.characterId, proposal.field, -proposal.delta);
+			const defs = await getGameStatDefs(gameId);
+			const def = resolveStatDef(defs, proposal.field);
+			await applyStatDelta(proposal.characterId, proposal.field, -proposal.delta, def?.isVital ?? false);
 		}
 	},
 
@@ -312,7 +315,7 @@ export const remove = command(
 
 		const proposal = await _getProposal(type, id, true);
 
-		await (removePropose[type] as (p: typeof proposal) => Promise<void>)(proposal);
+		await (removePropose[type] as (p: typeof proposal, gameId: string) => Promise<void>)(proposal, gameId);
 
 		// Hard delete the system message — cascade removes the proposal row
 		await db
@@ -333,29 +336,20 @@ export const remove = command(
 // Send commands (per-type, called from message form)
 // ---------------------------------------------------------------------------
 
-const statFieldValues = [
-	'hp',
-	'mp',
-	'maxHp',
-	'maxMp',
-	'str',
-	'dex',
-	'con',
-	'int',
-	'wis',
-	'cha'
-] as const;
-
 export const sendStat = command(
 	v.object({
 		locationId: v.pipe(v.string(), v.trim(), v.minLength(1)),
-		field: v.picklist(statFieldValues),
+		field: v.pipe(v.string(), v.trim(), v.minLength(1)),
 		delta: v.pipe(v.number(), v.integer()),
 		reason: v.optional(v.pipe(v.string(), v.trim(), v.maxLength(512)))
 	}),
 	async ({ locationId, field, delta, reason }) => {
 		const { locals, params } = getRequestEvent();
 		const gameId = params.id!;
+
+		const defs = await getGameStatDefs(gameId);
+		if (!resolveStatDef(defs, field)) error(400, 'Unknown stat field');
+
 		const character = await getCharacterInGame(locals.user!.id, gameId);
 
 		const msg = await insertSystemMessage(locationId, character.id);
@@ -446,13 +440,17 @@ export const gmSetStat = command(
 	v.object({
 		locationId: v.pipe(v.string(), v.trim(), v.minLength(1)),
 		characterId: v.pipe(v.string(), v.trim(), v.minLength(1)),
-		field: v.picklist(statFieldValues),
+		field: v.pipe(v.string(), v.trim(), v.minLength(1)),
 		delta: v.pipe(v.number(), v.integer())
 	}),
 	async ({ locationId, characterId, field, delta }) => {
 		const { locals, params } = getRequestEvent();
 		const gameId = params.id!;
 		await assertGm(gameId);
+
+		const defs = await getGameStatDefs(gameId);
+		const def = resolveStatDef(defs, field);
+		if (!def) error(400, 'Unknown stat field');
 
 		const msg = await insertSystemMessage(locationId, characterId);
 		await db.insert(statProposals).values({
@@ -464,7 +462,7 @@ export const gmSetStat = command(
 			delta,
 			status: 'approved'
 		});
-		await applyStatDelta(characterId, field, delta);
+		await applyStatDelta(characterId, field, delta, def.isVital);
 
 		broadcastSystemMessage(gameId, msg.ref!, locationId, characterId);
 		await index(locationId).refresh();

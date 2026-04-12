@@ -26,7 +26,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import MessagePanel from '$lib/partials/message/MessagePanel.svelte';
 	import * as messages from '$lib/remote/messages.remote';
-	import type { GameLabels } from '$lib/utils/stats';
+	import type { StatDef } from '$lib/server/db/schema';
 
 	const MAX_LENGTH = 4096;
 
@@ -42,7 +42,7 @@
 		messageId?: string;
 		initialContent?: string;
 		replyTo?: ReplyTarget | null;
-		game?: GameLabels;
+		statDefs?: StatDef[];
 		onCancelReply?: () => void;
 		onDone?: () => void;
 	}
@@ -53,7 +53,7 @@
 		messageId,
 		initialContent = '',
 		replyTo = null,
-		game,
+		statDefs,
 		onCancelReply,
 		onDone
 	}: Props = $props();
@@ -250,7 +250,7 @@
 
 	{#if !isEditing && !disabled}
 		<!-- Action panels -->
-		<MessagePanel {activeAction} {locationId} {game} />
+		<MessagePanel {activeAction} {locationId} {statDefs} />
 
 		<div class="flex items-center justify-end gap-2">
 			{#if isEditing}

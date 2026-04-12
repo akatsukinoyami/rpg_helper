@@ -5,11 +5,10 @@
 	import * as messages from '$lib/remote/messages.remote';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import { type MessageData, type ProposalEventType, type SystemEvent } from '$lib/types';
-	import { buildStatLabels, statLabel, type GameLabels } from '$lib/utils/stats';
+	import { statLabel } from '$lib/utils/stats';
+	import type { StatDef } from '$lib/server/db/schema';
 
-	let { msg, isGm, game }: { msg: MessageData; isGm: boolean; game?: GameLabels } = $props();
-
-	let statLabels = $derived(buildStatLabels(game));
+	let { msg, isGm, statDefs = [] }: { msg: MessageData; isGm: boolean; statDefs?: StatDef[] } = $props();
 	const statuses = {
 		pending: m.game_dashboard_pending,
 		approved: m.game_dashboard_approved,
@@ -47,7 +46,7 @@
 {#if msg.event}
   <message-wrapper class={[
     "flex items-center gap-2 px-2 py-1 font-light text-gray-500",
-    msg.event?.status === 'rejected' ? 'opacity-50' : ''
+    'status' in msg.event && msg.event.status === 'rejected' ? 'opacity-50' : ''
   ]}>
     <hr class="flex-1 border-gray-500" />
     <span class="text-[10px] text-gray-400 flex items-center">
@@ -63,14 +62,14 @@
         <strong>{msg.event.result}</strong>
       {:else if msg.event?.type === 'characterChange'}
         <span class={guessProposalColor(msg.event.delta > 0)}>
-          {statLabel(msg.event.stat, statLabels)} {msg.event.delta > 0 ? '+' : ''}{msg.event.delta}
+          {statLabel(msg.event.stat, statDefs)} {msg.event.delta > 0 ? '+' : ''}{msg.event.delta}
           {#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
         </span>
       {:else if msg.event?.type === 'itemChange'}
-        <span class={guessProposalColor(msg.event.deltaQty > 0 || msg.event.deltaDur > 0)}>
+        <span class={guessProposalColor((msg.event.deltaQty ?? 0) > 0 || (msg.event.deltaDur ?? 0) > 0)}>
           {msg.event.itemTypeName ?? msg.event.itemTypeId}
-          {@render delta(m.item_qty(), msg.event.deltaQty)}
-          {@render delta(m.item_dur(), msg.event.deltaDur)}
+          {@render delta(m.item_qty(), msg.event.deltaQty ?? undefined)}
+          {@render delta(m.item_dur(), msg.event.deltaDur ?? undefined)}
           {#if msg.event.reason}<span class="opacity-60">— {msg.event.reason}</span>{/if}
         </span>
       {:else if msg.event?.type === 'skillChange'}
@@ -85,27 +84,27 @@
 
     <span class="text-[10px] text-gray-400 flex items-center">
       {#if isGm}
-        {#if msg.event?.status === 'pending'}
-          <ButtonSmall 
+        {#if 'status' in msg.event && msg.event.status === 'pending'}
+          <ButtonSmall
             class="hover:text-yellow-600"
-            onclick={() => proposals.approve({ type: msg.event?.type, id: msg.event?.id })}
+            onclick={() => proposals.approve({ type: msg.event!.type as ProposalEventType, id: (msg.event as {id:string}).id })}
             icon={mdiCheck}
           />
-          <ButtonSmall 
+          <ButtonSmall
             class="hover:text-red-600"
-            onclick={() => proposals.reject({ type: msg.event?.type, id: msg.event.id })}
+            onclick={() => proposals.reject({ type: msg.event!.type as ProposalEventType, id: (msg.event as {id:string}).id })}
             icon={mdiClose}
           />
         {/if}
-        <ButtonSmall 
+        <ButtonSmall
           class="hover:text-red-600"
           title={m.message_delete()}
-          onclick={() => handleDelete(msg.event)}
+          onclick={() => handleDelete(msg.event!)}
           disabled={deletePending}
           icon={mdiDelete}
         />
       {/if}
-      {statuses?.[msg.event?.status as keyof typeof statuses]?.() ?? ''}
+      {'status' in msg.event ? statuses?.[msg.event.status as keyof typeof statuses]?.() : ''}
       {time}
     </span>
     <hr class="flex-1 border-gray-500" />

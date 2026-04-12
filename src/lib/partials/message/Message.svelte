@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import type { MessageData } from '$lib/types';
+	import type { StatDef } from '$lib/server/db/schema';
 
 	export type MsgView = 'compact' | 'forum';
 
@@ -8,7 +9,7 @@
 		view: MsgView;
 		isGm?: boolean;
 		myCharacterId?: string | null;
-		game?: { hpLabel: string; mpLabel: string };
+		statDefs?: StatDef[];
 		onReply?: (msg: MessageData) => void;
 	}
 </script>
@@ -24,8 +25,9 @@
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
 	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
+	import VitalBar from '$lib/components/VitalBar.svelte';
 
-	let { msg, view, isGm = false, myCharacterId = null, game, onReply }: Props = $props();
+	let { msg, view, isGm = false, myCharacterId = null, statDefs = [], onReply }: Props = $props();
 
 	const isSystem = $derived(msg.content === null);
 
@@ -173,23 +175,9 @@
 	</footer>
 {/snippet}
 
-{#snippet bar({ bar, bg, text }: { bar: string, bg: string, text: string}, stat?: number | null, maxStat?: number | null)}
-	<div class={["relative w-full h-3 rounded-full overflow-hidden saturate-80", bg]}>
-		<div 
-			class={["absolute inset-y-0 left-0 rounded-lg", bar]} 
-			style:width="{Math.max(0, Math.min(100, Math.round((stat ?? 0) / (maxStat ?? 0) * 100)))}%"
-		></div>
-		<span class={[
-			"absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm leading-none",
-			text
-		]}>
-			{stat}/{maxStat}
-		</span>
-	</div>
-{/snippet}
 
 {#if isSystem}
-	<MessageSystem {msg} {isGm} {game} />
+	<MessageSystem {msg} {isGm} {statDefs} />
 {:else if view === 'compact'}
 	<message class="group flex items-start gap-2">
 		{@render avatar('h-5 w-5 text-[10px]')}
@@ -222,20 +210,12 @@
 		<avatar class="flex flex-col gap-1 p-1">
 			{@render avatar('h-24 w-24 text-10')}
 			<div class="mt-2 flex flex-col gap-1">
-				{#if msg.character?.maxHp}
-					{@render bar(
-						{ bar: 'bg-red-500', bg: 'bg-red-800', text: 'text-red-900'}, 
-						msg.character.hp, 
-						msg.character.maxHp
-					)}
-				{/if}
-				{#if msg.character?.maxMp}
-					{@render bar(
-						{ bar: 'bg-blue-500', bg: 'bg-blue-800', text: 'text-blue-300'}, 
-						msg.character.mp, 
-						msg.character.maxMp
-					)}
-				{/if}
+				{#each statDefs.filter(d => d.isVital) as def}
+					{@const vital = msg.character?.vitals?.[def.key]}
+					{#if vital?.max}
+						<VitalBar current={vital.current} max={vital.max} color={def.color} />
+					{/if}
+				{/each}
 			</div>
 		</avatar>
 

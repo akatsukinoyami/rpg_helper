@@ -9,6 +9,8 @@
 
 	let { data }: { data: PageData } = $props();
 
+	const defsQuery = game.statDefs();
+
 	async function doExport(section: 'all' | 'races' | 'skillTypes' | 'itemTypes' | 'locations') {
 		const result = await transfer.exportSection({ section });
 		const blob = new Blob([result.yaml], { type: 'text/yaml' });
@@ -31,12 +33,14 @@
 	name={data.game.name}
 	description={data.game.description}
 	image={data.game.image}
+	mode="edit"
+	statDefs={defsQuery.current ?? data.game.statDefs ?? []}
 >
 	<div class="flex flex-col gap-4 my-4 py-4 border-t border-gray-200">
 		{#if data.otherPlayers.length > 0}
 			<section>
 				<form {...game.transfer} class="flex justify-between items-center gap-3">
-				<span class="text-sm font-semibold text-gray-700">{m.game_transfer_gm()}</span>
+					<span class="text-sm font-semibold text-gray-700">{m.game_transfer_gm()}</span>
 					<div class="flex gap-2 items-center">
 						<InputSelect
 							id="newGmUserId"
@@ -64,4 +68,3 @@
 		</section>
 	</div>
 </GameForm>
-

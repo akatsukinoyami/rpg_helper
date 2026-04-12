@@ -45,7 +45,7 @@
 
 — *Говорят, вы искали того, кто не боится заглянуть в шахты Черного Пика? Считайте, что вы его нашли.*`,
       createdAt: new Date(),
-      characterName: "Эдриан",
+      character: { id: null, name: "Эдриан", image: null },
       locationName: "Интересная Локация"
     }} view={msgView} />
   </div>

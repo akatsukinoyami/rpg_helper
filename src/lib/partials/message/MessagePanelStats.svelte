@@ -6,18 +6,19 @@
 	import InputText from '$lib/components/InputText.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import * as proposals from '$lib/remote/proposals.remote';
-	import { buildStatLabels, type StatLabels } from '$lib/utils/stats';
+	import { buildStatOptions } from '$lib/utils/stats';
+	import type { StatDef } from '$lib/server/db/schema';
 
-	let { activeAction = $bindable(), locationId, game } = $props();
+	let { activeAction = $bindable(), locationId, statDefs = [] as StatDef[] } = $props();
 
-	let statLabels = $derived(buildStatLabels(game));
-	let statField = $state<keyof StatLabels>('hp');
+	let statOptions = $derived(buildStatOptions(statDefs));
+	let statField = $state('');
 	let statDelta = $state(1);
 	let statReason = $state('');
 	let statSubmitting = $state(false);
 
 	async function submitStat() {
-		if (statSubmitting) return;
+		if (!statField || statSubmitting) return;
 		statSubmitting = true;
 
 		proposals
@@ -31,7 +32,7 @@
   <InputSelect
     class="flex-1"
     bind:value={statField}
-    options={statLabels}
+    options={[['', '— stat —'], ...Object.entries(statOptions)]}
   />
   <InputNumber
     class="flex-1"

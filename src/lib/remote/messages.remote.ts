@@ -84,10 +84,7 @@ const messageFields = {
 		id: messages.characterId,
 		name: characters.name,
 		image: characters.image,
-		hp: characters.hp,
-		maxHp: characters.maxHp,
-		mp: characters.mp,
-		maxMp: characters.maxMp,
+		vitals: characters.vitals,
 	},
 	move: {
 		id: messages.moveId,

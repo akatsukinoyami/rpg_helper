@@ -25,8 +25,27 @@ import {
 	skills,
 	statProposals,
 	user,
-	verification
+	verification,
+	type StatDef
 } from '../schema';
+
+// Shared stat definitions (same keys across all games, game-specific vital labels)
+const BASE_STATS: StatDef[] = [
+	{ key: 'str', label: 'Сила',        isVital: false, color: '#f97316', sortOrder: 3 },
+	{ key: 'dex', label: 'Ловкость',    isVital: false, color: '#22c55e', sortOrder: 4 },
+	{ key: 'con', label: 'Телосложение',isVital: false, color: '#eab308', sortOrder: 5 },
+	{ key: 'int', label: 'Интеллект',   isVital: false, color: '#a855f7', sortOrder: 6 },
+	{ key: 'wis', label: 'Мудрость',    isVital: false, color: '#14b8a6', sortOrder: 7 },
+	{ key: 'cha', label: 'Харизма',     isVital: false, color: '#ec4899', sortOrder: 8 },
+];
+
+function makeStatDefs(hpLabel: string, mpLabel: string): StatDef[] {
+	return [
+		{ key: 'hp', label: hpLabel, isVital: true,  color: '#ef4444', sortOrder: 1 },
+		{ key: 'mp', label: mpLabel, isVital: true,  color: '#3b82f6', sortOrder: 2 },
+		...BASE_STATS,
+	];
+}
 
 const client = postgres(process.env.DATABASE_URL!);
 const db = drizzle(client, { schema });
@@ -45,8 +64,7 @@ const USERS = [
 const GAME1 = {
 	name: 'Хроники Арктики',
 	description: 'Суровый север, где боги ещё не покинули смертных.',
-	hpLabel: 'Здоровье',
-	mpLabel: 'Мана',
+	statDefs: makeStatDefs('Здоровье', 'Мана'),
 	skillTypes: [
 		{ name: 'Владение мечом', description: 'Атаки холодным оружием ближнего боя' },
 		{ name: 'Магия льда', description: 'Управление холодом и зимними стихиями' },
@@ -85,7 +103,6 @@ const GAME1 = {
 		{ name: 'Хроники Арктики', description: 'Корень мира', parentId: null },
 		{ name: 'Деревня Фьорда', description: 'Небольшое поселение у замёрзшего залива', parent: 0 }
 	],
-	// chars: [{ userId, name, gender, age, stats, hp, maxHp, mp, maxMp }]
 	chars: [
 		{
 			userId: 'user-aleksey',
@@ -93,11 +110,8 @@ const GAME1 = {
 			gender: 'male' as const,
 			age: 28,
 			prehistory: 'Северный воин, потерявший свой клан в битве с морозными великанами.',
-			stats: { str: 14, dex: 10, con: 13, int: 9, wis: 10, cha: 8 },
-			hp: 42,
-			maxHp: 42,
-			mp: 10,
-			maxMp: 10
+			vitals: { hp: { current: 42, max: 42 }, mp: { current: 10, max: 10 } },
+			stats: { str: 14, dex: 10, con: 13, int: 9, wis: 10, cha: 8 }
 		},
 		{
 			userId: 'user-mariya',
@@ -105,11 +119,8 @@ const GAME1 = {
 			gender: 'female' as const,
 			age: 24,
 			prehistory: 'Молодая жрица богини зимы, ищущая артефакт своего ордена.',
-			stats: { str: 7, dex: 12, con: 9, int: 14, wis: 13, cha: 11 },
-			hp: 28,
-			maxHp: 28,
-			mp: 35,
-			maxMp: 35
+			vitals: { hp: { current: 28, max: 28 }, mp: { current: 35, max: 35 } },
+			stats: { str: 7, dex: 12, con: 9, int: 14, wis: 13, cha: 11 }
 		}
 	]
 };
@@ -118,8 +129,7 @@ const GAME1 = {
 const GAME2 = {
 	name: 'Тёмные воды',
 	description: 'Пиратские моря, где каждый порт таит опасность.',
-	hpLabel: 'Стойкость',
-	mpLabel: 'Воля',
+	statDefs: makeStatDefs('Стойкость', 'Воля'),
 	skillTypes: [
 		{ name: 'Мореплавание', description: 'Управление кораблём и навигация' },
 		{ name: 'Фехтование', description: 'Искусство владения клинком' },
@@ -165,11 +175,8 @@ const GAME2 = {
 			gender: 'none' as const,
 			age: 35,
 			prehistory: 'Легендарный пират, захвативший семь торговых флотилий.',
-			stats: { str: 12, dex: 13, con: 11, int: 12, wis: 9, cha: 14 },
-			hp: 38,
-			maxHp: 38,
-			mp: 15,
-			maxMp: 15
+			vitals: { hp: { current: 38, max: 38 }, mp: { current: 15, max: 15 } },
+			stats: { str: 12, dex: 13, con: 11, int: 12, wis: 9, cha: 14 }
 		},
 		{
 			userId: 'user-dmitriy',
@@ -177,11 +184,8 @@ const GAME2 = {
 			gender: 'female' as const,
 			age: 22,
 			prehistory: 'Беглянка из знатного дома, нашедшая свободу на море.',
-			stats: { str: 9, dex: 16, con: 9, int: 11, wis: 11, cha: 13 },
-			hp: 30,
-			maxHp: 30,
-			mp: 20,
-			maxMp: 20
+			vitals: { hp: { current: 30, max: 30 }, mp: { current: 20, max: 20 } },
+			stats: { str: 9, dex: 16, con: 9, int: 11, wis: 11, cha: 13 }
 		}
 	]
 };
@@ -190,8 +194,7 @@ const GAME2 = {
 const GAME3 = {
 	name: 'Пустошь',
 	description: 'Мир после катастрофы. Выживание — единственный закон.',
-	hpLabel: 'Живучесть',
-	mpLabel: 'Концентрация',
+	statDefs: makeStatDefs('Живучесть', 'Концентрация'),
 	skillTypes: [
 		{ name: 'Стрельба', description: 'Владение огнестрельным и метательным оружием' },
 		{ name: 'Взлом', description: 'Открытие замков и электронных замков' },
@@ -236,11 +239,8 @@ const GAME3 = {
 			gender: 'male' as const,
 			age: 45,
 			prehistory: 'Бывший военный инженер, выживший в бункере двадцать лет.',
-			stats: { str: 11, dex: 10, con: 14, int: 15, wis: 13, cha: 7 },
-			hp: 45,
-			maxHp: 45,
-			mp: 25,
-			maxMp: 25
+			vitals: { hp: { current: 45, max: 45 }, mp: { current: 25, max: 25 } },
+			stats: { str: 11, dex: 10, con: 14, int: 15, wis: 13, cha: 7 }
 		},
 		{
 			userId: 'user-aleksey',
@@ -248,11 +248,8 @@ const GAME3 = {
 			gender: 'female' as const,
 			age: 19,
 			prehistory: 'Выросла среди руин, научилась выживать раньше, чем ходить.',
-			stats: { str: 9, dex: 15, con: 10, int: 10, wis: 12, cha: 10 },
-			hp: 32,
-			maxHp: 32,
-			mp: 18,
-			maxMp: 18
+			vitals: { hp: { current: 32, max: 32 }, mp: { current: 18, max: 18 } },
+			stats: { str: 9, dex: 15, con: 10, int: 10, wis: 12, cha: 10 }
 		}
 	]
 };
@@ -338,8 +335,7 @@ async function seed() {
 				name: def.name,
 				description: def.description,
 				gmUserId,
-				hpLabel: def.hpLabel,
-				mpLabel: def.mpLabel
+				statDefs: def.statDefs
 			})
 			.returning({ id: games.id });
 
@@ -384,12 +380,9 @@ async function seed() {
 				gender: char.gender,
 				age: char.age,
 				prehistory: char.prehistory,
+				vitals: char.vitals,
 				stats: char.stats,
-				status: 'approved',
-				hp: char.hp,
-				maxHp: char.maxHp,
-				mp: char.mp,
-				maxMp: char.maxMp
+				status: 'approved'
 			});
 		}
 

@@ -16,8 +16,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 			description: true,
 			image: true,
 			gmUserId: true,
-			hpLabel: true,
-			mpLabel: true
+			statDefs: true
 		}
 	});
 

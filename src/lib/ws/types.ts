@@ -16,8 +16,6 @@ export interface GameUpdatedPayload {
 	name: string;
 	description: string | null;
 	image: string | null;
-	hpLabel: string;
-	mpLabel: string;
 }
 
 export interface MessageCreatedPayload {
@@ -43,7 +41,7 @@ export interface CharacterMovedPayload {
 
 export interface CharacterStatPayload {
 	characterId: string;
-	field: 'hp' | 'mp' | 'maxHp' | 'maxMp';
+	field: string;
 	oldValue: number;
 	newValue: number;
 }

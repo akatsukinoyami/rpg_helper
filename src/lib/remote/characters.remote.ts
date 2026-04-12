@@ -44,12 +44,9 @@ export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (
 			image: characters.image,
 			bodyDescription: characters.bodyDescription,
 			prehistory: characters.prehistory,
+			vitals: characters.vitals,
 			stats: characters.stats,
 			status: characters.status,
-			hp: characters.hp,
-			maxHp: characters.maxHp,
-			mp: characters.mp,
-			maxMp: characters.maxMp,
 			userName: user.name,
 			raceName: races.name
 		})
@@ -114,7 +111,6 @@ export const createCharacter = form(CharacterSchema, async (data) => {
 
 	if (existing.length > 0) redirect(303, `/games/${gameId}`);
 
-	let stats = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
 	let skillIds: string[] = [];
 
 	if (data.raceId) {
@@ -123,7 +119,6 @@ export const createCharacter = form(CharacterSchema, async (data) => {
 			with: { raceSkills: true }
 		});
 		if (race) {
-			stats = race.baseStats;
 			skillIds = race.raceSkills.map((rs) => rs.skillId);
 		}
 	}
@@ -139,8 +134,7 @@ export const createCharacter = form(CharacterSchema, async (data) => {
 			age: data.age,
 			image: data.image?.trim() || null,
 			bodyDescription: data.bodyDescription?.trim() || null,
-			prehistory: data.prehistory?.trim() || null,
-			stats
+			prehistory: data.prehistory?.trim() || null
 		})
 		.returning({ id: characters.id });
 
@@ -182,7 +176,6 @@ export const editCharacter = form(CharacterSchema, async (data) => {
 	if (!isGm && !isOwner) error(403);
 
 	if (data.raceId !== character.raceId) {
-		let stats = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
 		let skillIds: string[] = [];
 
 		if (data.raceId) {
@@ -191,7 +184,6 @@ export const editCharacter = form(CharacterSchema, async (data) => {
 				with: { raceSkills: true }
 			});
 			if (race) {
-				stats = race.baseStats;
 				skillIds = race.raceSkills.map((rs) => rs.skillId);
 			}
 		}
@@ -214,7 +206,6 @@ export const editCharacter = form(CharacterSchema, async (data) => {
 				image: data.image?.trim() || null,
 				bodyDescription: data.bodyDescription?.trim() || null,
 				prehistory: data.prehistory?.trim() || null,
-				stats,
 				...(isOwner && !isGm ? { status: 'pending' as const } : {}),
 				updatedAt: new Date()
 			})

@@ -1,4 +1,5 @@
 import type { SystemEvent } from "./messageEvent";
+import type { Vitals } from "$lib/server/db/schema";
 
 export interface MessageData {
   id: string;
@@ -10,10 +11,7 @@ export interface MessageData {
     id?: string | null;
     name: string | null;
     image: string | null;
-    hp: number | null;
-    maxHp: number | null;
-    mp: number | null;
-    maxMp: number | null;
+    vitals?: Vitals | null;
   } | null;
   locationName?: string;
   locationId?: string;
@@ -27,5 +25,5 @@ export interface MessageData {
     content?: string | null;
     characterName?: string | null;
   } | null;
-  event?: ProposalEvent | null;
+  event?: SystemEvent | null;
 }

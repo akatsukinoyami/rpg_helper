@@ -20,7 +20,7 @@ export interface MoveEvent {
 export interface CharacterChangeEvent {
 	type: 'characterChange';
 	id: string;
-	stat: 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha' | 'hp' | 'mp' | 'maxHp' | 'maxMp';
+	stat: string;
 	delta: number;
 	reason: string | null;
 	status: ProposalStatus;

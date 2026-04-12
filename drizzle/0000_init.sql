@@ -1,6 +1,5 @@
 CREATE TYPE "public"."proposal_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
 CREATE TYPE "public"."skill_action" AS ENUM('add', 'remove');--> statement-breakpoint
-CREATE TYPE "public"."stat_field" AS ENUM('hp', 'mp', 'maxHp', 'maxMp', 'str', 'dex', 'con', 'int', 'wis', 'cha');--> statement-breakpoint
 CREATE TYPE "public"."tracking_mode" AS ENUM('durability', 'quantity');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
@@ -79,12 +78,9 @@ CREATE TABLE "characters" (
 	"image" text,
 	"body_description" text,
 	"prehistory" text,
-	"stats" jsonb NOT NULL,
+	"vitals" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"stats" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"status" varchar DEFAULT 'pending' NOT NULL,
-	"hp" integer DEFAULT 0 NOT NULL,
-	"max_hp" integer DEFAULT 0 NOT NULL,
-	"mp" integer DEFAULT 0 NOT NULL,
-	"max_mp" integer DEFAULT 0 NOT NULL,
 	"current_location_id" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -108,8 +104,7 @@ CREATE TABLE "games" (
 	"description" text,
 	"image" text,
 	"gm_user_id" text NOT NULL,
-	"hp_label" varchar(50) DEFAULT 'HP' NOT NULL,
-	"mp_label" varchar(50) DEFAULT 'MP' NOT NULL,
+	"stat_defs" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -199,7 +194,7 @@ CREATE TABLE "races" (
 	"name" varchar(255) NOT NULL,
 	"description" text,
 	"image" text,
-	"base_stats" jsonb NOT NULL,
+	"base_stats" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -253,7 +248,7 @@ CREATE TABLE "stat_proposals" (
 	"message_ref" text GENERATED ALWAYS AS (message_location_id || '#' || message_id::text) STORED,
 	"character_id" text NOT NULL,
 	"proposed_by" text NOT NULL,
-	"field" "stat_field" NOT NULL,
+	"field" varchar(50) NOT NULL,
 	"delta" integer NOT NULL,
 	"reason" text,
 	"status" "proposal_status" DEFAULT 'pending' NOT NULL,

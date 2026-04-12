@@ -6,13 +6,13 @@
 	import MessagePanelSkill from './MessagePanelSkill.svelte';
 	import MessagePanelStats from './MessagePanelStats.svelte';
 
-	let { activeAction = $bindable(), locationId, game } = $props();
+	let { activeAction = $bindable(), locationId, statDefs } = $props();
 </script>
 
 {#if activeAction}
   <div class="flex items-center gap-1.5 rounded bg-gray-50 border border-gray-200 px-2 py-1.5">
     {#each [MessagePanelDice, MessagePanelItem, MessagePanelSkill, MessagePanelStats] as Panel}
-      <Panel bind:activeAction {locationId} {game} />
+      <Panel bind:activeAction {locationId} {statDefs} />
     {/each}
 
     <Button

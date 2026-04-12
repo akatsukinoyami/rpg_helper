@@ -1,5 +1,5 @@
 {
-  "id": "5e63ce1d-cc68-4f72-837c-6142cb6509a7",
+  "id": "e0c818d1-5ce1-4401-ae69-1578a7c9e49a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -613,11 +613,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "vitals": {
+          "name": "vitals",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
         "stats": {
           "name": "stats",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "status": {
           "name": "status",
@@ -625,34 +633,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
-        },
-        "hp": {
-          "name": "hp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "max_hp": {
-          "name": "max_hp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "mp": {
-          "name": "mp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "max_mp": {
-          "name": "max_mp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         },
         "current_location_id": {
           "name": "current_location_id",
@@ -884,19 +864,12 @@
           "primaryKey": false,
           "notNull": true
         },
-        "hp_label": {
-          "name": "hp_label",
-          "type": "varchar(50)",
+        "stat_defs": {
+          "name": "stat_defs",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'HP'"
-        },
-        "mp_label": {
-          "name": "mp_label",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'MP'"
+          "default": "'[]'::jsonb"
         },
         "created_at": {
           "name": "created_at",
@@ -1657,7 +1630,8 @@
           "name": "base_stats",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "created_at": {
           "name": "created_at",
@@ -2068,8 +2042,7 @@
         },
         "field": {
           "name": "field",
-          "type": "stat_field",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
@@ -2280,22 +2253,6 @@
       "values": [
         "add",
         "remove"
-      ]
-    },
-    "public.stat_field": {
-      "name": "stat_field",
-      "schema": "public",
-      "values": [
-        "hp",
-        "mp",
-        "maxHp",
-        "maxMp",
-        "str",
-        "dex",
-        "con",
-        "int",
-        "wis",
-        "cha"
       ]
     },
     "public.tracking_mode": {
