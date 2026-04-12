@@ -56,7 +56,7 @@
   let classLocal = $derived([
 		kinds[kind], 
 		'flex border rounded-lg text-sm font-medium',
-		{ 'cursor-pointer': !!(href || rest.onclick) },
+		!!(href || rest.onclick) ? 'cursor-pointer' : '',
 		label && icon 
 			? 'justify-between' 
 			: `justify-center`, 

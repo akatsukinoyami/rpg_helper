@@ -73,29 +73,38 @@ function whereRef(ref: string) {
 		eq(messages.id, sql`split_part(${ref}, '#', 2)::integer`)
 	);
 }
+const messageFields = {
+	id: sql<string>`${messages.locationId} || '#' || ${messages.id}::text`,
+	content: messages.content,
+	createdAt: messages.createdAt,
+	editedAt: messages.editedAt,
+	gmAnnotation: messages.gmAnnotation,
+	locationId: messages.locationId,
+	character: {
+		id: messages.characterId,
+		name: characters.name,
+		image: characters.image,
+		hp: characters.hp,
+		maxHp: characters.maxHp,
+		mp: characters.mp,
+		maxMp: characters.maxMp,
+	},
+	move: {
+		id: messages.moveId,
+		from: fromLocation.name,
+		to: toLocation.name,
+	},
+	event: eventSubquery,
+	reply: {
+		id: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
+		content: replyMsg.content,
+		characterName: replyChar.name
+	}
+};
 
 export const index = query(v.pipe(v.string(), v.trim(), v.minLength(1)), async (locationId) => {
 	return await db
-		.select({
-			id: sql<string>`${messages.locationId} || '#' || ${messages.id}::text`,
-			content: messages.content,
-			createdAt: messages.createdAt,
-			editedAt: messages.editedAt,
-			gmAnnotation: messages.gmAnnotation,
-			locationId: messages.locationId,
-			characterId: messages.characterId,
-			characterName: characters.name,
-			characterImage: characters.image,
-			moveId: messages.moveId,
-			moveFromLocation: fromLocation,
-			moveToLocation: toLocation,
-			event: eventSubquery,
-			replyToId: sql<
-				string | null
-			>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
-			replyContent: replyMsg.content,
-			replyCharacterName: replyChar.name
-		})
+		.select(messageFields)
 		.from(messages)
 		.leftJoin(characters, eq(messages.characterId, characters.id))
 		.leftJoin(moves, eq(messages.moveId, moves.id))
@@ -115,27 +124,7 @@ export const feed = query(async () => {
 	const gameId = params.id!;
 
 	return await db
-		.select({
-			id: sql<string>`${messages.locationId} || '#' || ${messages.id}::text`,
-			content: messages.content,
-			createdAt: messages.createdAt,
-			editedAt: messages.editedAt,
-			gmAnnotation: messages.gmAnnotation,
-			locationId: messages.locationId,
-			characterId: messages.characterId,
-			locationName: locations.name,
-			characterName: characters.name,
-			characterImage: characters.image,
-			moveId: messages.moveId,
-			moveFromLocationName: fromLocation.name,
-			moveToLocationName: toLocation.name,
-			event: eventSubquery,
-			replyToId: sql<
-				string | null
-			>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
-			replyContent: replyMsg.content,
-			replyCharacterName: replyChar.name
-		})
+		.select(messageFields)
 		.from(messages)
 		.innerJoin(locations, eq(messages.locationId, locations.id))
 		.leftJoin(characters, eq(messages.characterId, characters.id))

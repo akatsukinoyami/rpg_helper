@@ -149,6 +149,8 @@
 	"proposal_stat_delta": "Дельта",
 	"proposal_item_qty": "Кол-во Δ",
 	"proposal_item_dur": "Прочность Δ",
+	"item_qty": "кол-во",
+	"item_dur": "прочн.",
 	"game_dashboard_no_characters": "Персонажей пока нет.",
 	"game_dashboard_pending": "Ожидает",
 	"game_dashboard_reject": "Отклонить",

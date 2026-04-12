@@ -149,6 +149,8 @@
 	"proposal_stat_delta": "Дельта",
 	"proposal_item_qty": "К-сть Δ",
 	"proposal_item_dur": "Міцність Δ",
+	"item_qty": "к-сть",
+	"item_dur": "міцн.",
 	"game_dashboard_no_characters": "Персонажів поки немає.",
 	"game_dashboard_pending": "Очікує",
 	"game_dashboard_reject": "Відхилити",

@@ -1,27 +1,7 @@
 <script lang="ts" module>
-	import type { SystemEvent } from '$lib/types';
+	import type { MessageData } from '$lib/types';
 
 	export type MsgView = 'compact' | 'forum';
-
-	export interface MessageData {
-		id: string;
-		content: string | null;
-		createdAt: Date | string;
-		editedAt?: Date | string | null;
-		gmAnnotation?: string | null;
-		characterId?: string | null;
-		characterName: string | null;
-		characterImage?: string | null;
-		locationName?: string;
-		locationId?: string;
-		moveId?: string | null;
-		moveFromLocation?: { id: string; name: string } | null;
-		moveToLocation?: { id: string; name: string } | null;
-		replyToId?: string | null;
-		replyContent?: string | null;
-		replyCharacterName?: string | null;
-		event?: SystemEvent | null;
-	}
 
 	export interface Props {
 		msg: MessageData;
@@ -49,12 +29,12 @@
 
 	const isSystem = $derived(msg.content === null);
 
-	const name = $derived(msg.characterName ?? m.message_gm());
+	const name = $derived(msg.character?.name ?? m.message_gm());
 
-	const initials = $derived(msg.characterImage ? '' : name
+	const initials = $derived(msg.character?.image ? '' : name
 			.split(' ')
 			.slice(0, 2)
-			.map((w) => w[0]?.toUpperCase() ?? '')
+			.map((w: string) => w[0]?.toUpperCase() ?? '')
 			.join('')
 	);
 
@@ -68,7 +48,7 @@
 
 	const rendered = $derived(msg.content ? renderMarkdown(msg.content) : '');
 
-	const isOwner = $derived(!!myCharacterId && myCharacterId === msg.characterId);
+	const isOwner = $derived(!!myCharacterId && myCharacterId === msg.character?.id);
 	const canEdit = $derived((isOwner || isGm) && !isSystem);
 
 	let editing = $state(false);
@@ -96,11 +76,11 @@
 {#snippet avatar(className: string)}
 	<span
 		class={[
-			className, 
-			msg.characterImage ? 'rounded-md' : 'rounded-full', 
+			className,
+			msg.character?.image ? 'rounded-md' : 'rounded-full',
 			"mt-0.5 flex shrink-0 items-center justify-center font-semibold text-white bg-contain"
 		]}
-		style={msg.characterImage ? `background-image: url(${msg.characterImage})` : `background-color: hsl(${hue} 50% 45%)`}
+		style={msg.character?.image ? `background-image: url(${msg.character.image})` : `background-color: hsl(${hue} 50% 45%)`}
 	>{initials}</span>
 {/snippet}
 
@@ -144,7 +124,7 @@
 			locationId={msg.locationId ?? ''}
 			messageId={msg.id}
 			initialContent={msg.content ?? ''}
-			myCharacterId={myCharacterId ?? msg.characterId}
+			myCharacterId={myCharacterId ?? msg.character?.id}
 			onDone={() => editing = false}
 		/>
 	{:else}
@@ -175,11 +155,11 @@
 {/snippet}
 
 {#snippet replyPreview()}
-	{#if msg.replyToId && msg.replyContent != null}
+	{#if msg.reply?.id && msg.reply?.content != null}
 		<div class="flex items-start gap-1 rounded bg-gray-100 border-l-2 border-gray-300 px-1.5 py-1 text-[11px] text-gray-500 max-w-full overflow-hidden">
 			<Icon path={mdiReply} size={11} pathClass="fill-gray-400 shrink-0 mt-0.5" />
-			<span class="font-semibold shrink-0">{msg.replyCharacterName ?? m.message_gm()}:</span>
-			<span class="truncate">{msg.replyContent}</span>
+			<span class="font-semibold shrink-0">{msg.reply.characterName ?? m.message_gm()}:</span>
+			<span class="truncate">{msg.reply.content}</span>
 		</div>
 	{/if}
 {/snippet}
@@ -191,6 +171,21 @@
 		{/if}
 		{@render actions()}
 	</footer>
+{/snippet}
+
+{#snippet bar({ bar, bg, text }: { bar: string, bg: string, text: string}, stat?: number | null, maxStat?: number | null)}
+	<div class={["relative w-full h-3 rounded-full overflow-hidden saturate-80", bg]}>
+		<div 
+			class={["absolute inset-y-0 left-0 rounded-lg", bar]} 
+			style:width="{Math.max(0, Math.min(100, Math.round((stat ?? 0) / (maxStat ?? 0) * 100)))}%"
+		></div>
+		<span class={[
+			"absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm leading-none",
+			text
+		]}>
+			{stat}/{maxStat}
+		</span>
+	</div>
 {/snippet}
 
 {#if isSystem}
@@ -224,8 +219,24 @@
 			{time}
 		</header>
 
-		<avatar class="block">
+		<avatar class="flex flex-col gap-1 p-1">
 			{@render avatar('h-24 w-24 text-10')}
+			<div class="mt-2 flex flex-col gap-1">
+				{#if msg.character?.maxHp}
+					{@render bar(
+						{ bar: 'bg-red-500', bg: 'bg-red-800', text: 'text-red-900'}, 
+						msg.character.hp, 
+						msg.character.maxHp
+					)}
+				{/if}
+				{#if msg.character?.maxMp}
+					{@render bar(
+						{ bar: 'bg-blue-500', bg: 'bg-blue-800', text: 'text-blue-300'}, 
+						msg.character.mp, 
+						msg.character.maxMp
+					)}
+				{/if}
+			</div>
 		</avatar>
 
 		<section class="flex-1 min-w-0">

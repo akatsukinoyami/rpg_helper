@@ -214,18 +214,35 @@
 					{disabled} 
 				/>
 			{/each}
+			<span class={[
+				'text-[11px] tabular-nums', 
+				remaining < 100 
+					? (overLimit ? 'text-red-500 font-semibold' : 'text-amber-500') 
+					: 'text-gray-400'
+			]}>
+				{remaining}
+			</span>
 		{/if}
 	</div>
 
-	<textarea
-		bind:this={textarea}
-		bind:value={content}
-		oninput={handleInput}
-		{disabled}
-		placeholder={disabled ? m.message_no_char() : m.message_placeholder()}
-		rows={3}
-		class={[fieldColors, fieldSpacing, 'rounded-md border text-xs outline-none resize-y w-full', overLimit && 'border-red-400']}
-	></textarea>
+	<div class="flex gap-2">
+		<textarea
+			bind:this={textarea}
+			bind:value={content}
+			oninput={handleInput}
+			{disabled}
+			placeholder={disabled ? m.message_no_char() : m.message_placeholder()}
+			rows={3}
+			class={[fieldColors, fieldSpacing, 'rounded-md border text-xs outline-none resize-y w-full', overLimit && 'border-red-400']}
+		></textarea>
+
+		<Button
+			type="submit"
+			icon={mdiSend}
+			class="items-center p-2"
+			disabled={disabled || !content.trim() || overLimit || submitting}
+		/>
+	</div>
 
 	{#if htmlWarning}
 		<p class="text-[11px] text-amber-600">{m.message_html_forbidden()}</p>
@@ -236,18 +253,9 @@
 		<MessagePanel {activeAction} {locationId} {game} />
 
 		<div class="flex items-center justify-end gap-2">
-			<span class={['text-[11px] tabular-nums', remaining < 100 ? (overLimit ? 'text-red-500 font-semibold' : 'text-amber-500') : 'text-gray-400']}>
-				{remaining}
-			</span>
 			{#if isEditing}
 				<Button type="button" kind="secondary" icon={mdiClose} onclick={handleCancel} />
 			{/if}
-			<Button
-				type="submit"
-				icon={mdiSend}
-				kind="primary"
-				disabled={disabled || !content.trim() || overLimit || submitting}
-			/>
 		</div>
 	{/if}
 </form>

@@ -5,3 +5,4 @@ export type Options = OptionsObject | OptionsArray;
 export type Values<T> = T[keyof T];
 
 export * from './messageEvent';
+export * from './messageData';
