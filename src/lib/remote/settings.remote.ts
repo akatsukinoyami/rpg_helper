@@ -6,9 +6,9 @@ import { verifyPassword } from 'better-auth/crypto';
 import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { account, user } from '$lib/server/db/schema';
-import { COOKIE_NAME, buildTheme } from '$lib/theme';
+import { COOKIE_NAME, buildTheme } from '$lib/utils/theme';
 import { locales } from '$lib/paraglide/runtime';
-import type { Mode, Scheme } from '$lib/theme';
+import type { Mode, Scheme } from '$lib/utils/theme';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 

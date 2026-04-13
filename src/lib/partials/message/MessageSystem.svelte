@@ -30,7 +30,7 @@
 		if (deletePending) return;
 		deletePending = true;
 		try {
-			if (event.type === 'move' || event.type === 'diceRoll') {
+			if (event.type === 'diceRoll') {
 				await messages.remove(msg.id);
 			} else {
 				await proposals.remove({ type: event.type as ProposalEventType, id: event.id });
@@ -47,10 +47,10 @@
   {/if}
 {/snippet}
 
-{#if msg.event}
+{#if msg.event || msg.move?.id}
   <message-wrapper class={[
     "flex items-center gap-2 px-2 py-1 font-light text-gray-500",
-    'status' in msg.event && msg.event.status === 'rejected' ? 'opacity-50' : ''
+    msg.event?.status === 'rejected' ? 'opacity-50' : ''
   ]}>
     <hr class="flex-1 border-gray-500" />
     <span class="text-[10px] text-gray-400 flex items-center">
@@ -88,7 +88,7 @@
 
     <span class="text-[10px] text-gray-400 flex items-center">
       {#if isGm}
-        {#if 'status' in msg.event && msg.event.status === 'pending'}
+        {#if msg.event?.status === 'pending'}
           <ButtonSmall
             class="hover:text-yellow-600"
             onclick={() => proposals.approve({ type: msg.event!.type as ProposalEventType, id: (msg.event as {id:string}).id })}
@@ -103,12 +103,12 @@
         <ButtonSmall
           class="hover:text-red-600"
           title={m.message_delete()}
-          onclick={() => handleDelete(msg.event!)}
+          onclick={() => msg.event ? handleDelete(msg.event) : messages.remove(msg.id)}
           disabled={deletePending}
           icon={mdiDelete}
         />
       {/if}
-      {'status' in msg.event ? statuses?.[msg.event.status as keyof typeof statuses]?.() : ''}
+      {msg.event?.status ? statuses?.[msg.event.status as keyof typeof statuses]?.() : ''}
       {time}
     </span>
     <hr class="flex-1 border-gray-500" />

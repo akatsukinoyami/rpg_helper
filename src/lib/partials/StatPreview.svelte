@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Badge from '$lib/components/Badge.svelte';
-	import { localize } from '$lib/localize';
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
 
@@ -36,7 +35,7 @@
     <p class="mb-1 mt-3 text-xs font-medium text-gray-600">{m.char_starting_skills()}</p>
     <div class="flex flex-wrap gap-1">
       {#each selectedRace.raceSkills as rs}
-        <Badge label={localize(rs.skill.name, getLocale())} />
+        <Badge label={rs.skill.name} />
       {/each}
     </div>
   {/if}

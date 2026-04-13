@@ -2,7 +2,6 @@
 	import type { Snippet } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
 	import type { Locale, Stats } from '$lib/server/db/schema';
-	import { localize } from '$lib/localize';
 	import { getLocale } from '$lib/paraglide/runtime';
 
 	interface Props {
@@ -75,7 +74,7 @@
 				<p class="truncate font-semibold text-white">{name}</p>
 				<p class="truncate text-sm text-white/70">{playerName}</p>
 				{#if race}
-					<p class="truncate text-xs text-white/50">{localize(race.name, getLocale())}</p>
+					<p class="truncate text-xs text-white/50">{race.name}</p>
 				{/if}
 			</div>
 		</div>

@@ -1,4 +1,4 @@
-import { parseTheme } from '$lib/theme';
+import { parseTheme } from '$lib/utils/theme';
 import { getLocale } from '$lib/paraglide/runtime';
 import type { PageServerLoad } from './$types';
 

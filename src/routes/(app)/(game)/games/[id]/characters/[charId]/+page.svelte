@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
 	import Badge from '$lib/components/Badge.svelte';
-	import { localize } from '$lib/localize';
 	import * as chars from '$lib/remote/characters.remote';
 	import * as m from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
