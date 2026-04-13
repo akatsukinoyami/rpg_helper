@@ -19,7 +19,7 @@
 	import { untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import MessageForm from '$lib/partials/message/MessageForm.svelte';
-	import { renderMarkdown } from '$lib/md';
+	import { renderMarkdown } from '$lib/utils';
 	import MessageSystem from '$lib/partials/message/MessageSystem.svelte';
 	import MessageAnnotationForm from '$lib/partials/message/MessageAnnotationForm.svelte';
 	import * as messages from '$lib/remote/messages.remote';
