@@ -8,6 +8,7 @@
 	import * as proposals from '$lib/remote/proposals.remote';
 	import { buildStatOptions } from '$lib/utils/stats';
 	import type { StatDef } from '$lib/server/db/schema';
+	import { createProposalSubmit } from './proposalSubmit';
 
 	let { activeAction = $bindable(), locationId, statDefs = [] as StatDef[] } = $props();
 
@@ -17,14 +18,19 @@
 	let statReason = $state('');
 	let statSubmitting = $state(false);
 
-	async function submitStat() {
-		if (!statField || statSubmitting) return;
-		statSubmitting = true;
+	const submit = createProposalSubmit({
+		getSubmitting: () => statSubmitting,
+		setSubmitting: (v) => (statSubmitting = v),
+		setActiveAction: (v) => (activeAction = v)
+	});
 
-		proposals
-			.sendStat({ locationId, field: statField, delta: statDelta, reason: statReason || undefined })
-			.then(() => ((activeAction = null), (statReason = '')))
-			.finally(() => (statSubmitting = false));
+	function submitStat() {
+		if (!statField) return;
+		submit(
+			proposals.sendStat({ locationId, field: statField, delta: statDelta, reason: statReason || undefined }),
+			'Stat proposal',
+			() => (statReason = '')
+		);
 	}
 </script>
 

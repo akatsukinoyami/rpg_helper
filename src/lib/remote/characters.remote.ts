@@ -263,12 +263,12 @@ export const deleteChar = command(CharacterInGame, async ({ gameId, characterId 
 		.where(and(eq(characters.id, characterId), eq(characters.gameId, gameId)))
 		.limit(1);
 
-	if (!character) throw new Error('Not found');
+	if (!character) error(404, 'Not found');
 
 	const gm = await isGm(gameId, userId);
 	const isOwner = character.userId === userId;
 
-	if (!isGm && !isOwner) throw new Error('Forbidden');
+	if (!gm && !isOwner) error(403, 'Forbidden');
 
 	await db.delete(characters).where(eq(characters.id, characterId));
 	await indexAll().refresh();

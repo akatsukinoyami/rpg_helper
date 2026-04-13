@@ -17,6 +17,7 @@ import {
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm } from '$lib/remote/utils';
 import { index } from '$lib/remote/messages.remote';
+import { insertSystemMessage, broadcastSystemMessage } from '$lib/remote/messageUtils';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,23 +42,6 @@ async function getCharacterInGame(userId: string, gameId: string) {
 	return character;
 }
 
-/** Insert a system message using per-location counter. Returns { locationId, id, ref }. */
-async function insertSystemMessage(locationId: string, characterId: string) {
-	return await db.transaction(async (tx) => {
-		await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
-		const [row] = await tx
-			.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
-			.from(messages)
-			.where(eq(messages.locationId, locationId));
-		const id = (row?.max ?? 0) + 1;
-
-		const [msg] = await tx
-			.insert(messages)
-			.values({ locationId, id, characterId })
-			.returning({ locationId: messages.locationId, id: messages.id, ref: messages.ref });
-		return msg;
-	});
-}
 
 async function applyStatDelta(characterId: string, field: string, delta: number, isVital: boolean) {
 	if (isVital) {
@@ -108,23 +92,6 @@ async function refreshMessage(gameId: string, messageRef: string, type: 'edited'
 	await index(locationId).refresh();
 }
 
-function broadcastSystemMessage(
-	gameId: string,
-	messageRef: string,
-	locationId: string,
-	characterId: string
-) {
-	broadcast(gameId, {
-		type: 'message:created',
-		payload: {
-			messageId: messageRef,
-			locationId,
-			characterId,
-			content: null,
-			createdAt: new Date().toISOString()
-		}
-	});
-}
 
 async function _getProposal<T extends keyof typeof proposalTables>(
 	type: T,

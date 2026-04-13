@@ -1,12 +1,13 @@
 import { command, getRequestEvent } from '$app/server';
 import * as v from 'valibot';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { characters, diceRolls, messages } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm } from '$lib/remote/utils';
 import { index } from '$lib/remote/messages.remote';
+import { insertSystemMessage, broadcastSystemMessage } from '$lib/remote/messageUtils';
 
 // Matches e.g. "2d6", "1d20+3", "3d8-2"
 const diceExpressionSchema = v.pipe(
@@ -54,25 +55,7 @@ export const roll = command(
 
 		const { rolls, modifier, result } = evaluateDice(expression);
 
-		const msg = await db.transaction(async (tx) => {
-			await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
-			const [row] = await tx
-				.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
-				.from(messages)
-				.where(eq(messages.locationId, locationId));
-			const id = (row?.max ?? 0) + 1;
-
-			const [inserted] = await tx
-				.insert(messages)
-				.values({ locationId, id, characterId: character.id })
-				.returning({
-					locationId: messages.locationId,
-					id: messages.id,
-					ref: messages.ref,
-					createdAt: messages.createdAt
-				});
-			return inserted;
-		});
+		const msg = await insertSystemMessage(locationId, character.id);
 
 		await db.insert(diceRolls).values({
 			messageLocationId: msg.locationId,
@@ -88,16 +71,7 @@ export const roll = command(
 			payload: { characterId: character.id, expression, dice: rolls, modifier, total: result }
 		});
 
-		broadcast(gameId, {
-			type: 'message:created',
-			payload: {
-				messageId: msg.ref!,
-				locationId,
-				characterId: character.id,
-				content: null,
-				createdAt: msg.createdAt.toISOString()
-			}
-		});
+		broadcastSystemMessage(gameId, msg.ref!, locationId, character.id);
 
 		await index(locationId).refresh();
 	}

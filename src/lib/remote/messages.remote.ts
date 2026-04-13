@@ -2,21 +2,12 @@ import { command, getRequestEvent, query } from '$app/server';
 import * as v from 'valibot';
 import { and, asc, desc, eq, isNull, ne, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import type { PgTransaction } from 'drizzle-orm/pg-core';
-import type { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
-import type { ExtractTablesWithRelations } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import type * as schema from '$lib/server/db/schema';
 import { characters, locations, messages, moves } from '$lib/server/db/schema';
 import { broadcast } from '$lib/server/ws/adapter';
 import { assertGm, isGm } from '$lib/remote/utils';
-
-type AnyTx = PgTransaction<
-	PostgresJsQueryResultHKT,
-	typeof schema,
-	ExtractTablesWithRelations<typeof schema>
->;
+import { nextMessageId } from '$lib/remote/messageUtils';
 
 const replyMsg = alias(messages, 'reply_msg');
 const replyChar = alias(characters, 'reply_char');
@@ -52,17 +43,6 @@ const eventSubquery = sql<import('$lib/types').SystemEvent | null>`(
   LIMIT 1
 )`;
 
-/**
- * @description Compute the next per-location message ID inside a transaction, using an advisory lock.
- **/
-async function nextMessageId(locationId: string, tx: AnyTx): Promise<number> {
-	await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${locationId}))`);
-	const [row] = await tx
-		.select({ max: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
-		.from(messages)
-		.where(eq(messages.locationId, locationId));
-	return (row?.max ?? 0) + 1;
-}
 
 /**
  * @description WHERE clause that matches a message by its ref string ("locationId#integer").
@@ -157,6 +137,13 @@ export const send = command(
 			.limit(1);
 
 		if (!character) error(403, 'No character in this game');
+
+		const [location] = await db
+			.select({ id: locations.id })
+			.from(locations)
+			.where(and(eq(locations.id, locationId), eq(locations.gameId, gameId)))
+			.limit(1);
+		if (!location) error(404, 'Location not found');
 
 		// Detect location change: find last message this character sent in this game
 		const [lastMsg] = await db
@@ -254,6 +241,13 @@ async function getMessageAndCheckAccess(messageRef: string) {
 		.limit(1);
 
 	if (!msg) error(404, 'Message not found');
+
+	const [msgLocation] = await db
+		.select({ gameId: locations.gameId })
+		.from(locations)
+		.where(eq(locations.id, msg.locationId))
+		.limit(1);
+	if (!msgLocation || msgLocation.gameId !== gameId) error(403, 'Forbidden');
 
 	const gmAccess = await isGm(gameId);
 	if (!gmAccess) {

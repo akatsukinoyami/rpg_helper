@@ -7,6 +7,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import * as itemTypesRemote from '$lib/remote/item-types.remote';
+	import { createProposalSubmit } from './proposalSubmit';
 
 	let { activeAction = $bindable(), locationId } = $props();
 
@@ -18,21 +19,26 @@
 
 	const selectedItem = $derived(itemsQuery.current?.find((i) => i.id === itemTypeId));
 
-	async function submitItem() {
-		if (!itemTypeId || itemSubmitting) return;
-		itemSubmitting = true;
-		const isDur = selectedItem?.trackingMode === 'durability';
+	const submit = createProposalSubmit({
+		getSubmitting: () => itemSubmitting,
+		setSubmitting: (v) => (itemSubmitting = v),
+		setActiveAction: (v) => (activeAction = v)
+	});
 
-		proposals
-			.sendItem({
+	function submitItem() {
+		if (!itemTypeId) return;
+		const isDur = selectedItem?.trackingMode === 'durability';
+		submit(
+			proposals.sendItem({
 				locationId,
 				itemTypeId,
 				deltaQty: isDur ? undefined : itemDelta,
 				deltaDur: isDur ? itemDelta : undefined,
 				reason: itemReason || undefined
-			})
-			.then(() => ((activeAction = null), (itemReason = '')))
-			.finally(() => (itemSubmitting = false));
+			}),
+			'Item proposal',
+			() => (itemReason = '')
+		);
 	}
 </script>
 
@@ -41,7 +47,7 @@
     class="flex-1"
     bind:value={itemTypeId}
     options={[
-      ['', '— item —'], 
+      ['', '— item —'],
       ...(itemsQuery.current ?? []).map((i) => [i.id, i.name] as [string, string])
     ]}
   />
@@ -49,8 +55,8 @@
     class="flex-1"
     bind:value={itemDelta}
     placeholder={
-      selectedItem?.trackingMode === 'durability' 
-        ? m.proposal_item_dur() 
+      selectedItem?.trackingMode === 'durability'
+        ? m.proposal_item_dur()
         : m.proposal_item_qty()
     }
   />

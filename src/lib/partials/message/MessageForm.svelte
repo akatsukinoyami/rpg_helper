@@ -1,34 +1,15 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
-	import {
-		mdiSend,
-		mdiClose,
-		mdiReply,
-		mdiFormatBold,
-		mdiFormatItalic,
-		mdiFormatUnderline,
-		mdiFormatStrikethrough,
-		mdiEyeOff,
-		mdiFormatQuoteClose,
-		mdiCodeBraces,
-		mdiConsole,
-		mdiLink,
-		mdiImage,
-		mdiDiceMultiple,
-		mdiTune,
-		mdiBriefcase,
-		mdiFlash
-	} from '@mdi/js';
+	import { untrack } from 'svelte';
+	import { mdiSend, mdiClose, mdiReply } from '@mdi/js';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import * as m from '$lib/paraglide/messages';
-	import MessagePanel from '$lib/partials/message/MessagePanel.svelte';
+	import MessageMarkdownToolbar from '$lib/partials/message/MessageMarkdownToolbar.svelte';
 	import * as messages from '$lib/remote/messages.remote';
 	import type { StatDef } from '$lib/server/db/schema';
 
-	const MAX_LENGTH = 4096;
+	const MAX_LENGTH = 4096 as const;
 
 	export interface ReplyTarget {
 		id: string;
@@ -73,10 +54,6 @@
 	type ActionPanel = 'dice' | 'stat' | 'item' | 'skill';
 	let activeAction = $state<ActionPanel | null>(null);
 
-	function togglePanel(panel: ActionPanel) {
-		activeAction = activeAction === panel ? null : panel;
-	}
-
 	// ── Formatting ─────────────────────────────────────────────────────────────
 
 	function stripHtml(s: string) {
@@ -111,76 +88,7 @@
 		}
 	}
 
-	function handleCancel() {
-		content = initialContent;
-		htmlWarning = false;
-		onDone?.();
-	}
 
-	async function insertMarkdown(prefix: string, suffix = prefix) {
-		if (!textarea) return;
-		const start = textarea.selectionStart;
-		const end = textarea.selectionEnd;
-		const selected = content.slice(start, end);
-		const newContent = content.slice(0, start) + prefix + selected + suffix + content.slice(end);
-		if (newContent.length > MAX_LENGTH) return;
-		content = newContent;
-		await tick();
-		textarea.focus();
-		if (selected) {
-			textarea.setSelectionRange(start + prefix.length, end + prefix.length);
-		} else {
-			const cursor = start + prefix.length;
-			textarea.setSelectionRange(cursor, cursor);
-		}
-	}
-
-	async function insertCodeBlock() {
-		if (!textarea) return;
-		const start = textarea.selectionStart;
-		const end = textarea.selectionEnd;
-		const selected = content.slice(start, end);
-		const inner = selected && !selected.endsWith('\n') ? selected + '\n' : selected;
-		const block = '```\n' + inner + '```';
-		const newContent = content.slice(0, start) + block + content.slice(end);
-		if (newContent.length > MAX_LENGTH) return;
-		content = newContent;
-		await tick();
-		textarea.focus();
-		textarea.setSelectionRange(start + 4, start + 4 + selected.length);
-	}
-
-	async function insertLinePrefix(prefix: string) {
-		if (!textarea) return;
-		const start = textarea.selectionStart;
-		const lineStart = content.lastIndexOf('\n', start - 1) + 1;
-		const newContent = content.slice(0, lineStart) + prefix + content.slice(lineStart);
-		if (newContent.length > MAX_LENGTH) return;
-		content = newContent;
-		await tick();
-		textarea.focus();
-		textarea.setSelectionRange(start + prefix.length, start + prefix.length);
-	}
-
-	const tools: { icon: string; title: string; onclick: () => void }[] = [
-		{ icon: mdiFormatBold, title: 'Bold', onclick: () => insertMarkdown('**') },
-		{ icon: mdiFormatItalic, title: 'Italic', onclick: () => insertMarkdown('*') },
-		{ icon: mdiFormatUnderline, title: 'Underline', onclick: () => insertMarkdown('++') },
-		{ icon: mdiFormatStrikethrough, title: 'Strikethrough', onclick: () => insertMarkdown('~~') },
-		{ icon: mdiEyeOff, title: 'Hidden text', onclick: () => insertMarkdown('||') },
-		{ icon: mdiFormatQuoteClose, title: 'Quote', onclick: () => insertLinePrefix('> ') },
-		{ icon: mdiCodeBraces, title: 'Inline code', onclick: () => insertMarkdown('`') },
-		{ icon: mdiConsole, title: 'Code block', onclick: insertCodeBlock },
-		{ icon: mdiLink, title: 'Link', onclick: () => insertMarkdown('[', '](url)') },
-		{ icon: mdiImage, title: 'Image', onclick: () => insertMarkdown('![', '](url)') }
-	];
-
-	const panelButton = [
-		{ id: 'dice', icon: mdiDiceMultiple, title: 'Roll dice' },
-		{ id: 'stat', icon: mdiTune, title: 'Propose stat change' },
-		{ id: 'item', icon: mdiBriefcase, title: 'Propose item change' },
-		{ id: 'skill', icon: mdiFlash, title: 'Propose skill change' }
-	] as const;
 </script>
 
 <form onsubmit={handleSubmit} class="flex flex-col gap-1">
@@ -199,31 +107,15 @@
 		</div>
 	{/if}
 
-	<div class="flex gap-0.5 flex-wrap items-center">
-		{#each tools as { title, icon, onclick }}
-			<ButtonSmall {title} {icon} {onclick} {disabled} />
-		{/each}
-		{#if !isEditing && !disabled}
-			<span class="flex-1"></span>
-			{#each (panelButton) as { id, icon, title }}
-				<ButtonSmall 
-					class={activeAction === id ? 'bg-gray-200 text-gray-900' : ''} 
-					onclick={() => togglePanel(id)} 
-					{title} 
-					{icon} 
-					{disabled} 
-				/>
-			{/each}
-			<span class={[
-				'text-[11px] tabular-nums', 
-				remaining < 100 
-					? (overLimit ? 'text-red-500 font-semibold' : 'text-amber-500') 
-					: 'text-gray-400'
-			]}>
-				{remaining}
-			</span>
-		{/if}
-	</div>
+	<MessageMarkdownToolbar
+		{disabled}
+		{isEditing}
+		bind:content
+		bind:activeAction
+		{textarea}
+		{locationId}
+		{statDefs}
+	/>
 
 	<div class="flex gap-2">
 		<textarea
@@ -248,14 +140,4 @@
 		<p class="text-[11px] text-amber-600">{m.message_html_forbidden()}</p>
 	{/if}
 
-	{#if !isEditing && !disabled}
-		<!-- Action panels -->
-		<MessagePanel {activeAction} {locationId} {statDefs} />
-
-		<div class="flex items-center justify-end gap-2">
-			{#if isEditing}
-				<Button type="button" kind="secondary" icon={mdiClose} onclick={handleCancel} />
-			{/if}
-		</div>
-	{/if}
 </form>

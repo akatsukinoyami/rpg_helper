@@ -6,6 +6,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import * as proposals from '$lib/remote/proposals.remote';
 	import * as skillTypesRemote from '$lib/remote/skill-types.remote';
+	import { createProposalSubmit } from './proposalSubmit';
 
 	let { activeAction = $bindable(), locationId } = $props();
 
@@ -15,13 +16,19 @@
 	let skillReason = $state('');
 	let skillSubmitting = $state(false);
 
-	async function submitSkill() {
-		if (!skillTypeId || skillSubmitting) return;
-		skillSubmitting = true;
-		proposals
-			.sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined })
-			.then(() => ((activeAction = null), (skillReason = '')))
-			.finally(() => (skillSubmitting = false));
+	const submit = createProposalSubmit({
+		getSubmitting: () => skillSubmitting,
+		setSubmitting: (v) => (skillSubmitting = v),
+		setActiveAction: (v) => (activeAction = v)
+	});
+
+	function submitSkill() {
+		if (!skillTypeId) return;
+		submit(
+			proposals.sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined }),
+			'Skill proposal',
+			() => (skillReason = '')
+		);
 	}
 </script>
 
@@ -30,7 +37,7 @@
     class="flex-1"
     bind:value={skillTypeId}
     options={[
-      ['', '— skill —'], 
+      ['', '— skill —'],
       ...(skillsQuery.current ?? []).map((s) => [s.id, s.name] as [string, string])
     ]}
   />

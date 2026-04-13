@@ -30,7 +30,9 @@ export class WsStore {
 		ws.onmessage = ({ data }) => {
 			try {
 				this.#dispatch(JSON.parse(data as string));
-			} catch {}
+			} catch (e) {
+				console.error('WS parse error:', e, data);
+			}
 		};
 
 		ws.onclose = () => {

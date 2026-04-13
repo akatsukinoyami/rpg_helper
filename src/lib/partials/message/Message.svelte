@@ -15,13 +15,13 @@
 </script>
 
 <script lang="ts">
-	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiCheck, mdiClose, mdiReply } from '@mdi/js';
+	import { mdiPencil, mdiDelete, mdiCommentEdit, mdiReply } from '@mdi/js';
 	import { untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import MessageForm from '$lib/partials/message/MessageForm.svelte';
-	import { fieldColors, fieldSpacing } from '$lib/constants/styles';
 	import { renderMarkdown } from '$lib/md';
 	import MessageSystem from '$lib/partials/message/MessageSystem.svelte';
+	import MessageAnnotationForm from '$lib/partials/message/MessageAnnotationForm.svelte';
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
 	import ButtonSmall from '$lib/components/ButtonSmall.svelte';
@@ -41,7 +41,7 @@
 	);
 
 	const hue = $derived(
-		[...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360
+		untrack(() => [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360)
 	);
 
 	const time = $derived(
@@ -68,11 +68,7 @@
 		}
 	}
 
-	async function saveAnnotation(e: SubmitEvent) {
-		e.preventDefault();
-		await messages.annotate({ messageId: msg.id, annotation: annotationDraft });
-		annotating = false;
-	}
+
 </script>
 
 {#snippet avatar(className: string)}
@@ -139,19 +135,11 @@
 			</p>
 		{/if}
 		{#if annotating && isGm}
-			<form onsubmit={saveAnnotation} class="flex items-center gap-1 mt-1">
-				<input
-					class={[fieldColors, fieldSpacing, 'rounded-md border text-xs outline-none flex-1']}
-					bind:value={annotationDraft}
-					placeholder={m.message_gm_comment_placeholder()}
-				/>
-				<button type="submit" class="p-1 rounded text-gray-400 hover:text-indigo-600 cursor-pointer">
-					<Icon path={mdiCheck} size={13} pathClass="fill-current" />
-				</button>
-				<button type="button" class="p-1 rounded text-gray-400 hover:text-gray-700 cursor-pointer" onclick={() => annotating = false}>
-					<Icon path={mdiClose} size={13} pathClass="fill-current" />
-				</button>
-			</form>
+			<MessageAnnotationForm
+				messageId={msg.id}
+				bind:value={annotationDraft}
+				onClose={() => annotating = false}
+			/>
 		{/if}
 	{/if}
 {/snippet}

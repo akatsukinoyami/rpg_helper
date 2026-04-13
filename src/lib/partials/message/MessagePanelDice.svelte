@@ -3,21 +3,23 @@
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import * as dice from '$lib/remote/diceRolls.remote';
+	import { createProposalSubmit } from './proposalSubmit';
 
 	let { activeAction = $bindable(), locationId } = $props();
 
 	let diceExpr = $state('1d20');
 	let diceSubmitting = $state(false);
 
-	async function submitDice() {
-		const expr = diceExpr.trim();
-		if (!expr || diceSubmitting) return;
-		diceSubmitting = true;
+	const submit = createProposalSubmit({
+		getSubmitting: () => diceSubmitting,
+		setSubmitting: (v) => (diceSubmitting = v),
+		setActiveAction: (v) => (activeAction = v)
+	});
 
-		dice
-			.roll({ locationId, expression: expr })
-			.then(() => ((activeAction = null), (diceExpr = '1d20')))
-			.finally(() => (diceSubmitting = false));
+	function submitDice() {
+		const expr = diceExpr.trim();
+		if (!expr) return;
+		submit(dice.roll({ locationId, expression: expr }), 'Dice roll', () => (diceExpr = '1d20'));
 	}
 </script>
 
