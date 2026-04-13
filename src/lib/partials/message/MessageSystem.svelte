@@ -8,7 +8,11 @@
 	import { statLabel } from '$lib/utils/stats';
 	import type { StatDef } from '$lib/server/db/schema';
 
-	let { msg, isGm, statDefs = [] }: { msg: MessageData; isGm: boolean; statDefs?: StatDef[] } = $props();
+	let {
+		msg,
+		isGm,
+		statDefs = []
+	}: { msg: MessageData; isGm: boolean; statDefs?: StatDef[] } = $props();
 	const statuses = {
 		pending: m.game_dashboard_pending,
 		approved: m.game_dashboard_approved,

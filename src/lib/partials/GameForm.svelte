@@ -53,14 +53,20 @@
 
 	async function handleYamlFile(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
-		if (!file) { yamlContent = ''; yamlFileName = ''; return; }
+		if (!file) {
+			yamlContent = '';
+			yamlFileName = '';
+			return;
+		}
 		yamlContent = await file.text();
 		yamlFileName = file.name;
 		try {
 			const parsed = yaml.load(yamlContent) as Record<string, any>;
 			if (parsed?.game?.name) nameValue = parsed.game.name;
 			if (parsed?.game?.description) descriptionValue = parsed.game.description;
-		} catch { /* invalid YAML — server will reject it */ }
+		} catch {
+			/* invalid YAML — server will reject it */
+		}
 	}
 </script>
 

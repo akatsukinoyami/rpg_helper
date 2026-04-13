@@ -31,19 +31,19 @@ import {
 
 // Shared stat definitions (same keys across all games, game-specific vital labels)
 const BASE_STATS: StatDef[] = [
-	{ key: 'str', label: 'Сила',        isVital: false, color: '#f97316', sortOrder: 3 },
-	{ key: 'dex', label: 'Ловкость',    isVital: false, color: '#22c55e', sortOrder: 4 },
-	{ key: 'con', label: 'Телосложение',isVital: false, color: '#eab308', sortOrder: 5 },
-	{ key: 'int', label: 'Интеллект',   isVital: false, color: '#a855f7', sortOrder: 6 },
-	{ key: 'wis', label: 'Мудрость',    isVital: false, color: '#14b8a6', sortOrder: 7 },
-	{ key: 'cha', label: 'Харизма',     isVital: false, color: '#ec4899', sortOrder: 8 },
+	{ key: 'str', label: 'Сила', isVital: false, color: '#f97316', sortOrder: 3 },
+	{ key: 'dex', label: 'Ловкость', isVital: false, color: '#22c55e', sortOrder: 4 },
+	{ key: 'con', label: 'Телосложение', isVital: false, color: '#eab308', sortOrder: 5 },
+	{ key: 'int', label: 'Интеллект', isVital: false, color: '#a855f7', sortOrder: 6 },
+	{ key: 'wis', label: 'Мудрость', isVital: false, color: '#14b8a6', sortOrder: 7 },
+	{ key: 'cha', label: 'Харизма', isVital: false, color: '#ec4899', sortOrder: 8 }
 ];
 
 function makeStatDefs(hpLabel: string, mpLabel: string): StatDef[] {
 	return [
-		{ key: 'hp', label: hpLabel, isVital: true,  color: '#ef4444', sortOrder: 1 },
-		{ key: 'mp', label: mpLabel, isVital: true,  color: '#3b82f6', sortOrder: 2 },
-		...BASE_STATS,
+		{ key: 'hp', label: hpLabel, isVital: true, color: '#ef4444', sortOrder: 1 },
+		{ key: 'mp', label: mpLabel, isVital: true, color: '#3b82f6', sortOrder: 2 },
+		...BASE_STATS
 	];
 }
 

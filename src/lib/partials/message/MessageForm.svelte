@@ -87,8 +87,6 @@
 			submitting = false;
 		}
 	}
-
-
 </script>
 
 <form onsubmit={handleSubmit} class="flex flex-col gap-1">

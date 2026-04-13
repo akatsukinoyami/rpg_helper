@@ -27,7 +27,12 @@
 	function submitStat() {
 		if (!statField) return;
 		submit(
-			proposals.sendStat({ locationId, field: statField, delta: statDelta, reason: statReason || undefined }),
+			proposals.sendStat({
+				locationId,
+				field: statField,
+				delta: statDelta,
+				reason: statReason || undefined
+			}),
 			'Stat proposal',
 			() => (statReason = '')
 		);

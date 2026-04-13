@@ -19,10 +19,10 @@ import { generateId } from './id';
 // ---------------------------------------------------------------------------
 
 export interface StatDef {
-	key: string;       // immutable
-	label: string;     // editable
-	isVital: boolean;  // immutable — vitals have current/max and render as bars
-	color: string;     // editable
+	key: string; // immutable
+	label: string; // editable
+	isVital: boolean; // immutable — vitals have current/max and render as bars
+	color: string; // editable
 	sortOrder: number; // editable
 }
 

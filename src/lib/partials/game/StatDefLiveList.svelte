@@ -24,9 +24,14 @@
 		if (!editingKey || editPending) return;
 		editPending = true;
 		gameRemote
-			.editStatDef({ key: editingKey, label: editLabel, color: editColor, sortOrder: editSortOrder })
-			.then(() => editingKey = null)
-			.finally(() => editPending = false);
+			.editStatDef({
+				key: editingKey,
+				label: editLabel,
+				color: editColor,
+				sortOrder: editSortOrder
+			})
+			.then(() => (editingKey = null))
+			.finally(() => (editPending = false));
 	}
 </script>
 

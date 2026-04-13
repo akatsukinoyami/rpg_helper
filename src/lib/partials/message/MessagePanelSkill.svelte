@@ -25,7 +25,12 @@
 	function submitSkill() {
 		if (!skillTypeId) return;
 		submit(
-			proposals.sendSkill({ locationId, skillTypeId, action: skillAction, reason: skillReason || undefined }),
+			proposals.sendSkill({
+				locationId,
+				skillTypeId,
+				action: skillAction,
+				reason: skillReason || undefined
+			}),
 			'Skill proposal',
 			() => (skillReason = '')
 		);

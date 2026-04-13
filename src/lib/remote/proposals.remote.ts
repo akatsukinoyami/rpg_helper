@@ -24,12 +24,19 @@ import { insertSystemMessage, broadcastSystemMessage } from '$lib/remote/message
 // ---------------------------------------------------------------------------
 
 async function getGameStatDefs(gameId: string): Promise<StatDef[]> {
-	const [game] = await db.select({ statDefs: games.statDefs }).from(games).where(eq(games.id, gameId)).limit(1);
+	const [game] = await db
+		.select({ statDefs: games.statDefs })
+		.from(games)
+		.where(eq(games.id, gameId))
+		.limit(1);
 	return (game?.statDefs ?? []) as StatDef[];
 }
 
 function resolveStatDef(defs: StatDef[], field: string): StatDef | undefined {
-	return defs.find((d) => d.key === field || (d.isVital && `max${d.key[0].toUpperCase()}${d.key.slice(1)}` === field));
+	return defs.find(
+		(d) =>
+			d.key === field || (d.isVital && `max${d.key[0].toUpperCase()}${d.key.slice(1)}` === field)
+	);
 }
 
 async function getCharacterInGame(userId: string, gameId: string) {
@@ -42,12 +49,13 @@ async function getCharacterInGame(userId: string, gameId: string) {
 	return character;
 }
 
-
 async function applyStatDelta(characterId: string, field: string, delta: number, isVital: boolean) {
 	if (isVital) {
 		// vitals[key].current or vitals[maxKey].max
 		const maxPrefix = 'max';
-		const isMax = field.startsWith(maxPrefix) && field[maxPrefix.length] === field[maxPrefix.length].toUpperCase();
+		const isMax =
+			field.startsWith(maxPrefix) &&
+			field[maxPrefix.length] === field[maxPrefix.length].toUpperCase();
 		const [column, subkey] = isMax
 			? [field[maxPrefix.length].toLowerCase() + field.slice(maxPrefix.length + 1), 'max']
 			: [field, 'current'];
@@ -92,7 +100,6 @@ async function refreshMessage(gameId: string, messageRef: string, type: 'edited'
 	await index(locationId).refresh();
 }
 
-
 async function _getProposal<T extends keyof typeof proposalTables>(
 	type: T,
 	proposalId: string,
@@ -136,7 +143,12 @@ const applyApprove = {
 	async characterChange(proposal: ProposalOf<'characterChange'>, gameId: string) {
 		const defs = await getGameStatDefs(gameId);
 		const def = resolveStatDef(defs, proposal.field);
-		await applyStatDelta(proposal.characterId, proposal.field, proposal.delta, def?.isVital ?? false);
+		await applyStatDelta(
+			proposal.characterId,
+			proposal.field,
+			proposal.delta,
+			def?.isVital ?? false
+		);
 	},
 	async itemChange(proposal: ProposalOf<'itemChange'>) {
 		if (proposal.charItemId) {
@@ -192,7 +204,10 @@ export const approve = command(
 
 		const proposal = await _getProposal(type, id);
 
-		await (applyApprove[type] as (p: typeof proposal, gameId: string) => Promise<void>)(proposal, gameId);
+		await (applyApprove[type] as (p: typeof proposal, gameId: string) => Promise<void>)(
+			proposal,
+			gameId
+		);
 
 		await db
 			.update(proposalTables[type])
@@ -228,7 +243,12 @@ const removePropose = {
 		if (proposal.status === 'approved') {
 			const defs = await getGameStatDefs(gameId);
 			const def = resolveStatDef(defs, proposal.field);
-			await applyStatDelta(proposal.characterId, proposal.field, -proposal.delta, def?.isVital ?? false);
+			await applyStatDelta(
+				proposal.characterId,
+				proposal.field,
+				-proposal.delta,
+				def?.isVital ?? false
+			);
 		}
 	},
 
@@ -282,7 +302,10 @@ export const remove = command(
 
 		const proposal = await _getProposal(type, id, true);
 
-		await (removePropose[type] as (p: typeof proposal, gameId: string) => Promise<void>)(proposal, gameId);
+		await (removePropose[type] as (p: typeof proposal, gameId: string) => Promise<void>)(
+			proposal,
+			gameId
+		);
 
 		// Hard delete the system message — cascade removes the proposal row
 		await db

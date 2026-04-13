@@ -5,7 +5,11 @@
 	import * as messages from '$lib/remote/messages.remote';
 	import * as m from '$lib/paraglide/messages';
 
-	let { messageId, value = $bindable(''), onClose }: {
+	let {
+		messageId,
+		value = $bindable(''),
+		onClose
+	}: {
 		messageId: string;
 		value?: string;
 		onClose: () => void;

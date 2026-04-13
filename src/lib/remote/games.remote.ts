@@ -15,7 +15,13 @@ const GameBaseSchema = v.object({
 	yaml: v.optional(v.string()),
 	statDefsJson: v.pipe(
 		v.optional(v.string(), '[]'),
-		v.transform((s): StatDef[] => { try { return JSON.parse(s); } catch { return []; } })
+		v.transform((s): StatDef[] => {
+			try {
+				return JSON.parse(s);
+			} catch {
+				return [];
+			}
+		})
 	)
 });
 
@@ -133,7 +139,13 @@ export const statDefs = query(async () => {
 });
 
 const StatDefSchema = v.object({
-	key: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(50), v.regex(/^[a-zA-Z][a-zA-Z0-9]*$/, 'Key must be alphanumeric starting with a letter')),
+	key: v.pipe(
+		v.string(),
+		v.trim(),
+		v.minLength(1),
+		v.maxLength(50),
+		v.regex(/^[a-zA-Z][a-zA-Z0-9]*$/, 'Key must be alphanumeric starting with a letter')
+	),
 	label: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(100)),
 	isVital: v.boolean(),
 	color: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(20)),
@@ -145,14 +157,27 @@ export const addStatDef = command(StatDefSchema, async (data) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	const [game] = await db.select({ statDefs: games.statDefs }).from(games).where(eq(games.id, gameId)).limit(1);
+	const [game] = await db
+		.select({ statDefs: games.statDefs })
+		.from(games)
+		.where(eq(games.id, gameId))
+		.limit(1);
 	if (!game) error(404);
 
 	const existing = (game.statDefs ?? []) as StatDef[];
 	if (existing.some((d) => d.key === data.key)) error(400, 'Stat key already exists');
 
-	const newDef: StatDef = { key: data.key, label: data.label, isVital: data.isVital, color: data.color, sortOrder: data.sortOrder };
-	await db.update(games).set({ statDefs: [...existing, newDef] }).where(eq(games.id, gameId));
+	const newDef: StatDef = {
+		key: data.key,
+		label: data.label,
+		isVital: data.isVital,
+		color: data.color,
+		sortOrder: data.sortOrder
+	};
+	await db
+		.update(games)
+		.set({ statDefs: [...existing, newDef] })
+		.where(eq(games.id, gameId));
 	await statDefs().refresh();
 });
 
@@ -168,12 +193,18 @@ export const editStatDef = command(EditStatDefSchema, async (data) => {
 	const gameId = params.id!;
 	await assertGm(gameId);
 
-	const [game] = await db.select({ statDefs: games.statDefs }).from(games).where(eq(games.id, gameId)).limit(1);
+	const [game] = await db
+		.select({ statDefs: games.statDefs })
+		.from(games)
+		.where(eq(games.id, gameId))
+		.limit(1);
 	if (!game) error(404);
 
 	const existing = (game.statDefs ?? []) as StatDef[];
 	const updated = existing.map((d) =>
-		d.key === data.key ? { ...d, label: data.label, color: data.color, sortOrder: data.sortOrder } : d
+		d.key === data.key
+			? { ...d, label: data.label, color: data.color, sortOrder: data.sortOrder }
+			: d
 	);
 	await db.update(games).set({ statDefs: updated }).where(eq(games.id, gameId));
 	await statDefs().refresh();
@@ -194,10 +225,14 @@ export const removeStatDef = command(
 			.limit(1);
 		if (inUse) error(400, 'Stat is in use by one or more characters');
 
-		const [game] = await db.select({ statDefs: games.statDefs }).from(games).where(eq(games.id, gameId)).limit(1);
+		const [game] = await db
+			.select({ statDefs: games.statDefs })
+			.from(games)
+			.where(eq(games.id, gameId))
+			.limit(1);
 		if (!game) error(404);
 
-		const updated = (game.statDefs ?? [] as StatDef[]).filter((d: StatDef) => d.key !== key);
+		const updated = (game.statDefs ?? ([] as StatDef[])).filter((d: StatDef) => d.key !== key);
 		await db.update(games).set({ statDefs: updated }).where(eq(games.id, gameId));
 		await statDefs().refresh();
 	}

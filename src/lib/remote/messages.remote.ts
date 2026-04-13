@@ -43,7 +43,6 @@ const eventSubquery = sql<import('$lib/types').SystemEvent | null>`(
   LIMIT 1
 )`;
 
-
 /**
  * @description WHERE clause that matches a message by its ref string ("locationId#integer").
  **/
@@ -64,16 +63,18 @@ const messageFields = {
 		id: messages.characterId,
 		name: characters.name,
 		image: characters.image,
-		vitals: characters.vitals,
+		vitals: characters.vitals
 	},
 	move: {
 		id: messages.moveId,
 		from: fromLocation.name,
-		to: toLocation.name,
+		to: toLocation.name
 	},
 	event: eventSubquery,
 	reply: {
-		id: sql<string | null>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
+		id: sql<
+			string | null
+		>`CASE WHEN ${messages.replyToId} IS NOT NULL THEN ${messages.locationId} || '#' || ${messages.replyToId}::text ELSE NULL END`,
 		content: replyMsg.content,
 		characterName: replyChar.name
 	}
